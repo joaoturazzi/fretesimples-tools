@@ -36,20 +36,14 @@ const Index = () => {
         }`}
       >
         <div className="content-container px-4 sm:px-6">
-          {/* Hero Section */}
+          {/* Hero Section - Text removed as requested */}
           <div className="mb-10 text-center animate-fade-in bg-gradient-to-br from-white to-gray-50 rounded-xl border border-gray-100 shadow-sm py-8 px-4 sm:px-6 md:px-8">
             <div className="flex justify-center mb-4">
               <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-3 rounded-xl shadow-md">
                 <Truck size={32} />
               </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 leading-tight">
-              Ferramentas para transportadores
-            </h1>
-            <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
-              Calcule custos, simule lucros e otimize suas operações de transporte 
-              com nossas ferramentas simples e eficientes.
-            </p>
+            
             <div className="w-20 h-1 bg-gradient-to-r from-orange-500 to-blue-500 mx-auto mt-5 rounded-full"></div>
             
             <div className="flex flex-wrap justify-center mt-8 gap-3">

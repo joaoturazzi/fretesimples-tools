@@ -59,24 +59,24 @@
     @apply w-10 h-10 rounded-full border-3 border-orange-300 border-t-orange-600 animate-spin;
   }
   
-  /* Improve content container */
+  /* Improved content container */
   .content-container {
     @apply w-full max-w-6xl mx-auto px-4 sm:px-6 transition-all duration-300;
   }
   
   /* Enhance headings */
   .section-heading {
-    @apply border-l-4 border-orange-500 pl-4 mb-5;
+    @apply mb-5;
   }
   
   /* Tools container - contains all calculator tools */
   .tools-container {
-    @apply space-y-4;
+    @apply space-y-8;
   }
   
   /* Gradient dividers */
   .gradient-divider {
-    @apply h-1 w-24 bg-gradient-to-r from-orange-500 to-cci-500 rounded-full my-6 mx-auto;
+    @apply h-1 w-24 bg-gradient-to-r from-orange-500 to-blue-500 rounded-full my-6 mx-auto;
   }
   
   /* Card styles */

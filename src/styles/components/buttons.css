@@ -15,16 +15,17 @@
   }
   
   .btn-primary {
-    @apply bg-gradient-to-br from-frete-500 to-frete-600 border-transparent text-white shadow-sm
-    hover:from-frete-600 hover:to-frete-700 focus:ring-frete-500;
+    @apply bg-gradient-to-br from-orange-500 to-orange-600 border-transparent text-white shadow-sm
+    hover:from-orange-600 hover:to-orange-700 focus:ring-orange-500;
   }
   
   .btn-secondary {
-    @apply bg-white border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-gray-400;
+    @apply bg-gradient-to-br from-blue-500 to-blue-600 border-transparent text-white shadow-sm
+    hover:from-blue-600 hover:to-blue-700 focus:ring-blue-500;
   }
   
   .btn-outline {
-    @apply bg-transparent border-frete-500 text-frete-600 hover:bg-frete-50 focus:ring-frete-400;
+    @apply bg-transparent border-orange-500 text-orange-600 hover:bg-orange-50 focus:ring-orange-400;
   }
   
   .btn-ghost {

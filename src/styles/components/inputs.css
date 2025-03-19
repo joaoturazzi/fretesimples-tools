@@ -2,7 +2,7 @@
 @layer components {
   .input-field {
     @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm
-    focus:border-frete-500 focus:outline-none focus:ring-1 focus:ring-frete-500 
+    focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 
     disabled:opacity-50 disabled:bg-gray-50;
   }
   
@@ -12,7 +12,7 @@
   
   .select-field {
     @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm
-    focus:border-frete-500 focus:outline-none focus:ring-1 focus:ring-frete-500
+    focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500
     disabled:opacity-50 disabled:bg-gray-50 appearance-none bg-no-repeat bg-right pr-8;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.5rem center;
@@ -20,16 +20,16 @@
   }
   
   .checkbox-field {
-    @apply h-4 w-4 rounded border-gray-300 text-frete-600 shadow-sm focus:ring-frete-500;
+    @apply h-4 w-4 rounded border-gray-300 text-orange-600 shadow-sm focus:ring-orange-500;
   }
   
   .radio-field {
-    @apply h-4 w-4 border-gray-300 text-frete-600 shadow-sm focus:ring-frete-500;
+    @apply h-4 w-4 border-gray-300 text-orange-600 shadow-sm focus:ring-orange-500;
   }
   
   .textarea-field {
     @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm
-    focus:border-frete-500 focus:outline-none focus:ring-1 focus:ring-frete-500
+    focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500
     disabled:opacity-50 disabled:bg-gray-50 resize-y min-h-[80px];
   }
   

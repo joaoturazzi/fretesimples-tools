@@ -22,20 +22,20 @@ const ResultBox = ({ label, value, unit = '', className = '', tooltip = '', icon
   return (
     <div className={cn(
       "result-box bg-white border border-gray-100 rounded-xl p-4 shadow-sm transition-all duration-300 hover:shadow-md",
-      "animate-fade-slide-up",
+      "animate-bounce-in",
       className
     )}>
-      <div className="flex justify-between items-center mb-1.5">
+      <div className="flex justify-between items-center mb-2">
         <span className="text-sm font-medium text-gray-600 flex items-center gap-1.5">
-          {icon && icon}
+          {icon && <span className="text-frete-500">{icon}</span>}
           {label}
         </span>
         {tooltip && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="focus:outline-none" aria-label="Mais informações">
-                  <HelpCircle size={16} className="text-gray-400 hover:text-frete-500 transition-colors" />
+                <button className="focus:outline-none text-gray-400 hover:text-frete-500 transition-colors" aria-label="Mais informações">
+                  <HelpCircle size={16} />
                 </button>
               </TooltipTrigger>
               <TooltipContent>

@@ -6,12 +6,18 @@
   }
   
   .sidebar-link {
-    @apply flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:text-frete-600 
+    @apply flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-frete-600 
     hover:bg-frete-50 rounded-lg transition-all duration-200 text-sm;
   }
   
   .sidebar-link.active {
     @apply bg-frete-50 text-frete-600 font-medium shadow-sm;
+    position: relative;
+  }
+  
+  .sidebar-link.active::before {
+    content: '';
+    @apply absolute left-0 top-0 bottom-0 w-[3px] bg-frete-500 rounded-r;
   }
   
   .sidebar-link .icon {
@@ -39,5 +45,20 @@
     @apply fixed z-50 bg-gradient-to-br from-frete-500 to-frete-600 text-white p-3 
     rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 
     active:scale-95 focus:outline-none focus:ring-2 focus:ring-frete-400 focus:ring-offset-2;
+  }
+  
+  /* Sidebar user profile area */
+  .sidebar-profile {
+    @apply p-4 border-t border-gray-100 mt-auto flex items-center gap-3;
+  }
+  
+  /* Sidebar footer */
+  .sidebar-footer {
+    @apply p-4 text-xs text-gray-500 border-t border-gray-100;
+  }
+  
+  /* Improved active states */
+  .sidebar-link.active .icon {
+    @apply text-frete-600;
   }
 }

@@ -1,101 +1,90 @@
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+@keyframes slideInLeft {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-/* Page transition animations */
-.page-transition-enter {
-  opacity: 0;
-  transform: translateY(10px);
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-.page-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 400ms, transform 400ms;
+@keyframes slideInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-.page-transition-exit {
-  opacity: 1;
-  transform: translateY(0);
+@keyframes slideInDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-.page-transition-exit-active {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 300ms, transform 300ms;
-}
-
-/* Animation keyframes */
-@keyframes pulse-gentle {
+@keyframes pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03); }
+  50% { transform: scale(1.05); }
 }
 
-@keyframes fade-slide-up {
-  from { 
-    opacity: 0; 
-    transform: translateY(20px);
+@keyframes bounceIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  70% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@layer components {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
   }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
+  
+  .animate-slide-in-left {
+    animation: slideInLeft 0.5s ease-out forwards;
   }
-}
-
-@keyframes fade-slide-down {
-  from { 
-    opacity: 0; 
-    transform: translateY(-20px);
+  
+  .animate-slide-in-right {
+    animation: slideInRight 0.5s ease-out forwards;
   }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
+  
+  .animate-slide-in-up {
+    animation: slideInUp 0.5s ease-out forwards;
   }
-}
-
-@keyframes fade-slide-right {
-  from { 
-    opacity: 0; 
-    transform: translateX(-20px);
+  
+  .animate-slide-in-down {
+    animation: slideInDown 0.5s ease-out forwards;
   }
-  to { 
-    opacity: 1;
-    transform: translateX(0);
+  
+  .animate-bounce-in {
+    animation: bounceIn 0.6s ease-out forwards;
   }
+  
+  .animate-pulse-soft {
+    animation: pulse 2s infinite ease-in-out;
+  }
+  
+  .animate-shimmer {
+    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.5), rgba(255,255,255,0));
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+  
+  /* Staggered animations for lists */
+  .staggered-list > * {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  
+  .staggered-list > *:nth-child(1) { animation: slideInUp 0.4s 0.1s ease-out forwards; }
+  .staggered-list > *:nth-child(2) { animation: slideInUp 0.4s 0.2s ease-out forwards; }
+  .staggered-list > *:nth-child(3) { animation: slideInUp 0.4s 0.3s ease-out forwards; }
+  .staggered-list > *:nth-child(4) { animation: slideInUp 0.4s 0.4s ease-out forwards; }
+  .staggered-list > *:nth-child(5) { animation: slideInUp 0.4s 0.5s ease-out forwards; }
+  .staggered-list > *:nth-child(n+6) { animation: slideInUp 0.4s 0.6s ease-out forwards; }
 }
-
-/* Animation classes */
-.animate-fade-slide-up {
-  animation: fade-slide-up 0.5s ease forwards;
-}
-
-.animate-fade-slide-down {
-  animation: fade-slide-down 0.5s ease forwards;
-}
-
-.animate-fade-slide-right {
-  animation: fade-slide-right 0.5s ease forwards;
-}
-
-.animate-pulse-gentle {
-  animation: pulse-gentle 2s ease-in-out infinite;
-}
-
-/* Animation delay utilities */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }

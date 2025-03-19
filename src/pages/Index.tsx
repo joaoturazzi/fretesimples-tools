@@ -29,41 +29,43 @@ const Index = () => {
       />
       
       <main 
-        className={`pt-28 pb-20 transition-all duration-300 ${
+        className={`pt-24 pb-20 transition-all duration-300 ${
           isMobile ? 'ml-0' : 'ml-64'
         }`}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
-          <div className="mb-16 text-center animate-fade-in">
-            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+        <div className="content-container">
+          <div className="mb-10 text-center animate-fade-in">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
               Ferramentas gratuitas para transportadores
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Calcule custos, simule lucros e otimize suas operações de transporte 
               com nossas ferramentas simples e eficientes.
             </p>
           </div>
           
-          <FreightCalculator isActive={activeSection === 'calculadora-frete'} />
-          <ProfitSimulator isActive={activeSection === 'simulador-lucro'} />
-          <RiskCalculator isActive={activeSection === 'calculadora-risco'} />
-          <TransportCostSimulator isActive={activeSection === 'simulador-custos'} />
-          <FuelCalculator isActive={activeSection === 'calculadora-combustivel'} />
-          <FreightViabilityChecker isActive={activeSection === 'verificador-viabilidade'} />
-          <TripChecklist isActive={activeSection === 'checklist-viagem'} />
-          <JobMarketplace isActive={activeSection === 'marketplace'} />
+          <div className="tools-container">
+            <FreightCalculator isActive={activeSection === 'calculadora-frete'} />
+            <ProfitSimulator isActive={activeSection === 'simulador-lucro'} />
+            <RiskCalculator isActive={activeSection === 'calculadora-risco'} />
+            <TransportCostSimulator isActive={activeSection === 'simulador-custos'} />
+            <FuelCalculator isActive={activeSection === 'calculadora-combustivel'} />
+            <FreightViabilityChecker isActive={activeSection === 'verificador-viabilidade'} />
+            <TripChecklist isActive={activeSection === 'checklist-viagem'} />
+            <JobMarketplace isActive={activeSection === 'marketplace'} />
+          </div>
           
-          <section id="sobre" className="tool-section py-12 px-4 sm:px-8 mb-8 glass-card visible">
+          <section id="sobre" className="tool-section py-10 px-6 sm:px-8 mt-12 mb-8 glass-card visible">
             <div className="max-w-5xl mx-auto">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Sobre o FreteSimples</h2>
-              <p className="text-gray-600 mb-10 text-lg">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Sobre o FreteSimples</h2>
+              <p className="text-gray-600 mb-8 text-base lg:text-lg">
                 O FreteSimples é um projeto que oferece ferramentas gratuitas para profissionais do transporte e logística, 
                 ajudando a calcular custos, otimizar rotas e aumentar a eficiência das operações.
               </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Nossa missão</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Nossa missão</h3>
                   <p className="text-gray-700">
                     Facilitar o dia a dia dos transportadores com ferramentas simples, práticas e gratuitas que ajudem 
                     na tomada de decisões e na gestão eficiente do negócio.
@@ -71,8 +73,8 @@ const Index = () => {
                 </div>
                 
                 <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Por que usar?</h3>
-                  <ul className="space-y-3 text-gray-700">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Por que usar?</h3>
+                  <ul className="space-y-2 text-gray-700">
                     <li className="flex items-center">
                       <span className="text-frete-500 mr-2">✓</span> 
                       Ferramentas 100% gratuitas
@@ -99,7 +101,7 @@ const Index = () => {
             </div>
           </section>
           
-          <footer id="footer" className="text-center text-gray-500 text-sm py-10">
+          <footer id="footer" className="text-center text-gray-500 text-sm py-8 border-t border-gray-100 mt-12">
             <p>© {new Date().getFullYear()} FreteSimples - Todas as ferramentas gratuitas para sempre.</p>
             <p className="mt-1">
               Desenvolvido para auxiliar transportadores e profissionais de logística.

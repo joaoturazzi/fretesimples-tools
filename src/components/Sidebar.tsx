@@ -37,12 +37,6 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
     if (isMobile) {
       setIsSidebarOpen(false);
     }
-    
-    // Smooth scroll to section
-    const element = document.getElementById(section);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
   };
   
   const sidebarItems = [

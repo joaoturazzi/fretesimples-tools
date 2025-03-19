@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import { 
@@ -18,32 +18,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const Index = () => {
   const [activeSection, setActiveSection] = useState('calculadora-frete');
   const isMobile = useIsMobile();
-  
-  // Handle section visibility when scrolling
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = document.querySelectorAll('.tool-section');
-      sections.forEach(section => {
-        const rect = section.getBoundingClientRect();
-        const isVisible = (
-          rect.top < window.innerHeight / 2 &&
-          rect.bottom > window.innerHeight / 2
-        );
-        
-        if (isVisible) {
-          section.classList.add('visible');
-          setActiveSection(section.id);
-        }
-      });
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Check on initial load
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
   
   return (
     <div className="bg-gray-50 min-h-screen">

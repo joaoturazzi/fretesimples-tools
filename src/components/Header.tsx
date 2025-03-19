@@ -14,38 +14,7 @@ const Header = () => {
             <h1 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
               FreteSimples
             </h1>
-            <p className="text-xs text-gray-500 animate-fade-in">
-              Ferramentas gratuitas para transportadores
-            </p>
           </div>
-        </div>
-        <div className="hidden md:flex items-center space-x-4">
-          <a 
-            href="#" 
-            onClick={(e) => {
-              e.preventDefault();
-              document.dispatchEvent(new CustomEvent('navigate-section', { detail: 'sobre' }));
-            }}
-            className="text-gray-600 hover:text-frete-600 transition-colors duration-200 font-medium text-sm"
-          >
-            Sobre
-          </a>
-          <a 
-            href="#" 
-            onClick={(e) => {
-              e.preventDefault();
-              const assistantEl = document.getElementById('assistente');
-              if (assistantEl) assistantEl.click();
-            }}
-            className="text-gray-600 hover:text-frete-600 transition-colors duration-200 font-medium text-sm"
-          >
-            Assistente IA
-          </a>
-          <button 
-            className="px-3 py-1.5 bg-frete-50 text-frete-600 rounded-lg font-medium hover:bg-frete-100 transition-colors text-sm"
-          >
-            Contato
-          </button>
         </div>
       </div>
     </header>

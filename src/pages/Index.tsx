@@ -30,7 +30,7 @@ const Index = () => {
       />
       
       <main 
-        className={`pt-24 pb-16 transition-all duration-300 ${
+        className={`pt-20 pb-16 transition-all duration-300 ${
           isMobile ? 'ml-0' : 'ml-64'
         }`}
       >

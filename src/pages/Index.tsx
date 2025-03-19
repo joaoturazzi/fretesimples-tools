@@ -15,7 +15,7 @@ import {
 import ChatAssistant from '@/components/ChatAssistant';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AboutSection from '@/components/AboutSection';
-import { Truck, Calculator, TrendingUp } from 'lucide-react';
+import { Truck } from 'lucide-react';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('calculadora-frete');
@@ -36,34 +36,6 @@ const Index = () => {
         }`}
       >
         <div className="content-container px-4 sm:px-6">
-          {/* Hero Section - Text removed as requested */}
-          <div className="mb-10 text-center animate-fade-in bg-gradient-to-br from-white to-gray-50 rounded-xl border border-gray-100 shadow-sm py-8 px-4 sm:px-6 md:px-8">
-            <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-3 rounded-xl shadow-md">
-                <Truck size={32} />
-              </div>
-            </div>
-            
-            <div className="w-20 h-1 bg-gradient-to-r from-orange-500 to-blue-500 mx-auto mt-5 rounded-full"></div>
-            
-            <div className="flex flex-wrap justify-center mt-8 gap-3">
-              <button 
-                onClick={() => setActiveSection('calculadora-frete')}
-                className="bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-md transition-transform hover:scale-105"
-              >
-                <Calculator size={18} />
-                Calcular Frete
-              </button>
-              <button 
-                onClick={() => setActiveSection('simulador-lucro')}
-                className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-md transition-transform hover:scale-105"
-              >
-                <TrendingUp size={18} />
-                Simular Lucro
-              </button>
-            </div>
-          </div>
-          
           <div className="tools-container">
             <FreightCalculator isActive={activeSection === 'calculadora-frete'} />
             <ProfitSimulator isActive={activeSection === 'simulador-lucro'} />

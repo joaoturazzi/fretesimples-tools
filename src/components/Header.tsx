@@ -4,10 +4,10 @@ import { Truck } from 'lucide-react';
 
 const Header = () => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="bg-frete-500 text-white p-2.5 rounded-lg shadow-md animate-fade-in">
+          <div className="bg-gradient-to-br from-frete-500 to-frete-600 text-white p-2.5 rounded-lg shadow-md animate-fade-in flex items-center justify-center">
             <Truck size={24} />
           </div>
           <div>
@@ -21,20 +21,20 @@ const Header = () => {
         </div>
         <div className="hidden md:flex items-center space-x-6">
           <a 
-            href="#ferramentas" 
-            className="text-gray-600 hover:text-frete-600 transition-colors duration-200"
+            href="#calculadora-frete" 
+            className="text-gray-600 hover:text-frete-600 transition-colors duration-200 font-medium"
           >
             Ferramentas
           </a>
           <a 
             href="#assistente" 
-            className="text-gray-600 hover:text-frete-600 transition-colors duration-200"
+            className="text-gray-600 hover:text-frete-600 transition-colors duration-200 font-medium"
           >
             Assistente IA
           </a>
           <a 
             href="#sobre" 
-            className="text-gray-600 hover:text-frete-600 transition-colors duration-200"
+            className="text-gray-600 hover:text-frete-600 transition-colors duration-200 font-medium"
           >
             Sobre
           </a>

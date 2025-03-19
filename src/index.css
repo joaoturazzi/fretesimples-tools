@@ -79,7 +79,7 @@
   }
   
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-gray-50 text-foreground font-sans antialiased;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -89,7 +89,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm rounded-xl;
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-lg rounded-xl transition-all duration-300;
   }
   
   .tool-section {
@@ -101,22 +101,22 @@
   }
   
   .input-field {
-    @apply px-4 py-3 rounded-lg border border-gray-200 bg-white/80 backdrop-blur-sm 
+    @apply px-4 py-3 rounded-lg border border-gray-200 bg-white/90 backdrop-blur-sm 
     transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-frete-400 
-    focus:border-transparent w-full;
+    focus:border-transparent w-full shadow-sm;
   }
   
   .select-field {
-    @apply px-4 py-3 rounded-lg border border-gray-200 bg-white/80 backdrop-blur-sm 
+    @apply px-4 py-3 rounded-lg border border-gray-200 bg-white/90 backdrop-blur-sm 
     transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-frete-400 
-    focus:border-transparent w-full appearance-none bg-no-repeat bg-right pr-10;
+    focus:border-transparent w-full appearance-none bg-no-repeat bg-right pr-10 shadow-sm;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23999999' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
     background-size: 20px;
   }
   
   .btn {
     @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-[1.03] 
-    active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2;
+    active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center;
   }
   
   .btn-primary {
@@ -138,17 +138,21 @@
   }
   
   .sidebar-link.active {
-    @apply bg-frete-50 text-frete-600 font-medium;
+    @apply bg-frete-50 text-frete-600 font-medium shadow-sm;
   }
   
   .result-box {
     @apply bg-gradient-to-br from-white to-gray-50 rounded-lg border 
-    border-gray-100 p-4 shadow-sm transition-all duration-500;
+    border-gray-100 p-4 shadow-sm transition-all duration-300 hover:shadow-md;
   }
   
   .tooltip {
     @apply absolute invisible opacity-0 bg-gray-900 text-white text-xs py-1 px-2 rounded 
-    transition-opacity duration-200 -mt-8 whitespace-nowrap;
+    transition-opacity duration-200 -mt-8 whitespace-nowrap shadow-lg;
+  }
+  
+  .has-tooltip {
+    @apply relative cursor-help;
   }
   
   .has-tooltip:hover .tooltip {
@@ -226,4 +230,41 @@ input[type=number] {
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 300ms, transform 300ms;
+}
+
+/* Enhanced calculator styles */
+.calculator-card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all duration-300 hover:shadow-md;
+}
+
+.calculator-input-group {
+  @apply mb-4;
+}
+
+.calculator-label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.calculator-result {
+  @apply mt-8 border-t border-gray-100 pt-6;
+}
+
+/* Print styles for checklist */
+@media print {
+  header, footer, .sidebar, button {
+    display: none !important;
+  }
+  
+  .tool-section {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  .print-section {
+    break-inside: avoid;
+  }
 }

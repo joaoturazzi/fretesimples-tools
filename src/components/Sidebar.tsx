@@ -13,6 +13,7 @@ import {
   X
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 interface SidebarProps {
   activeSection: string;
@@ -61,7 +62,8 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
       {isMobile && (
         <button 
           onClick={toggleSidebar}
-          className="fixed bottom-6 right-6 z-50 bg-frete-500 text-white p-3 rounded-full shadow-lg transition-transform duration-300 transform hover:scale-105 active:scale-95"
+          className="fixed bottom-6 right-6 z-50 bg-gradient-to-br from-frete-500 to-frete-600 text-white p-3 rounded-full shadow-lg transition-transform duration-300 transform hover:scale-105 active:scale-95"
+          aria-label={isSidebarOpen ? "Fechar menu" : "Abrir menu"}
         >
           {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -69,12 +71,14 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
     
       {/* Sidebar */}
       <div 
-        className={`fixed top-[72px] bottom-0 bg-white border-r border-gray-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto
-          ${isSidebarOpen ? 'left-0' : '-left-full md:left-0'} 
-          ${isMobile ? 'w-64' : 'w-64'}`}
+        className={cn(
+          "fixed top-[72px] bottom-0 bg-white border-r border-gray-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto",
+          isSidebarOpen ? "left-0" : "-left-full md:left-0",
+          isMobile ? "w-64" : "w-64"
+        )}
       >
         <div className="p-4">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">
             Ferramentas
           </h2>
           <nav className="space-y-1.5">
@@ -82,9 +86,12 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
               <button
                 key={item.id}
                 onClick={() => handleSectionClick(item.id)}
-                className={`sidebar-link w-full text-left ${activeSection === item.id ? 'active' : ''}`}
+                className={cn(
+                  "sidebar-link w-full text-left",
+                  activeSection === item.id ? "active" : ""
+                )}
               >
-                <span className="mr-3">{item.icon}</span>
+                <span className="mr-3 text-frete-500">{item.icon}</span>
                 {item.label}
               </button>
             ))}

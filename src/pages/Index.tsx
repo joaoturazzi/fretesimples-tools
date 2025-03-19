@@ -55,17 +55,18 @@ const Index = () => {
       />
       
       <main 
-        className={`pt-24 pb-16 transition-all duration-300 ${
+        className={`pt-28 pb-20 transition-all duration-300 ${
           isMobile ? 'ml-0' : 'ml-64'
         }`}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
-          <div className="mb-12 text-center animate-fade-in">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+          <div className="mb-16 text-center animate-fade-in">
+            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 leading-tight">
               Ferramentas gratuitas para transportadores
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Calcule custos, simule lucros e otimize suas operações de transporte com nossas ferramentas simples e eficientes.
+              Calcule custos, simule lucros e otimize suas operações de transporte 
+              com nossas ferramentas simples e eficientes.
             </p>
           </div>
           
@@ -78,36 +79,53 @@ const Index = () => {
           <TripChecklist isActive={activeSection === 'checklist-viagem'} />
           <JobMarketplace isActive={activeSection === 'marketplace'} />
           
-          <section id="sobre" className="tool-section py-8 px-4 sm:px-8 mb-8 glass-card visible">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Sobre o FreteSimples</h2>
-            <p className="text-gray-600 mb-6">
-              O FreteSimples é um projeto que oferece ferramentas gratuitas para profissionais do transporte e logística, 
-              ajudando a calcular custos, otimizar rotas e aumentar a eficiência das operações.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Nossa missão</h3>
-                <p className="text-gray-700">
-                  Facilitar o dia a dia dos transportadores com ferramentas simples, práticas e gratuitas que ajudem 
-                  na tomada de decisões e na gestão eficiente do negócio.
-                </p>
-              </div>
+          <section id="sobre" className="tool-section py-12 px-4 sm:px-8 mb-8 glass-card visible">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">Sobre o FreteSimples</h2>
+              <p className="text-gray-600 mb-10 text-lg">
+                O FreteSimples é um projeto que oferece ferramentas gratuitas para profissionais do transporte e logística, 
+                ajudando a calcular custos, otimizar rotas e aumentar a eficiência das operações.
+              </p>
               
-              <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Por que usar?</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li>✓ Ferramentas 100% gratuitas</li>
-                  <li>✓ Cálculos rápidos e precisos</li>
-                  <li>✓ Interface simples e intuitiva</li>
-                  <li>✓ Sem necessidade de cadastro</li>
-                  <li>✓ Assistente de IA para dúvidas</li>
-                </ul>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Nossa missão</h3>
+                  <p className="text-gray-700">
+                    Facilitar o dia a dia dos transportadores com ferramentas simples, práticas e gratuitas que ajudem 
+                    na tomada de decisões e na gestão eficiente do negócio.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Por que usar?</h3>
+                  <ul className="space-y-3 text-gray-700">
+                    <li className="flex items-center">
+                      <span className="text-frete-500 mr-2">✓</span> 
+                      Ferramentas 100% gratuitas
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-frete-500 mr-2">✓</span> 
+                      Cálculos rápidos e precisos
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-frete-500 mr-2">✓</span> 
+                      Interface simples e intuitiva
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-frete-500 mr-2">✓</span> 
+                      Sem necessidade de cadastro
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-frete-500 mr-2">✓</span> 
+                      Assistente de IA para dúvidas
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </section>
           
-          <footer id="footer" className="text-center text-gray-500 text-sm py-8">
+          <footer id="footer" className="text-center text-gray-500 text-sm py-10">
             <p>© {new Date().getFullYear()} FreteSimples - Todas as ferramentas gratuitas para sempre.</p>
             <p className="mt-1">
               Desenvolvido para auxiliar transportadores e profissionais de logística.

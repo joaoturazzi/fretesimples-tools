@@ -26,7 +26,11 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   
   useEffect(() => {
-    setIsSidebarOpen(!isMobile);
+    // On desktop, sidebar is open by default
+    // On mobile, it starts closed but can be toggled
+    if (!isMobile) {
+      setIsSidebarOpen(true);
+    }
   }, [isMobile]);
   
   useEffect(() => {
@@ -68,7 +72,7 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
   
   return (
     <>
-      {/* Mobile Toggle Button */}
+      {/* Mobile Toggle Button - Always visible on mobile */}
       {isMobile && (
         <button 
           onClick={toggleSidebar}
@@ -79,11 +83,13 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
         </button>
       )}
     
-      {/* Sidebar */}
+      {/* Sidebar - Positioned with transform for better mobile experience */}
       <div 
         className={cn(
           "fixed left-0 top-16 bottom-0 bg-white border-r border-orange-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto w-64",
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+          // On desktop, always show the sidebar
+          !isMobile && "md:translate-x-0"
         )}
       >
         <div className="p-4">
@@ -117,6 +123,15 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
           </nav>
         </div>
       </div>
+
+      {/* Semi-transparent overlay that appears behind the sidebar on mobile */}
+      {isMobile && isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
     </>
   );
 };

@@ -1,23 +1,23 @@
 
 @layer components {
   .sidebar {
-    @apply fixed top-16 bottom-0 bg-white border-r border-gray-100 shadow-sm 
+    @apply fixed top-16 bottom-0 bg-white border-r border-orange-100 shadow-sm 
     transition-all duration-300 ease-in-out z-40 overflow-y-auto;
   }
   
   .sidebar-link {
-    @apply flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:text-frete-600 
-    hover:bg-frete-50 rounded-lg transition-all duration-200 text-sm;
+    @apply flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:text-orange-600 
+    hover:bg-orange-50 rounded-lg transition-all duration-200 text-sm;
   }
   
   .sidebar-link.active {
-    @apply bg-frete-50 text-frete-600 font-medium shadow-sm;
+    @apply bg-orange-50 text-orange-600 font-medium shadow-sm;
     position: relative;
   }
   
   .sidebar-link.active::before {
     content: '';
-    @apply absolute left-0 top-0 bottom-0 w-[3px] bg-frete-500 rounded-r;
+    @apply absolute left-0 top-0 bottom-0 w-[3px] bg-orange-500 rounded-r;
   }
   
   .sidebar-link .icon {
@@ -42,9 +42,9 @@
   
   /* Mobile sidebar toggle button */
   .sidebar-toggle {
-    @apply fixed z-50 bg-gradient-to-br from-frete-500 to-frete-600 text-white p-2.5 
+    @apply fixed z-50 bg-gradient-to-br from-orange-500 to-orange-600 text-white p-2.5 
     rounded-full shadow-md transition-all duration-300 transform hover:scale-105 
-    active:scale-95 focus:outline-none focus:ring-2 focus:ring-frete-400 focus:ring-offset-2;
+    active:scale-95 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2;
   }
   
   /* Sidebar user profile area */
@@ -59,6 +59,6 @@
   
   /* Improved active states */
   .sidebar-link.active .icon {
-    @apply text-frete-600;
+    @apply text-orange-600;
   }
 }

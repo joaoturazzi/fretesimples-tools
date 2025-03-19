@@ -72,7 +72,7 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
       {isMobile && (
         <button 
           onClick={toggleSidebar}
-          className="fixed bottom-6 right-6 z-50 bg-gradient-to-br from-frete-500 to-frete-600 text-white p-3 rounded-full shadow-lg transition-transform duration-300 transform hover:scale-105 active:scale-95"
+          className="fixed bottom-6 right-6 z-50 bg-gradient-to-br from-orange-500 to-orange-600 text-white p-3 rounded-full shadow-lg transition-transform duration-300 transform hover:scale-105 active:scale-95"
           aria-label={isSidebarOpen ? "Fechar menu" : "Abrir menu"}
         >
           {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
@@ -82,7 +82,7 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
       {/* Sidebar */}
       <div 
         className={cn(
-          "fixed left-0 top-16 bottom-0 bg-white border-r border-gray-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto w-64",
+          "fixed left-0 top-16 bottom-0 bg-white border-r border-orange-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto w-64",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
@@ -90,18 +90,28 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">
             Ferramentas
           </h2>
-          <nav className="space-y-1">
+          <nav className="space-y-1.5">
             {sidebarItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleSectionClick(item.id)}
                 className={cn(
-                  "sidebar-link w-full text-left",
-                  activeSection === item.id ? "active" : ""
+                  "w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-3 text-sm",
+                  activeSection === item.id 
+                    ? "bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 font-medium" 
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-700"
                 )}
               >
-                <span className="icon text-frete-500">{item.icon}</span>
+                <span className={cn(
+                  "transition-colors",
+                  activeSection === item.id ? "text-orange-500" : "text-gray-500"
+                )}>
+                  {item.icon}
+                </span>
                 {item.label}
+                {activeSection === item.id && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-500"></div>
+                )}
               </button>
             ))}
           </nav>

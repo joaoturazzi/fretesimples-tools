@@ -56,7 +56,7 @@
   }
   
   .loading-spinner {
-    @apply w-10 h-10 rounded-full border-3 border-frete-300 border-t-frete-600 animate-spin;
+    @apply w-10 h-10 rounded-full border-3 border-orange-300 border-t-orange-600 animate-spin;
   }
   
   /* Improve content container */
@@ -66,11 +66,43 @@
   
   /* Enhance headings */
   .section-heading {
-    @apply border-l-4 border-frete-500 pl-4 mb-5;
+    @apply border-l-4 border-orange-500 pl-4 mb-5;
   }
   
   /* Tools container - contains all calculator tools */
   .tools-container {
-    @apply space-y-2;
+    @apply space-y-4;
+  }
+  
+  /* Gradient dividers */
+  .gradient-divider {
+    @apply h-1 w-24 bg-gradient-to-r from-orange-500 to-cci-500 rounded-full my-6 mx-auto;
+  }
+  
+  /* Card styles */
+  .feature-card {
+    @apply bg-white rounded-xl p-5 border border-gray-100 shadow-sm 
+    hover:shadow-md transition-all duration-300 flex flex-col h-full;
+  }
+  
+  .feature-card-icon {
+    @apply w-12 h-12 rounded-lg bg-orange-100 text-orange-600 flex items-center 
+    justify-center mb-4;
+  }
+  
+  /* Button styles with new colors */
+  .btn-orange {
+    @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg 
+    shadow-sm hover:shadow-md transition-all duration-300 px-4 py-2 font-medium;
+  }
+  
+  .btn-blue {
+    @apply bg-gradient-to-r from-cci-500 to-cci-600 text-white rounded-lg 
+    shadow-sm hover:shadow-md transition-all duration-300 px-4 py-2 font-medium;
+  }
+  
+  .btn-ghost {
+    @apply bg-white text-gray-700 border border-gray-200 rounded-lg shadow-sm 
+    hover:bg-gray-50 transition-all duration-300 px-4 py-2 font-medium;
   }
 }

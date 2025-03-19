@@ -36,13 +36,14 @@ const Index = () => {
       >
         <div className="content-container px-4 sm:px-6">
           <div className="mb-8 text-center animate-fade-in">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3 leading-tight">
-              Ferramentas gratuitas para transportadores
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 leading-tight">
+              Ferramentas para transportadores
             </h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
               Calcule custos, simule lucros e otimize suas operações de transporte 
               com nossas ferramentas simples e eficientes.
             </p>
+            <div className="w-20 h-1 bg-gradient-to-r from-orange-500 to-cci-500 mx-auto mt-5 rounded-full"></div>
           </div>
           
           <div className="tools-container">
@@ -59,7 +60,7 @@ const Index = () => {
           {activeSection === 'sobre' && <AboutSection />}
           
           <footer id="footer" className="text-center text-gray-500 text-sm py-8 border-t border-gray-100 mt-12">
-            <p>© {new Date().getFullYear()} FreteSimples - Todas as ferramentas gratuitas para sempre.</p>
+            <p>© {new Date().getFullYear()} Frete Simples BY CCI - Todas as ferramentas gratuitas para sempre.</p>
             <p className="mt-1">
               Desenvolvido para auxiliar transportadores e profissionais de logística.
             </p>

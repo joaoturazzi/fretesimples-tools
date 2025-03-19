@@ -53,18 +53,33 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Replace the old frete color scale with our new orange theme
 				frete: {
-					50: '#eef9ff',
-					100: '#dcf2ff',
-					200: '#b3e7ff',
-					300: '#70d7ff',
-					400: '#29c0ff',
-					500: '#06a6f1',
-					600: '#0086d1',
-					700: '#006ca9',
-					800: '#005c8c',
-					900: '#064e74',
-					950: '#03304c',
+					50: '#FFF7ED',
+					100: '#FFEDD5',
+					200: '#FED7AA',
+					300: '#FDBA74',
+					400: '#FB923C',
+					500: '#F97316', // Primary orange
+					600: '#EA580C',
+					700: '#C2410C',
+					800: '#9A3412',
+					900: '#7C2D12',
+					950: '#431407',
+				},
+				// Add complementary blue theme
+				cci: {
+					50: '#EFF6FF',
+					100: '#DBEAFE',
+					200: '#BFDBFE',
+					300: '#93C5FD',
+					400: '#60A5FA',
+					500: '#3B82F6', // Primary blue
+					600: '#2563EB',
+					700: '#1D4ED8',
+					800: '#1E40AF',
+					900: '#1E3A8A',
+					950: '#172554',
 				},
 				success: {
 					50: '#f0fdf4',

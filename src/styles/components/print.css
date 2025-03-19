@@ -1,0 +1,20 @@
+
+/* Print styles for checklist */
+@media print {
+  header, footer, .sidebar, button {
+    display: none !important;
+  }
+  
+  .tool-section {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  .print-section {
+    break-inside: avoid;
+  }
+}

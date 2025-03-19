@@ -1,0 +1,14 @@
+
+@layer components {
+  .chat-bubble {
+    @apply max-w-[85%] p-3 rounded-lg mb-2;
+  }
+  
+  .chat-bubble-user {
+    @apply bg-frete-500 text-white ml-auto rounded-br-none;
+  }
+  
+  .chat-bubble-ai {
+    @apply bg-gray-100 text-gray-800 mr-auto rounded-bl-none;
+  }
+}

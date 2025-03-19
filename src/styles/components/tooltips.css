@@ -1,0 +1,15 @@
+
+@layer components {
+  .tooltip {
+    @apply absolute invisible opacity-0 bg-gray-900 text-white text-xs py-1 px-2 rounded 
+    transition-opacity duration-200 -mt-8 whitespace-nowrap shadow-lg;
+  }
+  
+  .has-tooltip {
+    @apply relative cursor-help;
+  }
+  
+  .has-tooltip:hover .tooltip {
+    @apply visible opacity-100;
+  }
+}

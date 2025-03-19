@@ -1,14 +1,52 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-lg rounded-xl transition-all duration-300;
+    @apply bg-white/90 backdrop-blur-md border border-white/80 shadow-lg rounded-xl 
+    transition-all duration-300 hover:shadow-xl;
+  }
+  
+  .container-responsive {
+    @apply px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto;
+  }
+  
+  .section-spacing {
+    @apply py-12 md:py-16 lg:py-20;
   }
   
   .tool-section {
-    @apply opacity-0 translate-y-4 transition-all duration-500 ease-out;
+    @apply opacity-0 translate-y-4 transition-all duration-500 ease-out scroll-mt-28;
   }
   
   .tool-section.visible {
     @apply opacity-100 translate-y-0;
+  }
+  
+  .page-header {
+    @apply fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-md shadow-sm;
+  }
+  
+  .page-content {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .two-column-layout {
+    @apply grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12;
+  }
+  
+  .three-column-layout {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+  
+  .four-column-layout {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6;
+  }
+  
+  /* Loading indicator overlay */
+  .loading-overlay {
+    @apply fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50;
+  }
+  
+  .loading-spinner {
+    @apply w-12 h-12 rounded-full border-4 border-frete-300 border-t-frete-600 animate-spin;
   }
 }

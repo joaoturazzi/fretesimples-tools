@@ -20,10 +20,19 @@ const Calculator = ({ id, title, description, isActive, children }: CalculatorPr
       )}
     >
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{title}</h2>
-        <p className="text-gray-600 mb-8 text-lg max-w-3xl">{description}</p>
-        <div className="calculator-card">
-          {children}
+        <div className="mb-6 border-l-4 border-frete-500 pl-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{title}</h2>
+          <p className="text-gray-600 max-w-3xl text-base md:text-lg">{description}</p>
+        </div>
+        
+        <div className="calculator-card relative">
+          {/* Decorative elements */}
+          <div className="absolute -top-1 -right-1 w-20 h-20 bg-frete-50 rounded-full blur-xl opacity-50"></div>
+          <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-blue-50 rounded-full blur-xl opacity-40"></div>
+          
+          <div className="relative z-10">
+            {children}
+          </div>
         </div>
       </div>
     </section>

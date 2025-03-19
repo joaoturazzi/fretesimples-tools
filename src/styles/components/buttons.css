@@ -1,20 +1,64 @@
 
 @layer components {
   .btn {
-    @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-[1.03] 
-    active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center;
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 transform 
+    hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-offset-2 
+    flex items-center justify-center gap-2 relative overflow-hidden;
+  }
+  
+  .btn::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+  }
+  
+  .btn:active::before {
+    @apply opacity-100;
+  }
+  
+  .btn:active {
+    @apply scale-[0.98] shadow-inner;
   }
   
   .btn-primary {
-    @apply bg-frete-500 text-white hover:bg-frete-600 focus:ring-frete-400 shadow-md 
-    hover:shadow-lg active:shadow;
+    @apply bg-gradient-to-br from-frete-500 to-frete-600 text-white hover:bg-frete-600 
+    focus:ring-frete-400 shadow-md hover:shadow-lg active:shadow;
   }
   
   .btn-secondary {
-    @apply bg-gray-100 text-gray-800 hover:bg-gray-200 focus:ring-gray-300;
+    @apply bg-gray-50 text-gray-800 border border-gray-200 hover:bg-gray-100 
+    focus:ring-gray-300 shadow-sm hover:shadow-md;
+  }
+  
+  .btn-success {
+    @apply bg-gradient-to-br from-success-500 to-success-600 text-white 
+    hover:bg-success-600 focus:ring-success-400 shadow-md hover:shadow-lg;
+  }
+  
+  .btn-warning {
+    @apply bg-gradient-to-br from-warning-500 to-warning-600 text-white 
+    hover:bg-warning-600 focus:ring-warning-400 shadow-md hover:shadow-lg;
+  }
+  
+  .btn-danger {
+    @apply bg-gradient-to-br from-danger-500 to-danger-600 text-white 
+    hover:bg-danger-600 focus:ring-danger-400 shadow-md hover:shadow-lg;
   }
   
   .btn-small {
     @apply px-4 py-2 text-sm;
+  }
+  
+  .btn-icon {
+    @apply p-2 rounded-full;
+  }
+  
+  .btn-loading {
+    @apply relative text-transparent pointer-events-none;
+  }
+  
+  .btn-loading::after {
+    content: '';
+    @apply absolute inset-0 m-auto w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin;
   }
 }

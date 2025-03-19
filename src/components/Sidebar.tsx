@@ -82,9 +82,8 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
       {/* Sidebar */}
       <div 
         className={cn(
-          "fixed top-16 bottom-0 bg-white border-r border-gray-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto",
-          isSidebarOpen ? "left-0" : "-left-full md:left-0",
-          isMobile ? "w-64" : "w-64"
+          "fixed left-0 top-16 bottom-0 bg-white border-r border-gray-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto w-64",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
         <div className="p-4">
@@ -101,7 +100,7 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
                   activeSection === item.id ? "active" : ""
                 )}
               >
-                <span className="mr-3 text-frete-500">{item.icon}</span>
+                <span className="icon text-frete-500">{item.icon}</span>
                 {item.label}
               </button>
             ))}

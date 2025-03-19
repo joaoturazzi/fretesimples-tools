@@ -1,8 +1,8 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/95 backdrop-blur-md border border-white/80 shadow-lg rounded-xl 
-    transition-all duration-300 hover:shadow-xl;
+    @apply bg-white/95 backdrop-blur-md border border-white/80 shadow-sm rounded-xl 
+    transition-all duration-300 hover:shadow-md;
   }
   
   .container-responsive {
@@ -10,17 +10,19 @@
   }
   
   .section-spacing {
-    @apply py-12 md:py-16 lg:py-20;
+    @apply py-8 md:py-12 lg:py-16;
   }
   
   .tool-section {
-    @apply opacity-100 transition-all duration-500 ease-out overflow-hidden h-auto;
+    @apply opacity-0 transition-all duration-300 ease-out overflow-hidden h-auto max-h-0;
     display: none;
   }
   
   .tool-section.visible {
     display: block;
-    animation: fadeIn 0.5s ease forwards;
+    max-height: none;
+    @apply opacity-100;
+    animation: fadeIn 0.4s ease forwards;
   }
   
   @keyframes fadeIn {
@@ -37,11 +39,11 @@
   }
   
   .two-column-layout {
-    @apply grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12;
+    @apply grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8;
   }
   
   .three-column-layout {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6;
   }
   
   .four-column-layout {
@@ -54,7 +56,7 @@
   }
   
   .loading-spinner {
-    @apply w-12 h-12 rounded-full border-4 border-frete-300 border-t-frete-600 animate-spin;
+    @apply w-10 h-10 rounded-full border-3 border-frete-300 border-t-frete-600 animate-spin;
   }
   
   /* Improve content container */
@@ -64,6 +66,11 @@
   
   /* Enhance headings */
   .section-heading {
-    @apply border-l-4 border-frete-500 pl-4 mb-6;
+    @apply border-l-4 border-frete-500 pl-4 mb-5;
+  }
+  
+  /* Tools container - contains all calculator tools */
+  .tools-container {
+    @apply space-y-2;
   }
 }

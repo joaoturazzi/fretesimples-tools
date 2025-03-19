@@ -9,6 +9,7 @@ import {
   CheckCircle, 
   ClipboardCheck,
   Users,
+  Info,
   Menu,
   X
 } from 'lucide-react';
@@ -27,6 +28,20 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
   useEffect(() => {
     setIsSidebarOpen(!isMobile);
   }, [isMobile]);
+  
+  useEffect(() => {
+    const handleNavigateSection = (e: CustomEvent) => {
+      setActiveSection(e.detail);
+      if (isMobile) {
+        setIsSidebarOpen(false);
+      }
+    };
+    
+    document.addEventListener('navigate-section', handleNavigateSection as EventListener);
+    return () => {
+      document.removeEventListener('navigate-section', handleNavigateSection as EventListener);
+    };
+  }, [setActiveSection, isMobile]);
   
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -48,6 +63,7 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
     { id: 'verificador-viabilidade', label: 'Verificador de Viabilidade', icon: <CheckCircle size={18} /> },
     { id: 'checklist-viagem', label: 'Checklist de Viagem', icon: <ClipboardCheck size={18} /> },
     { id: 'marketplace', label: 'Marketplace', icon: <Users size={18} /> },
+    { id: 'sobre', label: 'Sobre', icon: <Info size={18} /> },
   ];
   
   return (
@@ -66,7 +82,7 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
       {/* Sidebar */}
       <div 
         className={cn(
-          "fixed top-[72px] bottom-0 bg-white border-r border-gray-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto",
+          "fixed top-16 bottom-0 bg-white border-r border-gray-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto",
           isSidebarOpen ? "left-0" : "-left-full md:left-0",
           isMobile ? "w-64" : "w-64"
         )}
@@ -75,7 +91,7 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">
             Ferramentas
           </h2>
-          <nav className="space-y-1.5">
+          <nav className="space-y-1">
             {sidebarItems.map((item) => (
               <button
                 key={item.id}

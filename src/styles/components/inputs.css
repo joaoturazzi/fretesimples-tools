@@ -1,74 +1,71 @@
 
 @layer components {
   .input-field {
-    @apply w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg shadow-sm
-    focus:outline-none focus:ring-2 focus:ring-frete-400 focus:border-frete-400
-    placeholder:text-gray-400 transition-all duration-200;
+    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm
+    focus:border-frete-500 focus:outline-none focus:ring-1 focus:ring-frete-500 
+    disabled:opacity-50 disabled:bg-gray-50;
   }
   
   .input-field.error {
-    @apply border-danger-500 bg-danger-50 focus:ring-danger-400 focus:border-danger-400;
-  }
-  
-  .textarea-field {
-    @apply w-full px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm resize-y min-h-[120px]
-    focus:outline-none focus:ring-2 focus:ring-frete-400 focus:border-frete-400
-    placeholder:text-gray-400 transition-all duration-200;
+    @apply border-danger-500 bg-danger-50 focus:border-danger-500 focus:ring-danger-500;
   }
   
   .select-field {
-    @apply w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg shadow-sm
-    focus:outline-none focus:ring-2 focus:ring-frete-400 focus:border-frete-400
-    appearance-none transition-all duration-200;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-position: right 10px center;
-    background-repeat: no-repeat;
-    background-size: 16px 16px;
-    padding-right: 42px;
-  }
-  
-  .input-group {
-    @apply flex items-center relative;
-  }
-  
-  .input-icon {
-    @apply absolute left-3 text-gray-400;
-  }
-  
-  .input-field-with-icon {
-    @apply pl-10;
-  }
-  
-  .input-label {
-    @apply block text-sm font-medium text-gray-700 mb-1.5;
+    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm
+    focus:border-frete-500 focus:outline-none focus:ring-1 focus:ring-frete-500
+    disabled:opacity-50 disabled:bg-gray-50 appearance-none bg-no-repeat bg-right pr-8;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-size: 1.5em 1.5em;
   }
   
   .checkbox-field {
-    @apply h-4 w-4 rounded border-gray-300 text-frete-600 shadow-sm
-    focus:outline-none focus:ring-2 focus:ring-frete-400 focus:ring-offset-0;
+    @apply h-4 w-4 rounded border-gray-300 text-frete-600 shadow-sm focus:ring-frete-500;
   }
   
   .radio-field {
-    @apply h-4 w-4 border-gray-300 text-frete-600 shadow-sm
-    focus:outline-none focus:ring-2 focus:ring-frete-400 focus:ring-offset-0;
+    @apply h-4 w-4 border-gray-300 text-frete-600 shadow-sm focus:ring-frete-500;
   }
   
-  /* Modern floating label */
-  .floating-label-group {
-    @apply relative;
+  .textarea-field {
+    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm
+    focus:border-frete-500 focus:outline-none focus:ring-1 focus:ring-frete-500
+    disabled:opacity-50 disabled:bg-gray-50 resize-y min-h-[80px];
   }
   
-  .floating-label-group .input-field {
-    @apply pt-6 pb-2;
+  .label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
   }
   
-  .floating-label-group label {
-    @apply absolute left-4 top-4 text-gray-500 transition-all duration-200
-    transform origin-left pointer-events-none;
+  .form-group {
+    @apply mb-4;
   }
   
-  .floating-label-group .input-field:focus + label,
-  .floating-label-group .input-field:not(:placeholder-shown) + label {
-    @apply transform -translate-y-3 scale-75 text-frete-600;
+  .form-helper {
+    @apply mt-1 text-xs text-gray-500;
+  }
+  
+  .form-error {
+    @apply mt-1 text-xs text-danger-600;
+  }
+  
+  .input-group {
+    @apply flex rounded-lg shadow-sm;
+  }
+  
+  .input-group-text {
+    @apply inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-gray-500 text-sm;
+  }
+  
+  .input-group .input-field {
+    @apply rounded-l-none flex-grow;
+  }
+  
+  .search-input {
+    @apply w-full pl-10 pr-3;
+  }
+  
+  .search-icon {
+    @apply absolute left-3 top-1/2 -translate-y-1/2 text-gray-400;
   }
 }

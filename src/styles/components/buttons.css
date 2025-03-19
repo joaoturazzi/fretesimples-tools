@@ -1,79 +1,68 @@
 
 @layer components {
   .btn {
-    @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 transform 
-    hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 
-    flex items-center justify-center gap-2 relative overflow-hidden;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg border font-medium text-sm
+    transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 
+    disabled:opacity-60 disabled:cursor-not-allowed gap-2;
   }
   
-  .btn::before {
-    content: '';
-    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs rounded;
   }
   
-  .btn:hover::before {
-    @apply opacity-100;
-  }
-  
-  .btn:active {
-    @apply scale-[0.98] shadow-inner;
+  .btn-lg {
+    @apply px-5 py-2.5 text-base;
   }
   
   .btn-primary {
-    @apply bg-gradient-to-br from-frete-500 to-frete-600 text-white hover:bg-frete-600 
-    focus:ring-frete-400 shadow-md hover:shadow-lg active:shadow;
+    @apply bg-gradient-to-br from-frete-500 to-frete-600 border-transparent text-white shadow-sm
+    hover:from-frete-600 hover:to-frete-700 focus:ring-frete-500;
   }
   
   .btn-secondary {
-    @apply bg-gray-50 text-gray-800 border border-gray-200 hover:bg-gray-100 
-    focus:ring-gray-300 shadow-sm hover:shadow-md;
+    @apply bg-white border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-gray-400;
   }
   
-  .btn-success {
-    @apply bg-gradient-to-br from-success-500 to-success-600 text-white 
-    hover:bg-success-600 focus:ring-success-400 shadow-md hover:shadow-lg;
+  .btn-outline {
+    @apply bg-transparent border-frete-500 text-frete-600 hover:bg-frete-50 focus:ring-frete-400;
   }
   
-  .btn-warning {
-    @apply bg-gradient-to-br from-warning-500 to-warning-600 text-white 
-    hover:bg-warning-600 focus:ring-warning-400 shadow-md hover:shadow-lg;
+  .btn-ghost {
+    @apply bg-transparent border-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-400;
   }
   
   .btn-danger {
-    @apply bg-gradient-to-br from-danger-500 to-danger-600 text-white 
-    hover:bg-danger-600 focus:ring-danger-400 shadow-md hover:shadow-lg;
+    @apply bg-gradient-to-br from-danger-500 to-danger-600 border-transparent text-white
+    hover:from-danger-600 hover:to-danger-700 focus:ring-danger-500;
   }
   
-  .btn-small {
-    @apply px-4 py-2 text-sm;
+  .btn-success {
+    @apply bg-gradient-to-br from-success-500 to-success-600 border-transparent text-white
+    hover:from-success-600 hover:to-success-700 focus:ring-success-500;
   }
   
+  .btn-warning {
+    @apply bg-gradient-to-br from-warning-400 to-warning-500 border-transparent text-white
+    hover:from-warning-500 hover:to-warning-600 focus:ring-warning-400;
+  }
+  
+  /* Loading button */
+  .btn-loading {
+    @apply relative text-transparent transition-none hover:text-transparent;
+  }
+  
+  .btn-loading::after {
+    @apply absolute h-5 w-5 rounded-full border-2 border-t-2 border-white border-t-transparent animate-spin;
+    content: '';
+  }
+  
+  /* Icon button */
   .btn-icon {
     @apply p-2 rounded-full;
   }
   
-  .btn-loading {
-    @apply relative text-transparent pointer-events-none;
-  }
-  
-  .btn-loading::after {
-    content: '';
-    @apply absolute inset-0 m-auto w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin;
-  }
-  
-  /* Pill buttons */
-  .btn-pill {
-    @apply rounded-full px-5;
-  }
-  
-  /* Ghost buttons */
-  .btn-ghost {
-    @apply bg-transparent border border-transparent hover:bg-gray-50 text-gray-700;
-  }
-  
-  /* Link buttons */
-  .btn-link {
-    @apply p-0 bg-transparent text-frete-600 hover:text-frete-700 hover:underline shadow-none hover:shadow-none;
+  /* Action button */
+  .action-btn {
+    @apply fixed z-40 rounded-full shadow-lg transition-transform duration-200 transform hover:scale-105 active:scale-95;
   }
 }

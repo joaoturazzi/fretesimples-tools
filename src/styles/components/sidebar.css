@@ -1,12 +1,12 @@
 
 @layer components {
   .sidebar {
-    @apply fixed top-0 bottom-0 bg-white border-r border-gray-100 shadow-sm 
+    @apply fixed top-16 bottom-0 bg-white border-r border-gray-100 shadow-sm 
     transition-all duration-300 ease-in-out z-40 overflow-y-auto;
   }
   
   .sidebar-link {
-    @apply flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-frete-600 
+    @apply flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:text-frete-600 
     hover:bg-frete-50 rounded-lg transition-all duration-200 text-sm;
   }
   
@@ -29,32 +29,32 @@
   }
   
   .sidebar-heading {
-    @apply text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-4;
+    @apply text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-2;
   }
   
   .sidebar-group {
-    @apply space-y-1.5 mb-6;
+    @apply space-y-1 mb-4;
   }
   
   .sidebar-divider {
-    @apply h-px bg-gray-100 my-4;
+    @apply h-px bg-gray-100 my-3;
   }
   
   /* Mobile sidebar toggle button */
   .sidebar-toggle {
-    @apply fixed z-50 bg-gradient-to-br from-frete-500 to-frete-600 text-white p-3 
-    rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 
+    @apply fixed z-50 bg-gradient-to-br from-frete-500 to-frete-600 text-white p-2.5 
+    rounded-full shadow-md transition-all duration-300 transform hover:scale-105 
     active:scale-95 focus:outline-none focus:ring-2 focus:ring-frete-400 focus:ring-offset-2;
   }
   
   /* Sidebar user profile area */
   .sidebar-profile {
-    @apply p-4 border-t border-gray-100 mt-auto flex items-center gap-3;
+    @apply p-3 border-t border-gray-100 mt-auto flex items-center gap-3;
   }
   
   /* Sidebar footer */
   .sidebar-footer {
-    @apply p-4 text-xs text-gray-500 border-t border-gray-100;
+    @apply p-3 text-xs text-gray-500 border-t border-gray-100;
   }
   
   /* Improved active states */

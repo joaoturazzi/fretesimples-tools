@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Truck, DollarSign, BarChart3, RefreshCw, Calculator, CheckCircle } from 'lucide-react';
-import Calculator from '../Calculator';
+import { Truck, DollarSign, BarChart3, RefreshCw, CalculatorIcon, CheckCircle } from 'lucide-react';
+import CalculatorSection from '../Calculator';
 import ResultBox from './ResultBox';
 import { formatCurrency } from '@/lib/utils';
 
@@ -131,7 +131,7 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
   };
 
   return (
-    <Calculator 
+    <CalculatorSection 
       id="calculadora-frete"
       title="Calculadora de Frete"
       description="Calcule o valor do frete com base na distância, peso da carga e tipo de veículo."
@@ -205,7 +205,7 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
           className={`btn btn-primary ${isCalculating ? 'btn-loading' : ''}`}
           disabled={isCalculating}
         >
-          {!isCalculating && <Calculator size={18} />}
+          {!isCalculating && <CalculatorIcon size={18} />}
           Calcular Frete
         </button>
         
@@ -274,7 +274,7 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
           </div>
         </div>
       )}
-    </Calculator>
+    </CalculatorSection>
   );
 };
 

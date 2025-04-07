@@ -8,7 +8,9 @@ import {
   Fuel, 
   CheckCircle, 
   ClipboardCheck,
-  Users,
+  Package,
+  BarChart,
+  Shield,
   Info,
   Menu,
   X
@@ -66,7 +68,9 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
     { id: 'calculadora-combustivel', label: 'Calculadora de Combustível', icon: <Fuel size={18} /> },
     { id: 'verificador-viabilidade', label: 'Verificador de Viabilidade', icon: <CheckCircle size={18} /> },
     { id: 'checklist-viagem', label: 'Checklist de Viagem', icon: <ClipboardCheck size={18} /> },
-    { id: 'marketplace', label: 'Marketplace', icon: <Users size={18} /> },
+    { id: 'dimensionamento-veiculo', label: 'Dimensionamento de Veículo', icon: <Package size={18} /> },
+    { id: 'diagnostico-logistica', label: 'Diagnóstico Logístico', icon: <BarChart size={18} /> },
+    { id: 'diagnostico-risco', label: 'Diagnóstico de Risco', icon: <Shield size={18} /> },
     { id: 'sobre', label: 'Sobre', icon: <Info size={18} /> },
   ];
   

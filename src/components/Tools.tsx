@@ -7,7 +7,9 @@ import TransportCostSimulator from '@/components/calculators/TransportCostSimula
 import FuelCalculator from '@/components/calculators/FuelCalculator';
 import FreightViabilityChecker from '@/components/calculators/FreightViabilityChecker';
 import TripChecklist from '@/components/calculators/TripChecklist';
-import JobMarketplace from '@/components/calculators/JobMarketplace';
+import VehicleSizingTool from '@/components/calculators/VehicleSizingTool';
+import LogisticsManagementDiagnostic from '@/components/calculators/LogisticsManagementDiagnostic';
+import RiskManagementDiagnostic from '@/components/calculators/RiskManagementDiagnostic';
 
 export {
   FreightCalculator,
@@ -17,5 +19,7 @@ export {
   FuelCalculator,
   FreightViabilityChecker,
   TripChecklist,
-  JobMarketplace
+  VehicleSizingTool,
+  LogisticsManagementDiagnostic,
+  RiskManagementDiagnostic
 };

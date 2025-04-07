@@ -1,7 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Calculator from '@/components/Calculator';
-import { RefreshCw, HelpCircle } from 'lucide-react';
+import { RefreshCw, HelpCircle, FileText, Download } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import html2pdf from 'html2pdf.js';
 
 interface TripChecklistProps {
   isActive: boolean;
@@ -12,6 +14,8 @@ const TripChecklist = ({ isActive }: TripChecklistProps) => {
   const [distance, setDistance] = useState('curta');
   const [vehicleType, setVehicleType] = useState('van');
   const [checklist, setChecklist] = useState<Record<string, string[]> | null>(null);
+  const checklistRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   
   // Generate checklist based on selections
   const generateChecklist = () => {
@@ -152,6 +156,48 @@ const TripChecklist = ({ isActive }: TripChecklistProps) => {
     setChecklist(groupedItems);
   };
   
+  const exportToPDF = () => {
+    if (!checklistRef.current) {
+      toast({
+        title: "Erro ao exportar",
+        description: "Gere um checklist antes de exportar para PDF.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const element = checklistRef.current;
+    const opt = {
+      margin: 1,
+      filename: `checklist-viagem-${vehicleType}-${distance}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'cm', format: 'a4', orientation: 'portrait' }
+    };
+
+    toast({
+      title: "Gerando PDF",
+      description: "Seu PDF está sendo gerado...",
+    });
+
+    // Slight delay to allow toast to show
+    setTimeout(() => {
+      html2pdf().set(opt).from(element).save().then(() => {
+        toast({
+          title: "PDF Gerado com Sucesso",
+          description: "Seu checklist foi exportado para PDF.",
+          variant: "default",
+        });
+      }).catch(() => {
+        toast({
+          title: "Erro ao gerar PDF",
+          description: "Ocorreu um erro ao exportar o checklist.",
+          variant: "destructive",
+        });
+      });
+    }, 500);
+  };
+  
   return (
     <Calculator
       id="checklist-viagem"
@@ -243,18 +289,25 @@ const TripChecklist = ({ isActive }: TripChecklistProps) => {
         <div className="mt-8 animate-fade-in">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium text-gray-900">Checklist de viagem</h3>
-            <button 
-              className="btn btn-small bg-gray-100 hover:bg-gray-200 text-gray-700"
-              onClick={() => {
-                // Print checklist
-                window.print();
-              }}
-            >
-              Imprimir
-            </button>
+            <div className="flex gap-2">
+              <button 
+                className="btn btn-small bg-gray-100 hover:bg-gray-200 text-gray-700"
+                onClick={() => window.print()}
+              >
+                <FileText size={16} className="mr-1" />
+                Imprimir
+              </button>
+              <button 
+                className="btn btn-small bg-blue-100 hover:bg-blue-200 text-blue-700"
+                onClick={exportToPDF}
+              >
+                <Download size={16} className="mr-1" />
+                Exportar PDF
+              </button>
+            </div>
           </div>
           
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div ref={checklistRef} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             {Object.keys(checklist).map((category, index) => (
               <div 
                 key={category}

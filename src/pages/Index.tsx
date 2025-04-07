@@ -10,7 +10,9 @@ import {
   FuelCalculator,
   FreightViabilityChecker,
   TripChecklist,
-  JobMarketplace
+  VehicleSizingTool,
+  LogisticsManagementDiagnostic,
+  RiskManagementDiagnostic
 } from '@/components/Tools';
 import ChatAssistant from '@/components/ChatAssistant';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -44,15 +46,17 @@ const Index = () => {
             <FuelCalculator isActive={activeSection === 'calculadora-combustivel'} />
             <FreightViabilityChecker isActive={activeSection === 'verificador-viabilidade'} />
             <TripChecklist isActive={activeSection === 'checklist-viagem'} />
-            <JobMarketplace isActive={activeSection === 'marketplace'} />
+            <VehicleSizingTool isActive={activeSection === 'dimensionamento-veiculo'} />
+            <LogisticsManagementDiagnostic isActive={activeSection === 'diagnostico-logistica'} />
+            <RiskManagementDiagnostic isActive={activeSection === 'diagnostico-risco'} />
           </div>
           
           {activeSection === 'sobre' && <AboutSection />}
           
           <footer id="footer" className="text-center text-gray-500 text-sm py-8 border-t border-gray-100 mt-12">
             <div className="flex justify-center items-center mb-4">
-              <div className="bg-orange-100 p-2 rounded-full mr-2">
-                <Truck size={16} className="text-orange-500" />
+              <div className="bg-white p-2 rounded-full mr-2">
+                <img src="https://www.ccigris.com.br/site/assets/img/logo-cci.png" alt="CCI Logo" className="h-8" />
               </div>
               <span className="font-semibold text-gray-700">Frete Simples BY CCI</span>
             </div>

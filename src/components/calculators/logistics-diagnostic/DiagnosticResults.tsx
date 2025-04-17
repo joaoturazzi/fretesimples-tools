@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CheckCircle, RefreshCw } from 'lucide-react';
-import { DiagnosticResults } from './types';
+import type { DiagnosticResults } from './types';
 
 interface DiagnosticResultsProps {
   profile: string;

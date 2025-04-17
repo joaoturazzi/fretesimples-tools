@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import Calculator from '@/components/Calculator';
-import { BarChart, RefreshCw, CheckCircle } from 'lucide-react';
+import { BarChart, RefreshCw, CheckCircle, Truck, Package } from 'lucide-react';
 
 interface LogisticsManagementDiagnosticProps {
   isActive: boolean;

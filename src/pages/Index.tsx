@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
@@ -12,7 +11,8 @@ import {
   TripChecklist,
   VehicleSizingTool,
   LogisticsManagementDiagnostic,
-  RiskManagementDiagnostic
+  RiskManagementDiagnostic,
+  LogisticsPostGenerator
 } from '@/components/Tools';
 import ChatAssistant from '@/components/ChatAssistant';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -49,6 +49,7 @@ const Index = () => {
             <VehicleSizingTool isActive={activeSection === 'dimensionamento-veiculo'} />
             <LogisticsManagementDiagnostic isActive={activeSection === 'diagnostico-logistica'} />
             <RiskManagementDiagnostic isActive={activeSection === 'diagnostico-risco'} />
+            <LogisticsPostGenerator isActive={activeSection === 'gerador-posts'} />
           </div>
           
           {activeSection === 'sobre' && <AboutSection />}

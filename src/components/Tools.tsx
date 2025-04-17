@@ -10,6 +10,7 @@ import TripChecklist from '@/components/calculators/TripChecklist';
 import VehicleSizingTool from '@/components/calculators/VehicleSizingTool';
 import LogisticsManagementDiagnostic from '@/components/calculators/LogisticsManagementDiagnostic';
 import RiskManagementDiagnostic from '@/components/calculators/RiskManagementDiagnostic';
+import LogisticsPostGenerator from '@/components/calculators/LogisticsPostGenerator';
 
 export {
   FreightCalculator,
@@ -21,5 +22,6 @@ export {
   TripChecklist,
   VehicleSizingTool,
   LogisticsManagementDiagnostic,
-  RiskManagementDiagnostic
+  RiskManagementDiagnostic,
+  LogisticsPostGenerator
 };

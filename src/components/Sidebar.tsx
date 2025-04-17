@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Calculator, 
@@ -13,7 +12,8 @@ import {
   Shield,
   Info,
   Menu,
-  X
+  X,
+  Linkedin
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -28,8 +28,6 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   
   useEffect(() => {
-    // On desktop, sidebar is open by default
-    // On mobile, it starts closed but can be toggled
     if (!isMobile) {
       setIsSidebarOpen(true);
     }
@@ -71,12 +69,12 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
     { id: 'dimensionamento-veiculo', label: 'Dimensionamento de Veículo', icon: <Package size={18} /> },
     { id: 'diagnostico-logistica', label: 'Diagnóstico Logístico', icon: <BarChart size={18} /> },
     { id: 'diagnostico-risco', label: 'Diagnóstico de Risco', icon: <Shield size={18} /> },
+    { id: 'gerador-posts', label: 'Gerador de Posts', icon: <Linkedin size={18} /> },
     { id: 'sobre', label: 'Sobre', icon: <Info size={18} /> },
   ];
   
   return (
     <>
-      {/* Mobile Toggle Button - Always visible on mobile */}
       {isMobile && (
         <button 
           onClick={toggleSidebar}
@@ -87,12 +85,10 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
         </button>
       )}
     
-      {/* Sidebar - Positioned with transform for better mobile experience */}
       <div 
         className={cn(
           "fixed left-0 top-16 bottom-0 bg-white border-r border-orange-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto w-64",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
-          // On desktop, always show the sidebar
           !isMobile && "md:translate-x-0"
         )}
       >
@@ -128,7 +124,6 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
         </div>
       </div>
 
-      {/* Semi-transparent overlay that appears behind the sidebar on mobile */}
       {isMobile && isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30"

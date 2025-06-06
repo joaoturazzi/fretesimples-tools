@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface MapComponentProps {
   origin?: string;
@@ -17,15 +17,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const routeGroupRef = useRef<any>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!mapRef.current) return;
 
     const initializeMap = () => {
       try {
+        setIsLoading(true);
+        setMapError(null);
+        
         // Check if HERE Maps is available
         if (typeof window === 'undefined' || !window.H) {
           console.warn('HERE Maps API not loaded');
+          setMapError('Mapa não disponível. Carregando API...');
+          setTimeout(initializeMap, 1000);
           return;
         }
 
@@ -34,6 +41,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
         });
 
         const defaultMapTypes = platform.createDefaultMapTypes();
+        
+        // Clear any existing map instance
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.dispose();
+          mapInstanceRef.current = null;
+        }
+
         const map = new window.H.Map(
           mapRef.current!,
           defaultMapTypes.vector.normal.map,
@@ -47,6 +61,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         const ui = window.H.ui.UI.createDefault(map);
 
         mapInstanceRef.current = map;
+        setIsLoading(false);
 
         // Add route if both origin and destination are provided
         if (origin && destination) {
@@ -55,6 +70,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
       } catch (error) {
         console.error('Error initializing HERE Map:', error);
+        setMapError('Erro ao carregar o mapa. Verifique sua conexão.');
+        setIsLoading(false);
       }
     };
 
@@ -137,35 +154,70 @@ const MapComponent: React.FC<MapComponentProps> = ({
             }
           }, (error: any) => {
             console.error('Route calculation failed:', error);
+            setMapError('Erro ao calcular a rota.');
           });
         }
       } catch (error) {
         console.error('Geocoding failed:', error);
+        setMapError('Erro ao localizar os endereços.');
       }
     };
 
-    // Initialize map when HERE Maps API is loaded
-    if (typeof window !== 'undefined' && window.H) {
-      initializeMap();
-    } else {
-      // Wait for HERE Maps to load
-      const checkHereMaps = () => {
-        if (window.H) {
-          initializeMap();
-        } else {
-          setTimeout(checkHereMaps, 100);
-        }
-      };
-      checkHereMaps();
-    }
+    // Try to initialize immediately, or wait for HERE Maps to load
+    const timeoutId = setTimeout(() => {
+      if (typeof window !== 'undefined' && window.H) {
+        initializeMap();
+      } else {
+        let attempts = 0;
+        const checkHereMaps = () => {
+          attempts++;
+          if (window.H) {
+            initializeMap();
+          } else if (attempts < 10) {
+            setTimeout(checkHereMaps, 500);
+          } else {
+            setMapError('Não foi possível carregar o mapa. Tente recarregar a página.');
+            setIsLoading(false);
+          }
+        };
+        checkHereMaps();
+      }
+    }, 100);
 
     return () => {
+      clearTimeout(timeoutId);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.dispose();
         mapInstanceRef.current = null;
       }
     };
   }, [origin, destination, onRouteCalculated]);
+
+  if (mapError) {
+    return (
+      <div className={className}>
+        <div className="w-full h-full rounded-lg bg-gray-100 flex items-center justify-center">
+          <div className="text-center p-4">
+            <div className="text-red-500 mb-2">🗺️</div>
+            <p className="text-sm text-gray-600">{mapError}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className={className}>
+        <div className="w-full h-full rounded-lg bg-gray-100 flex items-center justify-center">
+          <div className="text-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
+            <p className="text-sm text-gray-600">Carregando mapa...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={className}>

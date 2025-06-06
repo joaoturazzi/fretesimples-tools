@@ -9,6 +9,7 @@ import VehicleSizingTool from '@/components/calculators/VehicleSizingTool';
 import LogisticsManagementDiagnostic from '@/components/calculators/LogisticsManagementDiagnostic';
 import RiskManagementDiagnostic from '@/components/calculators/RiskManagementDiagnostic';
 import LogisticsPostGenerator from '@/components/calculators/LogisticsPostGenerator';
+import ContractGenerator from '@/components/calculators/ContractGenerator';
 
 export {
   FreightCalculator,
@@ -19,5 +20,6 @@ export {
   VehicleSizingTool,
   LogisticsManagementDiagnostic,
   RiskManagementDiagnostic,
-  LogisticsPostGenerator
+  LogisticsPostGenerator,
+  ContractGenerator
 };

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Calculator, 
@@ -13,7 +14,8 @@ import {
   Info,
   Menu,
   X,
-  Linkedin
+  Linkedin,
+  FileText
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -62,14 +64,13 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
     { id: 'calculadora-frete', label: 'Calculadora de Frete', icon: <Calculator size={18} /> },
     { id: 'simulador-lucro', label: 'Simulador de Lucro', icon: <TrendingUp size={18} /> },
     { id: 'calculadora-risco', label: 'Calculadora de Risco', icon: <AlertTriangle size={18} /> },
-    { id: 'simulador-custos', label: 'Simulador de Custos', icon: <Truck size={18} /> },
     { id: 'calculadora-combustivel', label: 'Calculadora de Combustível', icon: <Fuel size={18} /> },
-    { id: 'verificador-viabilidade', label: 'Verificador de Viabilidade', icon: <CheckCircle size={18} /> },
     { id: 'checklist-viagem', label: 'Checklist de Viagem', icon: <ClipboardCheck size={18} /> },
     { id: 'dimensionamento-veiculo', label: 'Dimensionamento de Veículo', icon: <Package size={18} /> },
     { id: 'diagnostico-logistica', label: 'Diagnóstico Logístico', icon: <BarChart size={18} /> },
     { id: 'diagnostico-risco', label: 'Diagnóstico de Risco', icon: <Shield size={18} /> },
     { id: 'gerador-posts', label: 'Gerador de Posts', icon: <Linkedin size={18} /> },
+    { id: 'gerador-contratos', label: 'Gerador de Contratos', icon: <FileText size={18} /> },
     { id: 'sobre', label: 'Sobre', icon: <Info size={18} /> },
   ];
   

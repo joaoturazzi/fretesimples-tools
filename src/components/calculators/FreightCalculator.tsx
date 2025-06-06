@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Truck, DollarSign, BarChart3, RefreshCw, CalculatorIcon, CheckCircle, MapPin, Save, TrendingUp } from 'lucide-react';
 import CalculatorSection from '../Calculator';
@@ -50,16 +49,20 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
             console.log('Auto-calculated distance:', route.distance, 'km');
           } else {
             console.log('Could not auto-calculate distance for:', origin, 'to', destination);
+            // Don't show error for auto-calculation failure
           }
         } catch (error) {
           console.error('Error auto-calculating distance:', error);
+          // Don't show error for auto-calculation failure
         } finally {
           setIsCalculatingRoute(false);
         }
+      } else {
+        setShowMap(false);
       }
     };
 
-    const timeoutId = setTimeout(autoCalculateDistance, 1000);
+    const timeoutId = setTimeout(autoCalculateDistance, 1500);
     return () => clearTimeout(timeoutId);
   }, [origin, destination]);
 
@@ -515,12 +518,21 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
         )}
       </div>
 
-      {showMap && (
+      {showMap && origin && destination && (
         <div className="mt-6">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Rota calculada</h4>
+          <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <span>🗺️</span>
+            Rota calculada: {origin} → {destination}
+          </h4>
           <MapComponent 
             origin={origin} 
             destination={destination}
+            onRouteCalculated={(dist, duration) => {
+              console.log('Route calculated via map:', dist, 'km,', duration, 'min');
+              if (!distance || distance === 0) {
+                setDistance(dist);
+              }
+            }}
             className="h-48 w-full rounded-lg border border-gray-200"
           />
         </div>

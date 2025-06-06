@@ -11,7 +11,8 @@ import {
   VehicleSizingTool,
   LogisticsManagementDiagnostic,
   RiskManagementDiagnostic,
-  LogisticsPostGenerator
+  LogisticsPostGenerator,
+  ContractGenerator
 } from '@/components/Tools';
 import ChatAssistant from '@/components/ChatAssistant';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -46,6 +47,7 @@ const Index = () => {
             <LogisticsManagementDiagnostic isActive={activeSection === 'diagnostico-logistica'} />
             <RiskManagementDiagnostic isActive={activeSection === 'diagnostico-risco'} />
             <LogisticsPostGenerator isActive={activeSection === 'gerador-posts'} />
+            <ContractGenerator isActive={activeSection === 'gerador-contratos'} />
           </div>
           
           {activeSection === 'sobre' && <AboutSection />}

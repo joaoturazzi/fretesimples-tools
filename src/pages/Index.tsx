@@ -6,7 +6,6 @@ import {
   FreightCalculator,
   ProfitSimulator,
   RiskCalculator,
-  TransportCostSimulator,
   FuelCalculator,
   TripChecklist,
   VehicleSizingTool,
@@ -17,7 +16,6 @@ import {
 import ChatAssistant from '@/components/ChatAssistant';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AboutSection from '@/components/AboutSection';
-import { Truck } from 'lucide-react';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('calculadora-frete');
@@ -42,7 +40,6 @@ const Index = () => {
             <FreightCalculator isActive={activeSection === 'calculadora-frete'} />
             <ProfitSimulator isActive={activeSection === 'simulador-lucro'} />
             <RiskCalculator isActive={activeSection === 'calculadora-risco'} />
-            <TransportCostSimulator isActive={activeSection === 'simulador-custos'} />
             <FuelCalculator isActive={activeSection === 'calculadora-combustivel'} />
             <TripChecklist isActive={activeSection === 'checklist-viagem'} />
             <VehicleSizingTool isActive={activeSection === 'dimensionamento-veiculo'} />

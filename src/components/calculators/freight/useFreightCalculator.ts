@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { HereMapsService } from '@/services/hereMapsService';
+import { mapService } from '@/services/unifiedMapService';
 import { useNotify } from '@/components/ui/notification';
 import { calculateFreight, calculateCostSimulation, getDefaultCostPerKm, FreightCalculationResult, CostSimulationResult } from './freightCalculations';
 
@@ -48,7 +48,7 @@ export const useFreightCalculator = () => {
         setHasError(false);
         
         try {
-          const route = await HereMapsService.calculateRoute(origin, destination);
+          const route = await mapService.calculateRoute(origin, destination);
           if (route) {
             setDistance(route.distance);
             setRouteDuration(route.duration);
@@ -92,7 +92,7 @@ export const useFreightCalculator = () => {
     setHasError(false);
 
     try {
-      const route = await HereMapsService.calculateRoute(origin, destination);
+      const route = await mapService.calculateRoute(origin, destination);
       if (route) {
         setDistance(route.distance);
         setRouteDuration(route.duration);

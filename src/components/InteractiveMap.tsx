@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import { LatLngExpression } from 'leaflet';
 import L from 'leaflet';
 import { LoadingState, LoadingOverlay } from '@/components/ui/loading';
-import { HereMapsService } from '@/services/hereMapsService';
+import { mapService } from '@/services/unifiedMapService';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 interface InteractiveMapProps {
@@ -98,7 +98,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const mapRef = useRef<L.Map | null>(null);
   const { handleError } = useErrorHandler();
 
-  const mapCenter: LatLngExpression = [0, 0];
+  const mapCenter: LatLngExpression = [-14.235, -51.9253]; // Centro do Brasil
 
   useEffect(() => {
     const geocode = async () => {
@@ -107,8 +107,8 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
       
       try {
         const [originData, destinationData] = await Promise.all([
-          HereMapsService.geocodeAddress(origin),
-          HereMapsService.geocodeAddress(destination)
+          mapService.geocodeAddress(origin),
+          mapService.geocodeAddress(destination)
         ]);
         
         if (originData) {

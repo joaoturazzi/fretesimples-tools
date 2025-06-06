@@ -39,14 +39,8 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    // Performance optimizations
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-        drop_debugger: mode === 'production',
-      },
-    },
+    // Use esbuild instead of terser to avoid dependency issues
+    minify: mode === 'production' ? 'esbuild' : false,
     // Enable gzip compression
     reportCompressedSize: false,
     chunkSizeWarningLimit: 1000,

@@ -1,19 +1,22 @@
 
 // Environment configuration
 const env = {
-  // HERE Maps API configuration
-  HERE_API_KEY: import.meta.env.VITE_HERE_API_KEY || 'JeglUu9l7gXwCMcH6x5-FaX0AkwABnmICqMupmCfIng',
+  // HERE Maps API configuration - Nova API key
+  HERE_API_KEY: 'xAWs93J1XD4ye3qV62X-_qMQ_Ei268DJU4MLQOSLHoA',
   
   // API endpoints
   HERE_ROUTER_API: 'https://router.hereapi.com/v8',
   HERE_GEOCODE_API: 'https://geocode.search.hereapi.com/v1',
+  
+  // Fallback geocoding (OpenStreetMap/Nominatim) para problemas de CORS
+  NOMINATIM_API: 'https://nominatim.openstreetmap.org',
   
   // Development flags
   IS_DEVELOPMENT: import.meta.env.DEV,
   IS_PRODUCTION: import.meta.env.PROD,
   
   // Rate limiting
-  API_RATE_LIMIT: 60, // requests per minute
+  API_RATE_LIMIT: 100, // requests per minute
   API_RETRY_ATTEMPTS: 3,
   API_RETRY_DELAY: 1000, // milliseconds
 } as const;

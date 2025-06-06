@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { 
   BarChart3, TrendingUp, Clock, FileText, Calculator, MapPin, 
@@ -16,6 +15,11 @@ const DashboardAdvanced = () => {
   const { history } = useCalculationHistory();
   const notify = useQuickNotify();
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter'>('week');
+
+  const calculateGrowthRate = (history: any[], range: string) => {
+    // Simplificado - retorna valor mock
+    return Math.floor(Math.random() * 40) - 10;
+  };
 
   const stats = useMemo(() => {
     const now = Date.now();
@@ -55,11 +59,6 @@ const DashboardAdvanced = () => {
       growthRate: calculateGrowthRate(history, timeRange)
     };
   }, [history, timeRange]);
-
-  const calculateGrowthRate = (history: any[], range: string) => {
-    // Simplificado - retorna valor mock
-    return Math.floor(Math.random() * 40) - 10;
-  };
 
   const handleExportReport = () => {
     notify.info(

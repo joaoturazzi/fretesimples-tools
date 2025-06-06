@@ -1,241 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { Truck, DollarSign, BarChart3, RefreshCw, CalculatorIcon, CheckCircle, MapPin, Save, TrendingUp } from 'lucide-react';
+
+import React from 'react';
+import { Truck, DollarSign, BarChart3, RefreshCw, CalculatorIcon, CheckCircle, Save } from 'lucide-react';
 import CalculatorSection from '../Calculator';
 import ResultBox from './ResultBox';
 import MapComponent from '../MapComponent';
+import LocationInputs from './freight/LocationInputs';
+import CostSimulation from './freight/CostSimulation';
+import { useFreightCalculator } from './freight/useFreightCalculator';
 import { formatCurrency } from '@/lib/utils';
-import { HereMapsService } from '@/services/hereMapsService';
 import useSharedData from '@/hooks/useSharedData';
 
 const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
-  const [origin, setOrigin] = useState('');
-  const [destination, setDestination] = useState('');
-  const [distance, setDistance] = useState<number | ''>('');
-  const [weight, setWeight] = useState<number | ''>('');
-  const [vehicleType, setVehicleType] = useState('truck');
-  const [costPerKm, setCostPerKm] = useState<number | ''>('');
-  const [fuelPrice, setFuelPrice] = useState<number | ''>('');
-  const [consumption, setConsumption] = useState<number | ''>('');
-  const [tollsCost, setTollsCost] = useState<number | ''>('');
-  
-  // Novos campos para simulação de custos
-  const [monthlyMaintenance, setMonthlyMaintenance] = useState<number | ''>('');
-  const [driverSalary, setDriverSalary] = useState<number | ''>('');
-  const [monthlyDistance, setMonthlyDistance] = useState<number | ''>('');
-  const [showCostSimulation, setShowCostSimulation] = useState(false);
-  
-  const [result, setResult] = useState<any>(null);
-  const [costSimulationResult, setCostSimulationResult] = useState<any>(null);
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showMap, setShowMap] = useState(false);
+  const {
+    origin, setOrigin,
+    destination, setDestination,
+    distance, setDistance,
+    weight, setWeight,
+    vehicleType, setVehicleType,
+    costPerKm, setCostPerKm,
+    fuelPrice, setFuelPrice,
+    consumption, setConsumption,
+    tollsCost, setTollsCost,
+    monthlyMaintenance, setMonthlyMaintenance,
+    driverSalary, setDriverSalary,
+    monthlyDistance, setMonthlyDistance,
+    showCostSimulation, setShowCostSimulation,
+    result,
+    costSimulationResult,
+    isCalculating,
+    isCalculatingRoute,
+    hasError,
+    errorMessage,
+    showMap,
+    calculateDistanceFromRoute,
+    performCalculation,
+    resetForm,
+    getDefaultCostPerKm
+  } = useFreightCalculator();
 
   const { saveFreightData } = useSharedData();
-
-  // Auto-calculate distance when both origin and destination are filled
-  useEffect(() => {
-    const autoCalculateDistance = async () => {
-      if (origin.trim() && destination.trim() && origin !== destination) {
-        setIsCalculatingRoute(true);
-        setHasError(false);
-        
-        try {
-          const route = await HereMapsService.calculateRoute(origin, destination);
-          if (route) {
-            setDistance(route.distance);
-            setShowMap(true);
-            console.log('Auto-calculated distance:', route.distance, 'km');
-          } else {
-            console.log('Could not auto-calculate distance for:', origin, 'to', destination);
-            // Don't show error for auto-calculation failure
-          }
-        } catch (error) {
-          console.error('Error auto-calculating distance:', error);
-          // Don't show error for auto-calculation failure
-        } finally {
-          setIsCalculatingRoute(false);
-        }
-      } else {
-        setShowMap(false);
-      }
-    };
-
-    const timeoutId = setTimeout(autoCalculateDistance, 1500);
-    return () => clearTimeout(timeoutId);
-  }, [origin, destination]);
-
-  const calculateDistanceFromRoute = async () => {
-    if (!origin || !destination) {
-      setErrorMessage('Por favor, informe origem e destino para calcular a rota.');
-      setHasError(true);
-      return;
-    }
-
-    setIsCalculatingRoute(true);
-    setHasError(false);
-
-    try {
-      const route = await HereMapsService.calculateRoute(origin, destination);
-      if (route) {
-        setDistance(route.distance);
-        setShowMap(true);
-      } else {
-        setErrorMessage('Não foi possível calcular a rota. Verifique os endereços informados.');
-        setHasError(true);
-      }
-    } catch (error) {
-      setErrorMessage('Erro ao calcular rota. Tente novamente.');
-      setHasError(true);
-    } finally {
-      setIsCalculatingRoute(false);
-    }
-  };
-
-  const validateInputs = () => {
-    if (distance === '' || distance <= 0) {
-      setErrorMessage('Por favor, informe uma distância válida.');
-      setHasError(true);
-      return false;
-    }
-
-    if (weight === '' || weight <= 0) {
-      setErrorMessage('Por favor, informe um peso válido.');
-      setHasError(true);
-      return false;
-    }
-
-    setHasError(false);
-    setErrorMessage('');
-    return true;
-  };
-
-  const calculateCostSimulation = () => {
-    if (!monthlyMaintenance || !driverSalary || !monthlyDistance || !fuelPrice || !consumption) {
-      return null;
-    }
-
-    const distanceValue = typeof distance === 'number' ? distance : 0;
-    const monthlyFuelCost = (typeof monthlyDistance === 'number' ? monthlyDistance : 0) / (typeof consumption === 'number' ? consumption : 1) * (typeof fuelPrice === 'number' ? fuelPrice : 0);
-    const monthlyTollsCost = (typeof tollsCost === 'number' ? tollsCost : 0) * (distanceValue / 100); // Estimativa baseada na viagem atual
-    
-    const totalMonthlyCost = monthlyFuelCost + (typeof monthlyMaintenance === 'number' ? monthlyMaintenance : 0) + (typeof driverSalary === 'number' ? driverSalary : 0) + monthlyTollsCost;
-    const costPerKmCalculated = totalMonthlyCost / (typeof monthlyDistance === 'number' ? monthlyDistance : 1);
-    
-    const fuelPercent = (monthlyFuelCost / totalMonthlyCost) * 100;
-    const maintenancePercent = ((typeof monthlyMaintenance === 'number' ? monthlyMaintenance : 0) / totalMonthlyCost) * 100;
-    const salaryPercent = ((typeof driverSalary === 'number' ? driverSalary : 0) / totalMonthlyCost) * 100;
-    const tollsPercent = (monthlyTollsCost / totalMonthlyCost) * 100;
-
-    return {
-      totalMonthlyCost,
-      costPerKmCalculated,
-      fuelPercent,
-      maintenancePercent,
-      salaryPercent,
-      tollsPercent
-    };
-  };
-
-  const calculateFreight = () => {
-    if (!validateInputs()) return;
-
-    setIsCalculating(true);
-    setResult(null);
-    
-    setTimeout(() => {
-      try {
-        const distanceValue = typeof distance === 'number' ? distance : 0;
-        const weightValue = typeof weight === 'number' ? weight : 0;
-        const fuelPriceValue = typeof fuelPrice === 'number' ? fuelPrice : 0;
-        const consumptionValue = typeof consumption === 'number' ? consumption : 0;
-        const tollsCostValue = typeof tollsCost === 'number' ? tollsCost : 0;
-        const costPerKmValue = typeof costPerKm === 'number' ? costPerKm : getDefaultCostPerKm();
-
-        // Calcular custos
-        let fuelCost = 0;
-        if (fuelPriceValue > 0 && consumptionValue > 0) {
-          const litersNeeded = distanceValue / consumptionValue;
-          fuelCost = litersNeeded * fuelPriceValue;
-        }
-
-        const distanceCost = distanceValue * costPerKmValue;
-        const weightCost = weightValue * getWeightMultiplier();
-        const totalFreight = distanceCost + weightCost + fuelCost + tollsCostValue;
-        const finalCostPerKm = totalFreight / distanceValue;
-        
-        const calculatedResult = {
-          distanceCost: distanceCost,
-          weightCost: weightCost,
-          fuelCost: fuelCost,
-          tollsCost: tollsCostValue,
-          totalFreight: totalFreight,
-          costPerKm: finalCostPerKm,
-          deliveryTime: calculateEstimatedTime(distanceValue, vehicleType),
-          breakdown: {
-            distance: distanceValue,
-            weight: weightValue,
-            fuelPrice: fuelPriceValue,
-            consumption: consumptionValue
-          }
-        };
-
-        setResult(calculatedResult);
-
-        // Calcular simulação de custos se os campos estiverem preenchidos
-        if (showCostSimulation) {
-          const costSim = calculateCostSimulation();
-          setCostSimulationResult(costSim);
-        }
-
-      } catch (error) {
-        setHasError(true);
-        setErrorMessage('Ocorreu um erro ao calcular o frete. Por favor, tente novamente.');
-        console.error('Erro ao calcular frete:', error);
-      } finally {
-        setIsCalculating(false);
-      }
-    }, 600);
-  };
-
-  const getDefaultCostPerKm = (): number => {
-    switch (vehicleType) {
-      case 'truck': return 2.5;
-      case 'van': return 1.8;
-      case 'motorcycle': return 1.2;
-      default: return 2.0;
-    }
-  };
-
-  const getWeightMultiplier = (): number => {
-    switch (vehicleType) {
-      case 'truck': return 0.15;
-      case 'van': return 0.1;
-      case 'motorcycle': return 0.05;
-      default: return 0.1;
-    }
-  };
-  
-  const calculateEstimatedTime = (distance: number, vehicleType: string) => {
-    let speedPerHour;
-    
-    switch (vehicleType) {
-      case 'truck': speedPerHour = 70; break;
-      case 'van': speedPerHour = 80; break;
-      case 'motorcycle': speedPerHour = 90; break;
-      default: speedPerHour = 60;
-    }
-    
-    const timeInHours = distance / speedPerHour;
-    const restTime = Math.floor(distance / 250) * 0.5;
-    const totalTime = timeInHours + restTime;
-    
-    const hours = Math.floor(totalTime);
-    const minutes = Math.round((totalTime - hours) * 60);
-    
-    return `${hours}h ${minutes}min`;
-  };
 
   const saveCalculation = () => {
     if (!result) return;
@@ -258,27 +61,6 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
     alert('Cálculo salvo com sucesso! Agora você pode importar estes dados no Simulador de Lucro.');
   };
 
-  const resetForm = () => {
-    setOrigin('');
-    setDestination('');
-    setDistance('');
-    setWeight('');
-    setVehicleType('truck');
-    setCostPerKm('');
-    setFuelPrice('');
-    setConsumption('');
-    setTollsCost('');
-    setMonthlyMaintenance('');
-    setDriverSalary('');
-    setMonthlyDistance('');
-    setResult(null);
-    setCostSimulationResult(null);
-    setHasError(false);
-    setErrorMessage('');
-    setShowMap(false);
-    setShowCostSimulation(false);
-  };
-
   return (
     <CalculatorSection 
       id="calculadora-frete"
@@ -294,66 +76,16 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="calculator-input-group">
-          <label htmlFor="origin" className="calculator-label flex items-center gap-1.5">
-            <MapPin size={16} className="text-frete-500" />
-            Origem
-          </label>
-          <input
-            id="origin"
-            type="text"
-            className="input-field"
-            value={origin}
-            onChange={(e) => setOrigin(e.target.value)}
-            placeholder="Ex: São Paulo, SP"
-          />
-        </div>
-        
-        <div className="calculator-input-group">
-          <label htmlFor="destination" className="calculator-label flex items-center gap-1.5">
-            <MapPin size={16} className="text-frete-500" />
-            Destino
-          </label>
-          <input
-            id="destination"
-            type="text"
-            className="input-field"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            placeholder="Ex: Rio de Janeiro, RJ"
-          />
-        </div>
-
-        <div className="calculator-input-group">
-          <label htmlFor="distance" className="calculator-label flex items-center gap-1.5">
-            <Truck size={16} className="text-frete-500" />
-            Distância (km) {isCalculatingRoute && <span className="text-sm text-gray-500">- Calculando...</span>}
-          </label>
-          <div className="flex gap-2">
-            <input
-              id="distance"
-              type="number"
-              className="input-field"
-              value={distance}
-              min={0}
-              onChange={(e) => setDistance(e.target.value ? parseFloat(e.target.value) : '')}
-              placeholder="Ex: 100"
-            />
-            <button
-              onClick={calculateDistanceFromRoute}
-              disabled={isCalculatingRoute}
-              className="btn btn-secondary px-3"
-              title="Calcular distância manualmente"
-            >
-              {isCalculatingRoute ? '...' : '📍'}
-            </button>
-          </div>
-          {origin && destination && (
-            <p className="text-xs text-gray-500 mt-1">
-              A distância será calculada automaticamente baseada na rota.
-            </p>
-          )}
-        </div>
+        <LocationInputs
+          origin={origin}
+          setOrigin={setOrigin}
+          destination={destination}
+          setDestination={setDestination}
+          distance={distance}
+          setDistance={setDistance}
+          isCalculatingRoute={isCalculatingRoute}
+          onCalculateDistance={calculateDistanceFromRoute}
+        />
         
         <div className="calculator-input-group">
           <label htmlFor="weight" className="calculator-label flex items-center gap-1.5">
@@ -454,69 +186,17 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
         </div>
       </div>
 
-      {/* Seção de Simulação de Custos */}
-      <div className="mt-8 border-t border-gray-200 pt-6">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-            <TrendingUp size={20} className="text-frete-500" />
-            Simulação de Custos Operacionais
-          </h4>
-          <button
-            onClick={() => setShowCostSimulation(!showCostSimulation)}
-            className="btn btn-secondary text-sm"
-          >
-            {showCostSimulation ? 'Ocultar' : 'Mostrar'}
-          </button>
-        </div>
-
-        {showCostSimulation && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="calculator-input-group">
-              <label htmlFor="monthlyMaintenance" className="calculator-label">
-                Manutenção mensal (R$)
-              </label>
-              <input
-                id="monthlyMaintenance"
-                type="number"
-                className="input-field"
-                value={monthlyMaintenance}
-                onChange={(e) => setMonthlyMaintenance(e.target.value ? parseFloat(e.target.value) : '')}
-                placeholder="Ex: 800"
-                step="0.01"
-              />
-            </div>
-            
-            <div className="calculator-input-group">
-              <label htmlFor="driverSalary" className="calculator-label">
-                Salário do motorista (R$)
-              </label>
-              <input
-                id="driverSalary"
-                type="number"
-                className="input-field"
-                value={driverSalary}
-                onChange={(e) => setDriverSalary(e.target.value ? parseFloat(e.target.value) : '')}
-                placeholder="Ex: 2500"
-                step="0.01"
-              />
-            </div>
-            
-            <div className="calculator-input-group">
-              <label htmlFor="monthlyDistance" className="calculator-label">
-                Distância mensal rodada (km)
-              </label>
-              <input
-                id="monthlyDistance"
-                type="number"
-                className="input-field"
-                value={monthlyDistance}
-                onChange={(e) => setMonthlyDistance(e.target.value ? parseFloat(e.target.value) : '')}
-                placeholder="Ex: 5000"
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      <CostSimulation
+        showCostSimulation={showCostSimulation}
+        setShowCostSimulation={setShowCostSimulation}
+        monthlyMaintenance={monthlyMaintenance}
+        setMonthlyMaintenance={setMonthlyMaintenance}
+        driverSalary={driverSalary}
+        setDriverSalary={setDriverSalary}
+        monthlyDistance={monthlyDistance}
+        setMonthlyDistance={setMonthlyDistance}
+        costSimulationResult={costSimulationResult}
+      />
 
       {showMap && origin && destination && (
         <div className="mt-6">
@@ -540,7 +220,7 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
       
       <div className="mt-6 flex flex-wrap gap-3">
         <button 
-          onClick={calculateFreight}
+          onClick={performCalculation}
           className={`btn btn-primary ${isCalculating ? 'btn-loading' : ''}`}
           disabled={isCalculating}
         >
@@ -611,83 +291,6 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
               tooltip="Valor adicional calculado pelo peso da carga"
             />
           </div>
-
-          {costSimulationResult && (
-            <div className="mt-6 border-t border-gray-200 pt-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Análise de Custos Operacionais</h4>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <ResultBox 
-                  label="Custo total mensal" 
-                  value={formatCurrency(costSimulationResult.totalMonthlyCost)}
-                  className="bg-blue-50"
-                />
-                <ResultBox 
-                  label="Custo por quilômetro calculado" 
-                  value={formatCurrency(costSimulationResult.costPerKmCalculated)}
-                  unit="/km"
-                  className="bg-green-50"
-                />
-              </div>
-              
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <h5 className="text-sm font-medium text-gray-700 mb-3">Distribuição de custos</h5>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Combustível</span>
-                      <span>{costSimulationResult.fuelPercent.toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-frete-500 h-2 rounded-full" 
-                        style={{ width: `${costSimulationResult.fuelPercent}%` }}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Manutenção</span>
-                      <span>{costSimulationResult.maintenancePercent.toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-orange-400 h-2 rounded-full" 
-                        style={{ width: `${costSimulationResult.maintenancePercent}%` }}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Salário</span>
-                      <span>{costSimulationResult.salaryPercent.toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-green-500 h-2 rounded-full" 
-                        style={{ width: `${costSimulationResult.salaryPercent}%` }}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Pedágios</span>
-                      <span>{costSimulationResult.tollsPercent.toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-400 h-2 rounded-full" 
-                        style={{ width: `${costSimulationResult.tollsPercent}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
           
           <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-lg text-blue-800 text-sm flex items-start gap-2.5">
             <CheckCircle className="shrink-0 mt-0.5 text-blue-500" size={16} />

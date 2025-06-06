@@ -3,28 +3,30 @@ declare global {
   interface Window {
     H: {
       service: {
-        Platform: {
-          new (options: { apikey: string }): {
-            createDefaultMapTypes: () => any;
-          };
+        Platform: new (options: { apikey: string }) => {
+          createDefaultMapTypes: () => any;
         };
       };
-      Map: {
-        new (container: HTMLElement, mapTypes: any, options: any): {
-          getViewPort: () => {
-            removeEventListener: (event: string, handler: () => void) => void;
-            resize: () => void;
-          };
-          dispose: () => void;
-          addObject: (object: any) => void;
-          setViewBounds: (bounds: any) => void;
+      Map: new (
+        container: HTMLElement,
+        mapType: any,
+        options: {
+          zoom: number;
+          center: { lat: number; lng: number };
+        }
+      ) => {
+        dispose: () => void;
+        getViewPort: () => {
+          removeEventListener: (event: string, handler: () => void) => void;
+          resize: () => void;
         };
+        addObjects: (objects: any[]) => void;
+        setCenter: (center: { lat: number; lng: number }) => void;
+        setZoom: (zoom: number) => void;
       };
       mapview: {
         behavior: {
-          Behavior: {
-            new (options: any): any;
-          };
+          Behavior: new (options: any) => any;
         };
       };
       ui: {
@@ -33,18 +35,12 @@ declare global {
         };
       };
       map: {
-        Marker: {
-          new (position: any, options?: any): any;
-        };
+        Marker: new (position: { lat: number; lng: number }, options?: any) => any;
+        Polyline: new (lineString: any, options?: any) => any;
       };
       geo: {
-        LineString: {
-          new (): {
-            pushPoint: (point: any) => void;
-          };
-        };
-        Point: {
-          new (lat: number, lng: number): any;
+        LineString: new () => {
+          pushPoint: (lat: number, lng: number) => void;
         };
       };
     };

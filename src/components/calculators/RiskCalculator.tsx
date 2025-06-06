@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import Calculator from '@/components/Calculator';
 import MapComponent from '@/components/MapComponent';
-import { RefreshCw, AlertCircle, CheckCircle, Info, MessageCircle, MapPin, Download } from 'lucide-react';
+import { RefreshCw, AlertCircle, CheckCircle, Info, MessageCircle, MapPin, Download, FileText } from 'lucide-react';
 import { HereMapsService } from '@/services/hereMapsService';
+import jsPDF from 'jspdf';
 
 interface RiskCalculatorProps {
   isActive: boolean;
@@ -21,7 +21,6 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
   const [routeDistance, setRouteDistance] = useState<number | null>(null);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
 
-  // Auto-calculate route when both origin and destination are filled
   useEffect(() => {
     const autoCalculateRoute = async () => {
       if (origin.trim() && destination.trim() && origin !== destination) {
@@ -44,91 +43,109 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
       }
     };
 
-    // Debounce the auto-calculation
     const timeoutId = setTimeout(autoCalculateRoute, 1000);
     return () => clearTimeout(timeoutId);
   }, [origin, destination]);
   
-  // Risk score calculation
   const calculateRisk = () => {
     if (!cargoValue || !origin || !destination) return;
     
     const value = parseFloat(cargoValue);
     
-    // Base risk factors
     const cargoRisk = {
-      'eletronicos': 5,
-      'alimentos': 2,
-      'carga_perigosa': 4,
-      'medicamentos': 4,
-      'vestuario': 3,
-      'moveis': 2,
-      'automoveis': 5,
-      'outros': 3
+      'eletronicos': 8,
+      'alimentos': 3,
+      'carga_perigosa': 9,
+      'medicamentos': 7,
+      'vestuario': 4,
+      'moveis': 3,
+      'automoveis': 8,
+      'combustivel': 9,
+      'quimicos': 8,
+      'joias': 10,
+      'outros': 5
     };
     
     const contractRisk = {
       'frota_propria': 1,
-      'agregado': 3,
-      'terceiro': 4
+      'agregado': 4,
+      'terceiro': 6
     };
+
+    const distanceRisk = routeDistance ? Math.min(10, Math.floor(routeDistance / 200)) : 5;
     
-    // Calculate base risk score (0-100)
     let riskScore = 0;
     
-    // Value factor (0-40 points)
-    const valueFactor = Math.min(40, (value / 50000) * 40);
+    let valueFactor = 0;
+    if (value <= 10000) valueFactor = 5;
+    else if (value <= 50000) valueFactor = 15;
+    else if (value <= 100000) valueFactor = 25;
+    else valueFactor = 35;
     
-    // Cargo type factor (0-25 points)
-    const cargoFactor = cargoRisk[cargoType as keyof typeof cargoRisk] * 5;
+    const cargoFactor = (cargoRisk[cargoType as keyof typeof cargoRisk] || 5) * 2.5;
     
-    // Contract type factor (0-20 points)
-    const contractFactor = contractRisk[contractType as keyof typeof contractRisk] * 5;
+    const contractFactor = contractRisk[contractType as keyof typeof contractRisk] * 3.33;
     
-    // Tools factor (0-15 points) - reduced if tools are mentioned
-    let toolsFactor = 15;
-    if (currentTools.toLowerCase().includes('rastreamento')) toolsFactor -= 5;
-    if (currentTools.toLowerCase().includes('seguro')) toolsFactor -= 5;
-    if (currentTools.toLowerCase().includes('escolta')) toolsFactor -= 5;
+    const distanceFactor = distanceRisk;
     
-    riskScore = valueFactor + cargoFactor + contractFactor + Math.max(0, toolsFactor);
+    let toolsFactor = 10;
+    const tools = currentTools.toLowerCase();
+    if (tools.includes('rastreamento') || tools.includes('gps')) toolsFactor -= 3;
+    if (tools.includes('seguro')) toolsFactor -= 3;
+    if (tools.includes('escolta')) toolsFactor -= 4;
+    if (tools.includes('lacre') || tools.includes('isca')) toolsFactor -= 2;
     
-    // Risk level
+    riskScore = valueFactor + cargoFactor + contractFactor + distanceFactor + Math.max(0, toolsFactor);
+    
     let riskLevel = 'Baixo';
     let riskColor = 'green';
     let suggestions = [];
     
-    if (riskScore > 70) {
+    if (riskScore > 75) {
+      riskLevel = 'Crítico';
+      riskColor = 'red';
+      suggestions = [
+        'Escolta armada obrigatória durante todo o trajeto',
+        'Rastreamento em tempo real com central 24h',
+        'Seguro de carga com cobertura total',
+        'Motorista experiente e certificado',
+        'Plano de contingência detalhado',
+        'Comunicação constante com base operacional',
+        'Isca eletrônica e lacres de segurança',
+        'Evitar paradas não programadas',
+        'Análise de inteligência da rota'
+      ];
+    } else if (riskScore > 50) {
       riskLevel = 'Alto';
       riskColor = 'red';
       suggestions = [
-        'Contratar escolta durante todo o trajeto',
-        'Utilizar rastreamento em tempo real',
-        'Seguro de carga com cobertura completa',
-        'Motorista experiente para este tipo de rota',
-        'Evitar paradas em locais não seguros',
-        'Planejamento detalhado da rota com pontos de descanso seguros',
-        'Considerar isca ou lacre eletrônico',
-        'Evitar fretebras e plataformas não confiáveis'
+        'Escolta recomendada em trechos críticos',
+        'Rastreamento ativo com alertas',
+        'Seguro de carga adequado ao valor',
+        'Motorista experiente para este tipo de carga',
+        'Evitar trafegar à noite',
+        'Pontos de parada seguros pré-definidos',
+        'Lacres de segurança',
+        'Check-ins regulares'
       ];
-    } else if (riskScore > 40) {
+    } else if (riskScore > 30) {
       riskLevel = 'Médio';
       riskColor = 'yellow';
       suggestions = [
-        'Rastreamento veicular ativo',
-        'Seguro de carga adequado',
-        'Definir rotas principais e alternativas',
-        'Evitar trafegar durante a noite em áreas de risco',
-        'Estabelecer check-ins periódicos',
-        'Considerar isca para cargas de alto valor',
-        'Evitar fretebras se possível'
+        'Rastreamento veicular básico',
+        'Seguro proporcional ao valor da carga',
+        'Planejamento de rota principal e alternativa',
+        'Evitar áreas de risco conhecidas',
+        'Check-ins em pontos estratégicos',
+        'Documentação completa e organizada'
       ];
     } else {
       suggestions = [
-        'Rastreamento básico do veículo',
-        'Seguro padrão para a carga',
+        'Rastreamento básico recomendado',
+        'Seguro padrão para transporte',
         'Planejar paradas em locais seguros',
-        'Verificar condições climáticas da rota'
+        'Verificar condições da rota',
+        'Documentação em ordem'
       ];
     }
     
@@ -137,17 +154,131 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
       riskLevel,
       riskColor,
       suggestions,
-      routeDistance
+      routeDistance,
+      valueFactor,
+      cargoFactor,
+      contractFactor,
+      distanceFactor,
+      toolsFactor: Math.max(0, toolsFactor)
     });
     
     setShowMap(true);
+  };
+
+  const exportRiskPDF = () => {
+    if (!result) return;
+    
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    let yPosition = 20;
+    
+    doc.setFontSize(20);
+    doc.setFont(undefined, 'bold');
+    doc.text('RELATÓRIO DE ANÁLISE DE RISCO', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 15;
+    
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 20;
+    
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('DADOS DA OPERAÇÃO', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+    const details = [
+      `Origem: ${origin}`,
+      `Destino: ${destination}`,
+      `Distância: ${routeDistance ? routeDistance + ' km' : 'Não calculada'}`,
+      `Tipo de Carga: ${cargoType}`,
+      `Valor da Carga: R$ ${parseFloat(cargoValue).toLocaleString('pt-BR')}`,
+      `Tipo de Contratação: ${contractType}`,
+      `Ferramentas Atuais: ${currentTools || 'Não informado'}`
+    ];
+    
+    details.forEach(detail => {
+      doc.text(detail, 20, yPosition);
+      yPosition += 7;
+    });
+    
+    yPosition += 10;
+    
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('ANÁLISE DE RISCO', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Nível de Risco: ${result.riskLevel}`, 20, yPosition);
+    doc.text(`Pontuação: ${result.riskScore}/100`, 120, yPosition);
+    yPosition += 15;
+    
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+    doc.text('Breakdown da Pontuação:', 20, yPosition);
+    yPosition += 7;
+    
+    const breakdown = [
+      `• Valor da Carga: ${result.valueFactor?.toFixed(1) || 0} pontos`,
+      `• Tipo de Carga: ${result.cargoFactor?.toFixed(1) || 0} pontos`,
+      `• Contratação: ${result.contractFactor?.toFixed(1) || 0} pontos`,
+      `• Distância: ${result.distanceFactor?.toFixed(1) || 0} pontos`,
+      `• Ferramentas: ${result.toolsFactor?.toFixed(1) || 0} pontos`
+    ];
+    
+    breakdown.forEach(item => {
+      doc.text(item, 25, yPosition);
+      yPosition += 6;
+    });
+    
+    yPosition += 10;
+    
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('RECOMENDAÇÕES DE SEGURANÇA', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+    
+    result.suggestions.forEach((suggestion: string, index: number) => {
+      if (yPosition > pageHeight - 30) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      const lines = doc.splitTextToSize(`${index + 1}. ${suggestion}`, pageWidth - 40);
+      lines.forEach((line: string) => {
+        doc.text(line, 20, yPosition);
+        yPosition += 6;
+      });
+      yPosition += 2;
+    });
+    
+    if (yPosition > pageHeight - 40) {
+      doc.addPage();
+      yPosition = 20;
+    }
+    
+    yPosition = pageHeight - 30;
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'italic');
+    doc.text('Este relatório é uma análise preliminar. Consulte especialistas em segurança para avaliação completa.', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('Gerado por: Frete Simples BY CCI', pageWidth / 2, yPosition + 7, { align: 'center' });
+    
+    doc.save(`analise-risco-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const exportRiskData = () => {
     if (!result) return;
     
     const exportData = {
-      empresa: 'Nome da Empresa', // Seria preenchido pelo usuário
+      empresa: 'Nome da Empresa',
       origem: origin,
       destino: destination,
       distanciaRota: routeDistance,
@@ -250,6 +381,9 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
               <option value="vestuario">Vestuário</option>
               <option value="moveis">Móveis</option>
               <option value="automoveis">Automóveis/Peças</option>
+              <option value="combustivel">Combustível</option>
+              <option value="quimicos">Químicos</option>
+              <option value="joias">Joias/Valores</option>
               <option value="outros">Outros</option>
             </select>
           </div>
@@ -296,7 +430,7 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
               className="input-field"
               value={currentTools}
               onChange={(e) => setCurrentTools(e.target.value)}
-              placeholder="Ex: rastreamento, seguro, escolta..."
+              placeholder="Ex: rastreamento, seguro, escolta, lacres..."
               rows={3}
             />
           </div>
@@ -328,10 +462,18 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
           <>
             <button 
               className="btn btn-success"
+              onClick={exportRiskPDF}
+            >
+              <FileText size={18} className="mr-2" />
+              Exportar PDF
+            </button>
+
+            <button 
+              className="btn btn-success"
               onClick={exportRiskData}
             >
               <Download size={18} className="mr-2" />
-              Exportar dados
+              Exportar JSON
             </button>
             
             <button 

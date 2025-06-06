@@ -50,18 +50,13 @@ declare global {
   }
 
   interface HereMap {
+    addObject: (object: any) => void;
+    getViewPort: () => any;
     dispose: () => void;
-    getViewPort: () => {
-      removeEventListener: (event: string, handler: () => void) => void;
-      resize: () => void;
-    };
-    addObjects: (objects: any[]) => void;
-    setCenter: (center: { lat: number; lng: number }) => void;
-    setZoom: (zoom: number) => void;
   }
 
   interface HereLineString {
-    pushPoint: (lat: number, lng: number) => void;
+    pushPoint: (point: { lat: number; lng: number }) => void;
   }
 }
 

@@ -38,7 +38,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         );
 
         const behavior = new window.H.mapview.behavior.Behavior({});
-        const ui = new window.H.ui.UI.createDefault(map);
+        const ui = window.H.ui.UI.createDefault(map);
 
         mapInstanceRef.current = map;
 

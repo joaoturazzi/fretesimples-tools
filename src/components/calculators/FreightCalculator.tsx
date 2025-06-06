@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Truck, DollarSign, BarChart3, RefreshCw, CalculatorIcon, CheckCircle, MapPin, Save } from 'lucide-react';
 import CalculatorSection from '../Calculator';
 import ResultBox from './ResultBox';
@@ -26,6 +26,35 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
   const [showMap, setShowMap] = useState(false);
 
   const { saveFreightData } = useSharedData();
+
+  // Auto-calculate distance when both origin and destination are filled
+  useEffect(() => {
+    const autoCalculateDistance = async () => {
+      if (origin.trim() && destination.trim() && origin !== destination) {
+        setIsCalculatingRoute(true);
+        setHasError(false);
+        
+        try {
+          const route = await HereMapsService.calculateRoute(origin, destination);
+          if (route) {
+            setDistance(route.distance);
+            setShowMap(true);
+            console.log('Auto-calculated distance:', route.distance, 'km');
+          } else {
+            console.log('Could not auto-calculate distance for:', origin, 'to', destination);
+          }
+        } catch (error) {
+          console.error('Error auto-calculating distance:', error);
+        } finally {
+          setIsCalculatingRoute(false);
+        }
+      }
+    };
+
+    // Debounce the auto-calculation
+    const timeoutId = setTimeout(autoCalculateDistance, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [origin, destination]);
 
   const calculateDistanceFromRoute = async () => {
     if (!origin || !destination) {
@@ -249,7 +278,7 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
         <div className="calculator-input-group">
           <label htmlFor="distance" className="calculator-label flex items-center gap-1.5">
             <Truck size={16} className="text-frete-500" />
-            Distância (km)
+            Distância (km) {isCalculatingRoute && <span className="text-sm text-gray-500">- Calculando...</span>}
           </label>
           <div className="flex gap-2">
             <input
@@ -265,11 +294,16 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
               onClick={calculateDistanceFromRoute}
               disabled={isCalculatingRoute}
               className="btn btn-secondary px-3"
-              title="Calcular distância via HERE Maps"
+              title="Calcular distância manualmente"
             >
               {isCalculatingRoute ? '...' : '📍'}
             </button>
           </div>
+          {origin && destination && (
+            <p className="text-xs text-gray-500 mt-1">
+              A distância será calculada automaticamente baseada na rota.
+            </p>
+          )}
         </div>
         
         <div className="calculator-input-group">

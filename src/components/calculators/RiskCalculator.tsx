@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Calculator from '@/components/Calculator';
 import MapComponent from '@/components/MapComponent';
 import { RefreshCw, AlertCircle, CheckCircle, Info, MessageCircle, MapPin, Download } from 'lucide-react';
+import { HereMapsService } from '@/services/hereMapsService';
 
 interface RiskCalculatorProps {
   isActive: boolean;
@@ -17,6 +18,36 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
   const [currentTools, setCurrentTools] = useState('');
   const [result, setResult] = useState<any>(null);
   const [showMap, setShowMap] = useState(false);
+  const [routeDistance, setRouteDistance] = useState<number | null>(null);
+  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
+
+  // Auto-calculate route when both origin and destination are filled
+  useEffect(() => {
+    const autoCalculateRoute = async () => {
+      if (origin.trim() && destination.trim() && origin !== destination) {
+        setIsCalculatingRoute(true);
+        
+        try {
+          const route = await HereMapsService.calculateRoute(origin, destination);
+          if (route) {
+            setRouteDistance(route.distance);
+            setShowMap(true);
+            console.log('Risk calculator - Auto-calculated distance:', route.distance, 'km');
+          } else {
+            console.log('Risk calculator - Could not auto-calculate distance for:', origin, 'to', destination);
+          }
+        } catch (error) {
+          console.error('Risk calculator - Error auto-calculating distance:', error);
+        } finally {
+          setIsCalculatingRoute(false);
+        }
+      }
+    };
+
+    // Debounce the auto-calculation
+    const timeoutId = setTimeout(autoCalculateRoute, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [origin, destination]);
   
   // Risk score calculation
   const calculateRisk = () => {
@@ -105,7 +136,8 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
       riskScore: riskScore.toFixed(0),
       riskLevel,
       riskColor,
-      suggestions
+      suggestions,
+      routeDistance
     });
     
     setShowMap(true);
@@ -118,6 +150,7 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
       empresa: 'Nome da Empresa', // Seria preenchido pelo usuário
       origem: origin,
       destino: destination,
+      distanciaRota: routeDistance,
       tipoCarga: cargoType,
       valorCarga: cargoValue,
       tipoContratacao: contractType,
@@ -147,6 +180,7 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
       `Dados da operação:%0A` +
       `• Origem: ${origin}%0A` +
       `• Destino: ${destination}%0A` +
+      `• Distância: ${routeDistance ? routeDistance + ' km' : 'Não calculada'}%0A` +
       `• Tipo de carga: ${cargoType}%0A` +
       `• Valor da carga: R$ ${cargoValue}%0A` +
       `• Tipo de contratação: ${contractType}%0A` +
@@ -167,7 +201,7 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
           <div className="mb-4">
             <label htmlFor="origin" className="calculator-label flex items-center gap-1.5">
               <MapPin size={16} className="text-frete-500" />
-              Origem
+              Origem {isCalculatingRoute && <span className="text-sm text-gray-500">- Calculando rota...</span>}
             </label>
             <input
               id="origin"
@@ -192,6 +226,11 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
               onChange={(e) => setDestination(e.target.value)}
               placeholder="Ex: Rio de Janeiro, RJ"
             />
+            {origin && destination && routeDistance && (
+              <p className="text-xs text-gray-500 mt-1">
+                Distância da rota: {routeDistance} km (calculada automaticamente)
+              </p>
+            )}
           </div>
 
           <div className="mb-4">
@@ -266,7 +305,9 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
 
       {showMap && origin && destination && (
         <div className="mt-6">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Rota da operação</h4>
+          <h4 className="text-sm font-medium text-gray-700 mb-2">
+            Rota da operação {routeDistance && `(${routeDistance} km)`}
+          </h4>
           <MapComponent 
             origin={origin} 
             destination={destination}
@@ -315,6 +356,7 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
             setCurrentTools('');
             setResult(null);
             setShowMap(false);
+            setRouteDistance(null);
           }}
         >
           <RefreshCw size={18} className="mr-2" />
@@ -336,6 +378,12 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
                   </span>
                   <span className="mx-2 text-gray-300">|</span>
                   <span className="text-gray-700">{result.riskScore} pontos</span>
+                  {routeDistance && (
+                    <>
+                      <span className="mx-2 text-gray-300">|</span>
+                      <span className="text-gray-600">{routeDistance} km</span>
+                    </>
+                  )}
                 </div>
               </div>
               <div 

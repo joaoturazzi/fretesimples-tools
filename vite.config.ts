@@ -39,8 +39,8 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    // Use esbuild instead of terser to avoid dependency issues
-    minify: mode === 'production' ? 'esbuild' : false,
+    // Use esbuild for minification in all cases to avoid terser dependency
+    minify: 'esbuild',
     // Enable gzip compression
     reportCompressedSize: false,
     chunkSizeWarningLimit: 1000,

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
@@ -7,7 +8,6 @@ import {
   RiskCalculator,
   TransportCostSimulator,
   FuelCalculator,
-  FreightViabilityChecker,
   TripChecklist,
   VehicleSizingTool,
   LogisticsManagementDiagnostic,
@@ -44,7 +44,6 @@ const Index = () => {
             <RiskCalculator isActive={activeSection === 'calculadora-risco'} />
             <TransportCostSimulator isActive={activeSection === 'simulador-custos'} />
             <FuelCalculator isActive={activeSection === 'calculadora-combustivel'} />
-            <FreightViabilityChecker isActive={activeSection === 'verificador-viabilidade'} />
             <TripChecklist isActive={activeSection === 'checklist-viagem'} />
             <VehicleSizingTool isActive={activeSection === 'dimensionamento-veiculo'} />
             <LogisticsManagementDiagnostic isActive={activeSection === 'diagnostico-logistica'} />

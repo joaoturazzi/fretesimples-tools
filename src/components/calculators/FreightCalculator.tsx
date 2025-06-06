@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Truck, DollarSign, BarChart3, RefreshCw, CalculatorIcon, CheckCircle, Save } from 'lucide-react';
 import CalculatorSection from '../Calculator';
 import ResultBox from './ResultBox';
-import MapComponent from '../MapComponent';
+import RouteVisualization from '../RouteVisualization';
 import LocationInputs from './freight/LocationInputs';
 import CostSimulation from './freight/CostSimulation';
 import { useFreightCalculator } from './freight/useFreightCalculator';
@@ -202,17 +201,12 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
         <div className="mt-6">
           <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
             <span>🗺️</span>
-            Rota calculada: {origin} → {destination}
+            Visualização da Rota: {origin} → {destination}
           </h4>
-          <MapComponent 
+          <RouteVisualization 
             origin={origin} 
             destination={destination}
-            onRouteCalculated={(dist, duration) => {
-              console.log('Route calculated via map:', dist, 'km,', duration, 'min');
-              if (!distance || distance === 0) {
-                setDistance(dist);
-              }
-            }}
+            distance={typeof distance === 'number' ? distance : undefined}
             className="h-48 w-full rounded-lg border border-gray-200"
           />
         </div>

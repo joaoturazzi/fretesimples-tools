@@ -15,11 +15,13 @@ import {
   ContractGenerator
 } from '@/components/Tools';
 import ChatAssistant from '@/components/ChatAssistant';
+import DashboardAdvanced from '@/components/DashboardAdvanced';
+import Settings from '@/components/Settings';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AboutSection from '@/components/AboutSection';
 
 const Index = () => {
-  const [activeSection, setActiveSection] = useState('calculadora-frete');
+  const [activeSection, setActiveSection] = useState('dashboard');
   const isMobile = useIsMobile();
   
   return (
@@ -37,6 +39,13 @@ const Index = () => {
         }`}
       >
         <div className="content-container px-4 sm:px-6">
+          {/* Dashboard */}
+          {activeSection === 'dashboard' && <DashboardAdvanced />}
+          
+          {/* Settings */}
+          {activeSection === 'settings' && <Settings />}
+          
+          {/* Tools */}
           <div className="tools-container">
             <FreightCalculator isActive={activeSection === 'calculadora-frete'} />
             <ProfitSimulator isActive={activeSection === 'simulador-lucro'} />
@@ -54,7 +63,7 @@ const Index = () => {
           
           <footer id="footer" className="text-center text-gray-500 text-sm py-8 border-t border-gray-100 mt-12">
             <div className="flex justify-center items-center mb-4">
-              <div className="bg-white p-2 rounded-full mr-2">
+              <div className="glass-card p-2 rounded-full mr-2">
                 <img src="https://www.ccigris.com.br/site/assets/img/logo-cci.png" alt="CCI Logo" className="h-8" />
               </div>
               <span className="font-semibold text-gray-700">Frete Simples BY CCI</span>

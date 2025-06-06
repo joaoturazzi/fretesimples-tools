@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Truck, DollarSign, BarChart3, RefreshCw, CalculatorIcon, MapPin, Fuel, Gauge } from 'lucide-react';
 import CalculatorSection from '../../Calculator';
@@ -6,10 +5,10 @@ import { useFreightCalculator } from './useFreightCalculator';
 import { MapProviderProvider } from '../../map/UniversalMapProvider';
 import HybridMap from '../../map/HybridMap';
 import FreightResults from './FreightResults';
-import { useNotify } from '@/components/ui/notification';
+import { useQuickNotify } from '@/components/ui/enhanced-notification';
 
 const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
-  const notify = useNotify();
+  const notify = useQuickNotify();
   const {
     origin, setOrigin,
     destination, setDestination,
@@ -40,7 +39,7 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
     if (routeData && routeData.distance !== distance) {
       setDistance(routeData.distance);
       notify.success(
-        'Rota calculada!',
+        'Rota Calculada!',
         `Distância: ${routeData.distance.toFixed(1)} km • Tempo: ${Math.floor(routeData.duration / 60)}h ${routeData.duration % 60}m`
       );
     }
@@ -59,12 +58,19 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
       notify.error('Endereços obrigatórios', 'Por favor, informe origem e destino');
       return;
     }
+    
     performCalculation();
+    
+    // Notification will be triggered by the hook when calculation completes
+    if (result) {
+      notify.calculationComplete('Frete', result);
+    }
   };
 
   const handleReset = () => {
     setRouteData(null);
     resetForm();
+    notify.info('Formulário Limpo', 'Todos os campos foram resetados');
   };
 
   return (
@@ -82,25 +88,27 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
           </div>
         )}
 
-        {/* Mapa sempre visível */}
+        {/* Mapa sempre visível com estilo aprimorado */}
         <div className="mb-6">
           <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
             <span>🗺️</span>
             Visualização da Rota
           </h4>
-          <HybridMap
-            origin={origin}
-            destination={destination}
-            distance={routeData?.distance}
-            duration={routeData?.duration}
-            routeCoordinates={routeData?.coordinates}
-            onRouteCalculated={handleRouteCalculated}
-            className="w-full"
-            height={300}
-          />
+          <div className="glass-card p-1">
+            <HybridMap
+              origin={origin}
+              destination={destination}
+              distance={routeData?.distance}
+              duration={routeData?.duration}
+              routeCoordinates={routeData?.coordinates}
+              onRouteCalculated={handleRouteCalculated}
+              className="w-full rounded-lg overflow-hidden"
+              height={300}
+            />
+          </div>
         </div>
 
-        {/* Campos de entrada organizados */}
+        {/* Campos de entrada organizados com estilo glass */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Origem e Destino lado a lado */}
           <div className="space-y-4">
@@ -112,7 +120,7 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
               <input
                 id="origin"
                 type="text"
-                className="input-field"
+                className="modern-input"
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value)}
                 placeholder="Ex: São Paulo, SP"
@@ -127,7 +135,7 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
               <input
                 id="destination"
                 type="text"
-                className="input-field"
+                className="modern-input"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 placeholder="Ex: Rio de Janeiro, RJ"
@@ -139,13 +147,13 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
                 <Truck size={16} className="text-frete-500" />
                 Distância (km)
                 {routeData && (
-                  <span className="text-xs text-green-600 ml-2">Auto-calculada</span>
+                  <span className="text-xs text-green-600 ml-2 animate-pulse">Auto-calculada</span>
                 )}
               </label>
               <input
                 id="distance"
                 type="number"
-                className="input-field"
+                className="modern-input"
                 value={distance}
                 onChange={(e) => setDistance(e.target.value ? parseFloat(e.target.value) : '')}
                 placeholder="Ex: 450"
@@ -164,7 +172,7 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
               <input
                 id="weight"
                 type="number"
-                className="input-field"
+                className="modern-input"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : '')}
                 placeholder="Ex: 500"
@@ -179,7 +187,7 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
               </label>
               <select
                 id="vehicleType"
-                className="select-field"
+                className="modern-input"
                 value={vehicleType}
                 onChange={(e) => setVehicleType(e.target.value)}
               >
@@ -197,7 +205,7 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
               <input
                 id="costPerKm"
                 type="number"
-                className="input-field"
+                className="modern-input"
                 value={costPerKm}
                 onChange={(e) => setCostPerKm(e.target.value ? parseFloat(e.target.value) : '')}
                 placeholder={`Ex: ${getDefaultCostPerKm()}`}
@@ -218,7 +226,7 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
             <input
               id="fuelPrice"
               type="number"
-              className="input-field"
+              className="modern-input"
               value={fuelPrice}
               onChange={(e) => setFuelPrice(e.target.value ? parseFloat(e.target.value) : '')}
               placeholder="Ex: 5.50"
@@ -235,7 +243,7 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
             <input
               id="consumption"
               type="number"
-              className="input-field"
+              className="modern-input"
               value={consumption}
               onChange={(e) => setConsumption(e.target.value ? parseFloat(e.target.value) : '')}
               placeholder="Ex: 10.5"
@@ -245,35 +253,39 @@ const EnhancedFreightCalculator = ({ isActive }: { isActive: boolean }) => {
           </div>
         </div>
 
-        {/* Botões de ação */}
+        {/* Botões de ação com estilo aprimorado */}
         <div className="mt-6 flex flex-wrap gap-3">
           <button 
             onClick={handleCalculate}
-            className={`btn btn-primary ${isCalculating ? 'btn-loading' : ''}`}
+            className={`modern-btn-primary ${isCalculating ? 'opacity-75 cursor-not-allowed' : ''}`}
             disabled={isCalculating}
           >
-            {!isCalculating && <CalculatorIcon size={18} />}
-            Calcular Frete
+            {!isCalculating && <CalculatorIcon size={18} className="mr-2" />}
+            {isCalculating ? 'Calculando...' : 'Calcular Frete'}
           </button>
           
           <button 
             onClick={handleReset}
-            className="btn btn-secondary"
+            className="modern-btn-secondary"
             disabled={isCalculating}
           >
-            <RefreshCw size={18} />
+            <RefreshCw size={18} className="mr-2" />
             Limpar
           </button>
 
           {routeData && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 bg-green-50 px-3 py-2 rounded-lg">
+            <div className="glass-card-orange px-4 py-2 text-sm text-orange-800 flex items-center gap-2 animate-scale-in">
               <span className="text-green-600">✓</span>
               Rota: {routeData.distance.toFixed(1)} km • {Math.floor(routeData.duration / 60)}h {routeData.duration % 60}m
             </div>
           )}
         </div>
         
-        {result && <FreightResults result={result} />}
+        {result && (
+          <div className="mt-6 animate-fade-in">
+            <FreightResults result={result} />
+          </div>
+        )}
       </CalculatorSection>
     </MapProviderProvider>
   );

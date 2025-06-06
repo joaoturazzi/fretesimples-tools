@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { LatLngExpression } from 'leaflet';
 import { LoadingState } from '@/components/ui/loading';
@@ -19,7 +19,7 @@ interface InteractiveMapProps {
   height?: number;
 }
 
-const InteractiveMap: React.FC<InteractiveMapProps> = ({
+const InteractiveMap: React.FC<InteractiveMapProps> = memo(({
   origin,
   destination,
   distance,
@@ -119,6 +119,19 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
       </div>
     );
   }
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison to prevent unnecessary re-renders
+  return (
+    prevProps.origin === nextProps.origin &&
+    prevProps.destination === nextProps.destination &&
+    prevProps.distance === nextProps.distance &&
+    prevProps.duration === nextProps.duration &&
+    prevProps.routeCoordinates?.length === nextProps.routeCoordinates?.length &&
+    prevProps.className === nextProps.className &&
+    prevProps.height === nextProps.height
+  );
+});
+
+InteractiveMap.displayName = 'InteractiveMap';
 
 export default InteractiveMap;

@@ -15,7 +15,7 @@ export const useFreightValidation = () => {
     setErrorMessage('');
 
     // Validate distance
-    if (!distance || distance === '') {
+    if (distance === '' || !distance) {
       const message = 'Por favor, informe a distância da viagem.';
       setErrorMessage(message);
       setHasError(true);
@@ -40,8 +40,17 @@ export const useFreightValidation = () => {
       return false;
     }
 
+    // Enhanced address validation for better geocoding
+    if (typeof distance === 'number' && distance > 2000) {
+      const message = 'Distância muito alta para rotas brasileiras. Verifique os endereços.';
+      setErrorMessage(message);
+      setHasError(true);
+      notify.warning('Distância suspeita', message);
+      return false;
+    }
+
     // Validate weight
-    if (!weight || weight === '') {
+    if (weight === '' || !weight) {
       const message = 'Por favor, informe o peso da carga.';
       setErrorMessage(message);
       setHasError(true);

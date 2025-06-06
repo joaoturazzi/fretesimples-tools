@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import Calculator from '@/components/Calculator';
 import ResultBox from './ResultBox';
-import MapComponent from '@/components/MapComponent';
+import InteractiveMap from '@/components/InteractiveMap';
 import { RefreshCw, MapPin, Calculator as CalcIcon, Fuel } from 'lucide-react';
-import { HereMapsService } from '@/services/hereMapsService';
+import { mapService } from '@/services/unifiedMapService';
 
 interface FuelCalculatorProps {
   isActive: boolean;
@@ -20,6 +20,8 @@ const FuelCalculator = ({ isActive }: FuelCalculatorProps) => {
   const [loadWeight, setLoadWeight] = useState('');
   const [result, setResult] = useState<any>(null);
   const [routeDistance, setRouteDistance] = useState<number | null>(null);
+  const [routeCoordinates, setRouteCoordinates] = useState<Array<{ lat: number; lng: number }>>([]);
+  const [routeDuration, setRouteDuration] = useState<number | undefined>(undefined);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
   const [showMap, setShowMap] = useState(false);
   
@@ -40,10 +42,12 @@ const FuelCalculator = ({ isActive }: FuelCalculatorProps) => {
         setIsCalculatingRoute(true);
         
         try {
-          const route = await HereMapsService.calculateRoute(origin, destination);
+          const route = await mapService.calculateRoute(origin, destination);
           if (route) {
             setRouteDistance(route.distance);
             setDistance(route.distance.toString());
+            setRouteDuration(route.duration);
+            setRouteCoordinates(route.route.geometry);
             setShowMap(true);
             console.log('Fuel calculator - Auto-calculated distance:', route.distance, 'km');
           } else {
@@ -259,15 +263,18 @@ const FuelCalculator = ({ isActive }: FuelCalculatorProps) => {
         </div>
       </div>
 
-      {showMap && origin && destination && (
+      {showMap && origin && destination && routeCoordinates && routeCoordinates.length > 0 && (
         <div className="mt-6">
           <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
             <MapPin size={16} className="mr-2 text-frete-500" />
             Rota calculada {routeDistance && `(${routeDistance} km)`}
           </h4>
-          <MapComponent 
+          <InteractiveMap 
             origin={origin} 
             destination={destination}
+            distance={routeDistance || undefined}
+            duration={routeDuration}
+            routeCoordinates={routeCoordinates}
             className="h-48 w-full rounded-lg border border-gray-200"
           />
         </div>
@@ -293,6 +300,8 @@ const FuelCalculator = ({ isActive }: FuelCalculatorProps) => {
             setResult(null);
             setShowMap(false);
             setRouteDistance(null);
+            setRouteCoordinates([]);
+            setRouteDuration(undefined);
           }}
         >
           <RefreshCw size={18} className="mr-2" />

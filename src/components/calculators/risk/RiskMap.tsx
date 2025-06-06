@@ -1,16 +1,18 @@
 
 import React from 'react';
-import MapComponent from '@/components/MapComponent';
+import InteractiveMap from '@/components/InteractiveMap';
 import { MapPin } from 'lucide-react';
 
 interface RiskMapProps {
   origin: string;
   destination: string;
   routeDistance: number | null;
+  routeCoordinates?: Array<{ lat: number; lng: number }>;
+  routeDuration?: number;
   showMap: boolean;
 }
 
-const RiskMap = ({ origin, destination, routeDistance, showMap }: RiskMapProps) => {
+const RiskMap = ({ origin, destination, routeDistance, routeCoordinates = [], routeDuration, showMap }: RiskMapProps) => {
   if (!showMap || !origin || !destination) return null;
 
   return (
@@ -19,9 +21,12 @@ const RiskMap = ({ origin, destination, routeDistance, showMap }: RiskMapProps) 
         <MapPin size={16} className="mr-2 text-frete-500" />
         Rota da operação {routeDistance && `(${routeDistance} km)`}
       </h4>
-      <MapComponent 
+      <InteractiveMap 
         origin={origin} 
         destination={destination}
+        distance={routeDistance || undefined}
+        duration={routeDuration}
+        routeCoordinates={routeCoordinates}
         className="h-48 w-full rounded-lg border border-gray-200"
       />
     </div>

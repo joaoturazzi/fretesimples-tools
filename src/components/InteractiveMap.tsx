@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState, memo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import { LatLngExpression } from 'leaflet';
@@ -65,15 +66,13 @@ const MapInitializer = memo(() => {
   const map = useMap();
   
   useEffect(() => {
-    // Fix the callback signature - no parameters needed
-    const handleMapReady = () => {
+    // Fix: Use a simple timeout instead of map.whenReady to avoid callback issues
+    const timeoutId = setTimeout(() => {
       map.invalidateSize();
-    };
-
-    map.whenReady(handleMapReady);
+    }, 100);
     
     return () => {
-      // Cleanup if needed
+      clearTimeout(timeoutId);
     };
   }, [map]);
 

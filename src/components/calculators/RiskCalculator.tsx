@@ -6,7 +6,7 @@ import RiskMap from './risk/RiskMap';
 import RiskResults from './risk/RiskResults';
 import RiskExport from './risk/RiskExport';
 import { RefreshCw } from 'lucide-react';
-import { HereMapsService } from '@/services/hereMapsService';
+import { mapService } from '@/services/unifiedMapService';
 import { calculateRisk } from './risk/riskCalculations';
 
 interface RiskCalculatorProps {
@@ -23,6 +23,8 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
   const [result, setResult] = useState<any>(null);
   const [showMap, setShowMap] = useState(false);
   const [routeDistance, setRouteDistance] = useState<number | null>(null);
+  const [routeCoordinates, setRouteCoordinates] = useState<Array<{ lat: number; lng: number }>>([]);
+  const [routeDuration, setRouteDuration] = useState<number | undefined>(undefined);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
 
   useEffect(() => {
@@ -31,9 +33,11 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
         setIsCalculatingRoute(true);
         
         try {
-          const route = await HereMapsService.calculateRoute(origin, destination);
+          const route = await mapService.calculateRoute(origin, destination);
           if (route) {
             setRouteDistance(route.distance);
+            setRouteDuration(route.duration);
+            setRouteCoordinates(route.route.geometry);
             setShowMap(true);
             console.log('Risk calculator - Auto-calculated distance:', route.distance, 'km');
           } else {
@@ -90,6 +94,8 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
     setResult(null);
     setShowMap(false);
     setRouteDistance(null);
+    setRouteCoordinates([]);
+    setRouteDuration(undefined);
   };
   
   return (
@@ -120,6 +126,8 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
         origin={origin}
         destination={destination}
         routeDistance={routeDistance}
+        routeCoordinates={routeCoordinates}
+        routeDuration={routeDuration}
         showMap={showMap}
       />
       

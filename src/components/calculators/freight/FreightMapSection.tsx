@@ -1,7 +1,6 @@
 
 import React from 'react';
 import InteractiveMap from '../../InteractiveMap';
-import ErrorBoundary from '../../ErrorBoundary';
 
 interface FreightMapSectionProps {
   showMap: boolean;
@@ -30,22 +29,14 @@ const FreightMapSection: React.FC<FreightMapSectionProps> = ({
         <span>🗺️</span>
         Mapa da Rota: {origin} → {destination}
       </h4>
-      <ErrorBoundary 
-        fallback={
-          <div className="h-96 w-full rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center">
-            <p className="text-gray-500">Erro ao carregar mapa. Tente novamente.</p>
-          </div>
-        }
-      >
-        <InteractiveMap 
-          origin={origin} 
-          destination={destination}
-          distance={typeof distance === 'number' ? distance : undefined}
-          duration={routeDuration}
-          routeCoordinates={routeCoordinates}
-          className="h-96 w-full rounded-lg"
-        />
-      </ErrorBoundary>
+      <InteractiveMap 
+        origin={origin} 
+        destination={destination}
+        distance={typeof distance === 'number' ? distance : undefined}
+        duration={routeDuration}
+        routeCoordinates={routeCoordinates}
+        className="h-96 w-full rounded-lg"
+      />
     </div>
   );
 };

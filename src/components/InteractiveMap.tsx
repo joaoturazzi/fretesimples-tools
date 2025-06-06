@@ -127,12 +127,24 @@ const InteractiveMap: React.FC<InteractiveMapProps> = memo(({
     </div>
   );
 }, (prevProps, nextProps) => {
-  // Comparação profunda mais segura para evitar re-renders desnecessários
-  const routeCoordsEqual = (
-    Array.isArray(prevProps.routeCoordinates) && Array.isArray(nextProps.routeCoordinates)
-      ? prevProps.routeCoordinates.length === nextProps.routeCoordinates.length
-      : prevProps.routeCoordinates === nextProps.routeCoordinates
-  );
+  // Comparação mais robusta para evitar re-renders desnecessários
+  const routeCoordsEqual = (() => {
+    const prev = prevProps.routeCoordinates;
+    const next = nextProps.routeCoordinates;
+    
+    // Se ambos são undefined/null, são iguais
+    if (!prev && !next) return true;
+    
+    // Se um é undefined e outro não, são diferentes
+    if (!prev || !next) return false;
+    
+    // Se ambos são arrays, comparar tamanho
+    if (Array.isArray(prev) && Array.isArray(next)) {
+      return prev.length === next.length;
+    }
+    
+    return prev === next;
+  })();
   
   return (
     prevProps.origin === nextProps.origin &&

@@ -23,9 +23,15 @@ const MapMarkers: React.FC<MapMarkersProps> = ({
 }) => {
   const map = useMap();
   
-  // Verificar se o mapa está disponível e válido
-  if (!map || typeof map.fitBounds !== 'function') {
-    console.warn('MapMarkers: Map not ready or missing fitBounds method');
+  // Verificação mais rigorosa se o mapa está disponível
+  if (!map) {
+    console.warn('MapMarkers: Map não disponível');
+    return null;
+  }
+  
+  // Verificar métodos essenciais do mapa
+  if (typeof map.fitBounds !== 'function') {
+    console.warn('MapMarkers: Map não possui método fitBounds');
     return null;
   }
   
@@ -54,11 +60,17 @@ const MapMarkers: React.FC<MapMarkersProps> = ({
         
         // Adicionar padding para melhor visualização
         map.fitBounds(bounds, { padding: [20, 20] });
+        console.log('MapMarkers: Bounds ajustados com sucesso');
       } catch (error) {
-        console.warn('MapMarkers: Error fitting bounds:', error);
+        console.warn('MapMarkers: Erro ao ajustar bounds:', error);
       }
     }
   }, [validOrigin, validDest, originCoords, destCoords, map]);
+
+  // Não renderizar nada se não há coordenadas válidas
+  if (!validOrigin && !validDest) {
+    return null;
+  }
 
   return (
     <>

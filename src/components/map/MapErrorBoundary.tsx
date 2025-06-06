@@ -28,24 +28,27 @@ class MapErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('MapErrorBoundary caught a map-related error:', error, errorInfo);
+    console.error('MapErrorBoundary: Erro crítico do mapa capturado:', error);
+    console.error('Stack trace completo:', errorInfo.componentStack);
     
-    // Log específico para erros do react-leaflet
+    // Log específico para o erro "r is not a function"
     if (error.message.includes('r is not a function') || 
         error.stack?.includes('react-leaflet') ||
         error.stack?.includes('leaflet')) {
-      console.error('LEAFLET ERROR DETECTED:', {
+      console.error('ERRO LEAFLET DETECTADO:', {
         message: error.message,
         stack: error.stack,
-        componentStack: errorInfo.componentStack
+        componentStack: errorInfo.componentStack,
+        userAgent: navigator.userAgent
       });
     }
     
     this.setState({ errorInfo });
     this.props.onError?.(error, errorInfo);
     
-    // Auto-retry após 3 segundos para erros específicos do mapa
-    if (this.state.retryCount < 2 && this.isRecoverableError(error)) {
+    // Auto-retry inteligente apenas para erros recuperáveis
+    if (this.state.retryCount < 3 && this.isRecoverableError(error)) {
+      console.log(`MapErrorBoundary: Agendando auto-retry (tentativa ${this.state.retryCount + 1})`);
       this.scheduleRetry();
     }
   }
@@ -55,7 +58,9 @@ class MapErrorBoundary extends Component<Props, State> {
       'r is not a function',
       'Cannot read properties of undefined',
       'map is not ready',
-      'tile loading error'
+      'tile loading error',
+      'invalidateSize',
+      'getContainer'
     ];
     
     return recoverableMessages.some(msg => 
@@ -68,10 +73,13 @@ class MapErrorBoundary extends Component<Props, State> {
       clearTimeout(this.retryTimeout);
     }
     
+    // Tempo de retry progressivo: 2s, 4s, 8s
+    const retryDelay = Math.min(2000 * Math.pow(2, this.state.retryCount), 8000);
+    
     this.retryTimeout = setTimeout(() => {
-      console.log('MapErrorBoundary: Attempting auto-retry...');
+      console.log('MapErrorBoundary: Executando auto-retry...');
       this.handleReset(true);
-    }, 3000);
+    }, retryDelay);
   };
 
   private handleReset = (isAutoRetry = false) => {
@@ -79,6 +87,8 @@ class MapErrorBoundary extends Component<Props, State> {
       clearTimeout(this.retryTimeout);
       this.retryTimeout = null;
     }
+    
+    console.log(`MapErrorBoundary: Reset ${isAutoRetry ? 'automático' : 'manual'}`);
     
     this.setState(prevState => ({ 
       hasError: false, 
@@ -120,7 +130,7 @@ class MapErrorBoundary extends Component<Props, State> {
             
             <p className="text-red-700 text-sm mb-4">
               {isLeafletError 
-                ? 'Falha na inicialização do mapa. Tentaremos recarregar automaticamente.'
+                ? 'Problema na inicialização do mapa. Tentando recarregar automaticamente...'
                 : (this.state.error?.message || 'Ocorreu um erro inesperado no mapa')
               }
             </p>
@@ -134,7 +144,7 @@ class MapErrorBoundary extends Component<Props, State> {
             <div className="flex gap-2 justify-center">
               <button
                 onClick={() => this.handleReset()}
-                disabled={this.state.retryCount >= 2}
+                disabled={this.state.retryCount >= 3}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <RefreshCw size={16} />

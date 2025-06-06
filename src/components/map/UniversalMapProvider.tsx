@@ -39,76 +39,110 @@ export const MapProviderProvider: React.FC<MapProviderProviderProps> = ({
     const initializeProvider = async () => {
       setIsReady(false);
       setError(null);
-
-      // Se é mobile ou não suporta mapas complexos, usar fallback
-      if (compatibility.shouldUseSimpleMap) {
-        setProvider('fallback');
-        setIsReady(true);
-        return;
-      }
+      console.log('Initializing map provider:', provider);
 
       try {
         if (provider === 'here') {
-          // Tentar carregar HERE Maps
-          await loadHereMaps();
+          console.log('Attempting to load HERE Maps...');
+          await loadHereMapsWithTimeout();
+          console.log('HERE Maps loaded successfully');
           setIsReady(true);
         } else if (provider === 'leaflet') {
-          // Verificar se Leaflet está disponível
+          console.log('Using Leaflet provider...');
           if (compatibility.canLoadLeaflet) {
             setIsReady(true);
           } else {
             throw new Error('Leaflet not available');
           }
         } else {
-          // Fallback sempre funciona
+          console.log('Using fallback provider...');
           setIsReady(true);
         }
       } catch (err) {
-        console.warn(`Failed to load ${provider}, falling back to simpler map`);
-        setProvider('fallback');
+        console.warn(`Failed to load ${provider}:`, err);
+        
+        // Automatic fallback sequence: HERE -> Leaflet -> Simple Fallback
+        if (provider === 'here' && compatibility.canLoadLeaflet) {
+          console.log('Falling back to Leaflet...');
+          setProvider('leaflet');
+          return;
+        } else if (provider === 'here' || provider === 'leaflet') {
+          console.log('Falling back to simple map...');
+          setProvider('fallback');
+          return;
+        }
+        
+        // If we're already on fallback, just mark as ready
         setIsReady(true);
+        setError(err instanceof Error ? err.message : 'Map initialization failed');
       }
     };
 
     initializeProvider();
   }, [provider, compatibility]);
 
-  const loadHereMaps = (): Promise<void> => {
+  const loadHereMapsWithTimeout = (): Promise<void> => {
     return new Promise((resolve, reject) => {
+      // Set timeout for loading
+      const timeout = setTimeout(() => {
+        reject(new Error('HERE Maps loading timeout'));
+      }, 10000); // 10 seconds timeout
+
+      const cleanup = () => clearTimeout(timeout);
+
       if (window.H) {
+        cleanup();
         resolve();
         return;
       }
 
-      const script = document.createElement('script');
-      script.src = 'https://js.api.here.com/v3/3.1/mapsjs-core.js';
-      script.async = true;
-      script.onload = () => {
-        const serviceScript = document.createElement('script');
-        serviceScript.src = 'https://js.api.here.com/v3/3.1/mapsjs-service.js';
-        serviceScript.async = true;
-        serviceScript.onload = () => {
-          const uiScript = document.createElement('script');
-          uiScript.src = 'https://js.api.here.com/v3/3.1/mapsjs-ui.js';
-          uiScript.async = true;
-          uiScript.onload = () => {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.type = 'text/css';
-            link.href = 'https://js.api.here.com/v3/3.1/mapsjs-ui.css';
-            document.head.appendChild(link);
-            resolve();
-          };
-          document.head.appendChild(uiScript);
-        };
-        document.head.appendChild(serviceScript);
+      const loadScript = (src: string): Promise<void> => {
+        return new Promise((scriptResolve, scriptReject) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.async = true;
+          script.onload = () => scriptResolve();
+          script.onerror = () => scriptReject(new Error(`Failed to load ${src}`));
+          document.head.appendChild(script);
+        });
       };
-      script.onerror = reject;
-      document.head.appendChild(script);
+
+      const loadStyles = () => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://js.api.here.com/v3/3.1/mapsjs-ui.css';
+        document.head.appendChild(link);
+      };
+
+      // Load scripts sequentially
+      const loadSequence = async () => {
+        try {
+          await loadScript('https://js.api.here.com/v3/3.1/mapsjs-core.js');
+          await loadScript('https://js.api.here.com/v3/3.1/mapsjs-service.js');
+          await loadScript('https://js.api.here.com/v3/3.1/mapsjs-ui.js');
+          await loadScript('https://js.api.here.com/v3/3.1/mapsjs-mapevents.js');
+          loadStyles();
+          
+          // Verify HERE Maps is actually available
+          if (!window.H || !window.H.Map || !window.H.service) {
+            throw new Error('HERE Maps components not properly loaded');
+          }
+          
+          cleanup();
+          resolve();
+        } catch (error) {
+          cleanup();
+          reject(error);
+        }
+      };
+
+      loadSequence();
     });
   };
 
   const switchProvider = (newProvider: MapProvider) => {
+    console.log('Switching to provider:', newProvider);
     setProvider(newProvider);
   };
 

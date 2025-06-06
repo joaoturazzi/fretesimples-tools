@@ -36,26 +36,42 @@ const HybridMap: React.FC<HybridMapProps> = memo(({
   const mapRef = useRef<any>(null);
   const [mapObjects, setMapObjects] = useState<any[]>([]);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
+  const [initializationError, setInitializationError] = useState<string | null>(null);
 
+  // Initialize HERE Map when provider and container are ready
   useEffect(() => {
     if (provider === 'here' && isReady && mapContainerRef.current && !mapRef.current) {
       initializeHereMap();
     }
   }, [provider, isReady]);
 
+  // Calculate route when origin/destination change
   useEffect(() => {
-    if (provider === 'here' && mapRef.current && origin && destination) {
+    if (provider === 'here' && mapRef.current && origin?.trim() && destination?.trim()) {
       calculateHereRoute();
     }
   }, [origin, destination, provider]);
 
   const initializeHereMap = async () => {
-    if (!window.H || !mapContainerRef.current) return;
-
     try {
+      console.log('Initializing HERE Map...');
+      
+      if (!window.H || !window.H.Map || !window.H.service) {
+        throw new Error('HERE Maps not properly loaded');
+      }
+
+      if (!mapContainerRef.current) {
+        throw new Error('Map container not available');
+      }
+
+      // Test API key by creating platform
       const platform = new window.H.service.Platform({
         apikey: env.HERE_API_KEY
       });
+
+      if (!platform) {
+        throw new Error('Failed to create HERE Maps platform - check API key');
+      }
 
       const defaultLayers = platform.createDefaultLayers();
       const map = new window.H.Map(
@@ -72,9 +88,12 @@ const HybridMap: React.FC<HybridMapProps> = memo(({
       const ui = window.H.ui.UI.createDefault(map);
 
       mapRef.current = map;
+      setInitializationError(null);
       console.log('HERE Map initialized successfully');
     } catch (error) {
-      console.error('Error initializing HERE Map:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error initializing HERE Map:', errorMsg);
+      setInitializationError(errorMsg);
     }
   };
 
@@ -84,6 +103,8 @@ const HybridMap: React.FC<HybridMapProps> = memo(({
     setIsCalculatingRoute(true);
     
     try {
+      console.log('Calculating HERE route:', { origin, destination });
+      
       // Clear previous objects
       clearMapObjects();
 
@@ -103,6 +124,8 @@ const HybridMap: React.FC<HybridMapProps> = memo(({
         throw new Error('Could not find addresses');
       }
 
+      console.log('Geocoding successful:', { originResult, destResult });
+
       // Calculate route
       const router = platform.getRoutingService();
       const routeParams = {
@@ -115,54 +138,64 @@ const HybridMap: React.FC<HybridMapProps> = memo(({
       };
 
       router.calculateRoute(routeParams, (result: any) => {
-        if (result.response && result.response.route && result.response.route[0]) {
-          const route = result.response.route[0];
-          const summary = route.summary;
-          const shape = route.shape;
+        try {
+          if (result.response && result.response.route && result.response.route[0]) {
+            const route = result.response.route[0];
+            const summary = route.summary;
+            const shape = route.shape;
 
-          // Convert shape to coordinates
-          const coordinates = shape.map((point: string) => {
-            const [lat, lng] = point.split(',').map(Number);
-            return { lat, lng };
-          });
-
-          // Add markers and route to map
-          const originMarker = new window.H.map.Marker(originResult);
-          const destMarker = new window.H.map.Marker(destResult);
-          
-          const lineString = new window.H.geo.LineString();
-          coordinates.forEach(coord => lineString.pushPoint(coord));
-          const polyline = new window.H.map.Polyline(lineString, {
-            style: { lineWidth: 5, strokeColor: '#FF6B00' }
-          });
-
-          mapRef.current.addObject(originMarker);
-          mapRef.current.addObject(destMarker);
-          mapRef.current.addObject(polyline);
-          
-          setMapObjects([originMarker, destMarker, polyline]);
-
-          // Fit map to route
-          mapRef.current.getViewModel().setLookAtData({
-            bounds: polyline.getBoundingBox()
-          });
-
-          // Callback with route data
-          if (onRouteCalculated) {
-            onRouteCalculated({
-              distance: summary.distance / 1000, // Convert to km
-              duration: summary.travelTime / 60, // Convert to minutes
-              coordinates
+            // Convert shape to coordinates
+            const coordinates = shape.map((point: string) => {
+              const [lat, lng] = point.split(',').map(Number);
+              return { lat, lng };
             });
+
+            // Add markers and route to map
+            const originMarker = new window.H.map.Marker(originResult);
+            const destMarker = new window.H.map.Marker(destResult);
+            
+            const lineString = new window.H.geo.LineString();
+            coordinates.forEach(coord => lineString.pushPoint(coord));
+            const polyline = new window.H.map.Polyline(lineString, {
+              style: { lineWidth: 5, strokeColor: '#FF6B00' }
+            });
+
+            mapRef.current.addObject(originMarker);
+            mapRef.current.addObject(destMarker);
+            mapRef.current.addObject(polyline);
+            
+            setMapObjects([originMarker, destMarker, polyline]);
+
+            // Fit map to route
+            mapRef.current.getViewModel().setLookAtData({
+              bounds: polyline.getBoundingBox()
+            });
+
+            // Callback with route data
+            if (onRouteCalculated) {
+              onRouteCalculated({
+                distance: summary.distance / 1000, // Convert to km
+                duration: summary.travelTime / 60, // Convert to minutes
+                coordinates
+              });
+            }
+
+            console.log('Route calculated successfully');
+          } else {
+            throw new Error('No route found in response');
           }
+        } catch (error) {
+          console.error('Error processing route result:', error);
+        } finally {
+          setIsCalculatingRoute(false);
         }
       }, (error: any) => {
         console.error('Route calculation error:', error);
+        setIsCalculatingRoute(false);
       });
 
     } catch (error) {
       console.error('Error calculating HERE route:', error);
-    } finally {
       setIsCalculatingRoute(false);
     }
   };
@@ -190,8 +223,20 @@ const HybridMap: React.FC<HybridMapProps> = memo(({
     }
   };
 
+  // Show empty state when no addresses
+  if (!origin?.trim() && !destination?.trim()) {
+    return (
+      <div className={`flex items-center justify-center bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
+        <div className="text-center p-6">
+          <div className="mb-2">🗺️</div>
+          <p className="text-sm">Insira origem e destino para visualizar a rota</p>
+        </div>
+      </div>
+    );
+  }
+
   // Render based on provider
-  if (provider === 'fallback') {
+  if (provider === 'fallback' || initializationError) {
     return (
       <SimpleMapFallback
         origin={origin}
@@ -238,15 +283,6 @@ const HybridMap: React.FC<HybridMapProps> = memo(({
         </div>
       )}
     </div>
-  );
-}, (prevProps, nextProps) => {
-  return (
-    prevProps.origin === nextProps.origin &&
-    prevProps.destination === nextProps.destination &&
-    prevProps.distance === nextProps.distance &&
-    prevProps.duration === nextProps.duration &&
-    prevProps.className === nextProps.className &&
-    prevProps.height === nextProps.height
   );
 });
 

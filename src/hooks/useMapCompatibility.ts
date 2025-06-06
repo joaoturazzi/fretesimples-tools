@@ -13,7 +13,7 @@ export const useMapCompatibility = (): MapCompatibility => {
     isSupported: false,
     isMobile: false,
     canLoadLeaflet: false,
-    shouldUseSimpleMap: true
+    shouldUseSimpleMap: false
   });
 
   useEffect(() => {
@@ -38,8 +38,9 @@ export const useMapCompatibility = (): MapCompatibility => {
         window.requestAnimationFrame
       );
 
-      // Decisão sobre usar mapa simples
-      const shouldUseSimpleMap = isMobile || !canLoadLeaflet || !isSupported;
+      // Ser menos restritivo - permitir mapas em mais dispositivos
+      // Só usar mapa simples se realmente não há suporte ou se está offline
+      const shouldUseSimpleMap = !isSupported || !navigator.onLine;
 
       setCompatibility({
         isSupported,
@@ -52,7 +53,8 @@ export const useMapCompatibility = (): MapCompatibility => {
         isSupported,
         isMobile,
         canLoadLeaflet,
-        shouldUseSimpleMap
+        shouldUseSimpleMap,
+        userAgent: navigator.userAgent
       });
     };
 

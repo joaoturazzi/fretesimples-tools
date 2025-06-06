@@ -79,12 +79,13 @@ export class HereMapsService {
       if (data.routes && data.routes.length > 0) {
         const route = data.routes[0];
         const summary = route.sections[0].summary;
+        const polyline = route.sections[0].polyline;
         
         return {
           distance: Math.round(summary.length / 1000), // Convert to km
           duration: Math.round(summary.duration / 60), // Convert to minutes
           route: {
-            geometry: this.decodePolyline(route.sections[0].polyline || '')
+            geometry: this.decodePolyline(polyline || '')
           }
         };
       }
@@ -97,8 +98,48 @@ export class HereMapsService {
   }
 
   private static decodePolyline(encoded: string): Array<{ lat: number; lng: number }> {
-    // Simplified polyline decoding - in production, use a proper library
-    // For now, return empty array
-    return [];
+    if (!encoded) return [];
+    
+    try {
+      // HERE Maps uses flexible polyline encoding
+      // This is a simplified decoder for basic functionality
+      const coords: Array<{ lat: number; lng: number }> = [];
+      let index = 0;
+      let lat = 0;
+      let lng = 0;
+
+      while (index < encoded.length) {
+        let b;
+        let shift = 0;
+        let result = 0;
+        do {
+          b = encoded.charCodeAt(index++) - 63;
+          result |= (b & 0x1f) << shift;
+          shift += 5;
+        } while (b >= 0x20);
+        const deltaLat = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1));
+        lat += deltaLat;
+
+        shift = 0;
+        result = 0;
+        do {
+          b = encoded.charCodeAt(index++) - 63;
+          result |= (b & 0x1f) << shift;
+          shift += 5;
+        } while (b >= 0x20);
+        const deltaLng = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1));
+        lng += deltaLng;
+
+        coords.push({
+          lat: lat / 1e5,
+          lng: lng / 1e5
+        });
+      }
+
+      return coords;
+    } catch (error) {
+      console.error('Error decoding polyline:', error);
+      return [];
+    }
   }
 }

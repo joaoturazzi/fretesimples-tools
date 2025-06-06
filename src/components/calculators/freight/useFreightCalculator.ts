@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { HereMapsService } from '@/services/hereMapsService';
 import { calculateFreight, calculateCostSimulation, getDefaultCostPerKm, FreightCalculationResult, CostSimulationResult } from './freightCalculations';
@@ -27,6 +26,8 @@ export const useFreightCalculator = () => {
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showMap, setShowMap] = useState(false);
+  const [routeCoordinates, setRouteCoordinates] = useState<Array<{ lat: number; lng: number }>>([]);
+  const [routeDuration, setRouteDuration] = useState<number | undefined>(undefined);
 
   // Helper function to convert input values
   const convertValue = (value: string | number): number | '' => {
@@ -47,6 +48,8 @@ export const useFreightCalculator = () => {
           const route = await HereMapsService.calculateRoute(origin, destination);
           if (route) {
             setDistance(route.distance);
+            setRouteDuration(route.duration);
+            setRouteCoordinates(route.route.geometry);
             setShowMap(true);
             console.log('Auto-calculated distance:', route.distance, 'km');
           } else {
@@ -59,6 +62,8 @@ export const useFreightCalculator = () => {
         }
       } else {
         setShowMap(false);
+        setRouteCoordinates([]);
+        setRouteDuration(undefined);
       }
     };
 
@@ -80,6 +85,8 @@ export const useFreightCalculator = () => {
       const route = await HereMapsService.calculateRoute(origin, destination);
       if (route) {
         setDistance(route.distance);
+        setRouteDuration(route.duration);
+        setRouteCoordinates(route.route.geometry);
         setShowMap(true);
       } else {
         setErrorMessage('Não foi possível calcular a rota. Verifique os endereços informados.');
@@ -185,6 +192,8 @@ export const useFreightCalculator = () => {
     setErrorMessage('');
     setShowMap(false);
     setShowCostSimulation(false);
+    setRouteCoordinates([]);
+    setRouteDuration(undefined);
   };
 
   return {
@@ -214,6 +223,8 @@ export const useFreightCalculator = () => {
     calculateDistanceFromRoute,
     performCalculation,
     resetForm,
-    getDefaultCostPerKm: () => getDefaultCostPerKm(vehicleType)
+    getDefaultCostPerKm: () => getDefaultCostPerKm(vehicleType),
+    routeCoordinates,
+    routeDuration
   };
 };

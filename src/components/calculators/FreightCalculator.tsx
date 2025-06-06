@@ -8,6 +8,7 @@ import CostSimulation from './freight/CostSimulation';
 import { useFreightCalculator } from './freight/useFreightCalculator';
 import { formatCurrency } from '@/lib/utils';
 import useSharedData from '@/hooks/useSharedData';
+import InteractiveMap from '../InteractiveMap';
 
 const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
   const {
@@ -34,7 +35,9 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
     calculateDistanceFromRoute,
     performCalculation,
     resetForm,
-    getDefaultCostPerKm
+    getDefaultCostPerKm,
+    routeCoordinates,
+    routeDuration
   } = useFreightCalculator();
 
   const { saveFreightData } = useSharedData();
@@ -197,7 +200,24 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
         costSimulationResult={costSimulationResult}
       />
 
-      {showMap && origin && destination && (
+      {showMap && origin && destination && routeCoordinates && routeCoordinates.length > 0 && (
+        <div className="mt-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <span>🗺️</span>
+            Mapa da Rota: {origin} → {destination}
+          </h4>
+          <InteractiveMap 
+            origin={origin} 
+            destination={destination}
+            distance={typeof distance === 'number' ? distance : undefined}
+            duration={routeDuration}
+            routeCoordinates={routeCoordinates}
+            className="h-96 w-full rounded-lg"
+          />
+        </div>
+      )}
+
+      {showMap && origin && destination && (!routeCoordinates || routeCoordinates.length === 0) && (
         <div className="mt-6">
           <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
             <span>🗺️</span>
@@ -207,6 +227,7 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
             origin={origin} 
             destination={destination}
             distance={typeof distance === 'number' ? distance : undefined}
+            duration={routeDuration}
             className="h-48 w-full rounded-lg border border-gray-200"
           />
         </div>

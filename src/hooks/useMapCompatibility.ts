@@ -12,31 +12,23 @@ export const useMapCompatibility = (): MapCompatibility => {
   const [compatibility, setCompatibility] = useState<MapCompatibility>({
     isSupported: true,
     isMobile: false,
-    canLoadLeaflet: true,
-    shouldUseSimpleMap: false
+    canLoadLeaflet: false,
+    shouldUseSimpleMap: true
   });
 
   useEffect(() => {
-    const checkCompatibility = async () => {
+    const checkCompatibility = () => {
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      let canLoadLeaflet = true;
-      try {
-        const L = await import('leaflet');
-        canLoadLeaflet = !!(L && L.Map && typeof L.Map === 'function');
-      } catch (error) {
-        console.warn('Leaflet não disponível:', error);
-        canLoadLeaflet = false;
-      }
-
       const isSupported = !!(
         window.document &&
         window.document.createElement &&
         window.requestAnimationFrame
       );
 
-      // Apenas usar mapa simples se realmente não há suporte
-      const shouldUseSimpleMap = !isSupported || !navigator.onLine;
+      // Por enquanto, usar sempre mapa simples para garantir estabilidade
+      const shouldUseSimpleMap = true;
+      const canLoadLeaflet = false;
 
       setCompatibility({
         isSupported,
@@ -45,12 +37,11 @@ export const useMapCompatibility = (): MapCompatibility => {
         shouldUseSimpleMap
       });
 
-      console.log('Map compatibility check:', {
+      console.log('Map compatibility check (stable mode):', {
         isSupported,
         isMobile,
         canLoadLeaflet,
-        shouldUseSimpleMap,
-        userAgent: navigator.userAgent
+        shouldUseSimpleMap
       });
     };
 

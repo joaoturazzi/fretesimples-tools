@@ -75,18 +75,20 @@ const Settings = () => {
   const [hasChanges, setHasChanges] = useState(false);
 
   const updateSettings = (section: keyof UserSettings, key: string, value: any) => {
-    setSettings(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [key]: value,
-      },
-    }));
+    setSettings(prev => {
+      const sectionData = prev[section] as Record<string, any>;
+      return {
+        ...prev,
+        [section]: {
+          ...sectionData,
+          [key]: value,
+        },
+      };
+    });
     setHasChanges(true);
   };
 
   const saveSettings = () => {
-    // Aqui salvaria no localStorage ou backend
     localStorage.setItem('userSettings', JSON.stringify(settings));
     setHasChanges(false);
     
@@ -97,7 +99,6 @@ const Settings = () => {
   };
 
   const resetToDefaults = () => {
-    // Reset apenas configurações padrão, mantendo perfil
     setSettings(prev => ({
       ...prev,
       theme: 'light',

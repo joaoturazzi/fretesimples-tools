@@ -42,14 +42,6 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
 
   const { saveFreightData } = useSharedData();
 
-  console.log('FreightCalculator render:', { 
-    showMap, 
-    origin, 
-    destination, 
-    routeCoordinatesLength: routeCoordinates?.length,
-    isCalculatingRoute 
-  });
-
   const saveCalculation = () => {
     if (!result) return;
 

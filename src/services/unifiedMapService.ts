@@ -27,7 +27,6 @@ class UnifiedMapService {
     }
     
     if (this.requestCount >= env.API_RATE_LIMIT) {
-      console.warn('API rate limit exceeded');
       return false;
     }
     
@@ -96,14 +95,12 @@ class UnifiedMapService {
           }
         }
       } catch (corsError) {
-        console.log('CORS error, trying alternative method...');
         // Se CORS falhar, usa fallback imediatamente
         return null;
       }
       
       return null;
     } catch (error) {
-      console.error('HERE Maps geocoding failed:', error);
       return null;
     }
   }
@@ -133,7 +130,6 @@ class UnifiedMapService {
       }
       return null;
     } catch (error) {
-      console.error('Nominatim geocoding failed:', error);
       return null;
     }
   }
@@ -143,14 +139,11 @@ class UnifiedMapService {
       throw new Error('Address is required');
     }
 
-    console.log('Geocoding address:', address);
-
     // Tenta HERE Maps primeiro
     let result = await this.geocodeWithHere(address);
     
     // Se falhar, usa Nominatim
     if (!result) {
-      console.log('Using Nominatim fallback...');
       result = await this.geocodeWithNominatim(address);
     }
 
@@ -185,8 +178,6 @@ class UnifiedMapService {
     }
 
     try {
-      console.log('Calculating route from', origin, 'to', destination);
-      
       // Geocode both addresses
       const [originCoords, destCoords] = await Promise.all([
         this.geocodeAddress(origin),
@@ -200,9 +191,6 @@ class UnifiedMapService {
       if (!destCoords) {
         throw new Error(`Could not find location for: ${destination}`);
       }
-
-      console.log('Origin coords:', originCoords);
-      console.log('Destination coords:', destCoords);
 
       // Para evitar CORS da HERE Router API, usamos cálculo direto
       const distance = this.calculateHaversineDistance(
@@ -229,7 +217,6 @@ class UnifiedMapService {
         route: { geometry }
       };
     } catch (error) {
-      console.error('Route calculation error:', error);
       throw error instanceof Error ? error : new Error('Failed to calculate route');
     }
   }

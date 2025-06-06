@@ -45,11 +45,8 @@ export const useFreightCalculator = () => {
   };
 
   const resetFormWithCleanup = () => {
-    console.log('resetForm called');
-    
     cleanupRouteCalculation();
     resetForm();
-    
     notify.info('Formulário limpo', 'Todos os campos foram resetados');
   };
 

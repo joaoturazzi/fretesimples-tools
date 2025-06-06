@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { mapService } from '@/services/unifiedMapService';
 import { useNotify } from '@/components/ui/notification';
 import { calculateFreight, calculateCostSimulation, getDefaultCostPerKm, FreightCalculationResult, CostSimulationResult } from './freightCalculations';
 
 export const useFreightCalculator = () => {
   const notify = useNotify();
+  const abortControllerRef = useRef<AbortController | null>(null);
   
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
@@ -40,44 +42,75 @@ export const useFreightCalculator = () => {
     return isNaN(parsed) ? '' : parsed;
   };
 
+  // Auto-calculate distance with improved debouncing and cancellation
+  const autoCalculateDistance = useCallback(async (originAddr: string, destinationAddr: string) => {
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    if (!originAddr.trim() || !destinationAddr.trim() || originAddr === destinationAddr) {
+      setShowMap(false);
+      setRouteCoordinates([]);
+      setRouteDuration(undefined);
+      setIsCalculatingRoute(false);
+      return;
+    }
+
+    setIsCalculatingRoute(true);
+    setHasError(false);
+    
+    // Create new abort controller
+    abortControllerRef.current = new AbortController();
+    
+    try {
+      const route = await mapService.calculateRoute(originAddr, destinationAddr);
+      
+      // Check if request was aborted
+      if (abortControllerRef.current?.signal.aborted) {
+        return;
+      }
+      
+      if (route) {
+        setDistance(route.distance);
+        setRouteDuration(route.duration);
+        setRouteCoordinates(route.route.geometry);
+        setShowMap(true);
+        console.log('Auto-calculated distance:', route.distance, 'km');
+        
+        notify.success(
+          'Rota calculada!',
+          `Distância: ${route.distance} km • Tempo: ${Math.floor(route.duration / 60)}h ${route.duration % 60}m`
+        );
+      }
+    } catch (error) {
+      // Don't show error if request was aborted
+      if (abortControllerRef.current?.signal.aborted) {
+        return;
+      }
+      
+      console.error('Error auto-calculating distance:', error);
+      const message = error instanceof Error ? error.message : 'Erro ao calcular rota';
+      notify.warning('Rota não calculada', message);
+    } finally {
+      setIsCalculatingRoute(false);
+    }
+  }, [notify]);
+
   // Auto-calculate distance when both origin and destination are filled
   useEffect(() => {
-    const autoCalculateDistance = async () => {
-      if (origin.trim() && destination.trim() && origin !== destination) {
-        setIsCalculatingRoute(true);
-        setHasError(false);
-        
-        try {
-          const route = await mapService.calculateRoute(origin, destination);
-          if (route) {
-            setDistance(route.distance);
-            setRouteDuration(route.duration);
-            setRouteCoordinates(route.route.geometry);
-            setShowMap(true);
-            console.log('Auto-calculated distance:', route.distance, 'km');
-            
-            notify.success(
-              'Rota calculada!',
-              `Distância: ${route.distance} km • Tempo: ${Math.floor(route.duration / 60)}h ${route.duration % 60}m`
-            );
-          }
-        } catch (error) {
-          console.error('Error auto-calculating distance:', error);
-          const message = error instanceof Error ? error.message : 'Erro ao calcular rota';
-          notify.warning('Rota não calculada', message);
-        } finally {
-          setIsCalculatingRoute(false);
-        }
-      } else {
-        setShowMap(false);
-        setRouteCoordinates([]);
-        setRouteDuration(undefined);
+    const timeoutId = setTimeout(() => {
+      autoCalculateDistance(origin, destination);
+    }, 2000); // Increased debounce time
+
+    return () => {
+      clearTimeout(timeoutId);
+      // Cancel ongoing request when effect cleans up
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
     };
-
-    const timeoutId = setTimeout(autoCalculateDistance, 1500);
-    return () => clearTimeout(timeoutId);
-  }, [origin, destination, notify]);
+  }, [origin, destination, autoCalculateDistance]);
 
   const calculateDistanceFromRoute = async () => {
     if (!origin || !destination) {
@@ -88,30 +121,7 @@ export const useFreightCalculator = () => {
       return;
     }
 
-    setIsCalculatingRoute(true);
-    setHasError(false);
-
-    try {
-      const route = await mapService.calculateRoute(origin, destination);
-      if (route) {
-        setDistance(route.distance);
-        setRouteDuration(route.duration);
-        setRouteCoordinates(route.route.geometry);
-        setShowMap(true);
-        
-        notify.success(
-          'Rota calculada com sucesso!',
-          `${route.distance} km • ${Math.floor(route.duration / 60)}h ${route.duration % 60}m`
-        );
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erro ao calcular rota. Tente novamente.';
-      setErrorMessage(message);
-      setHasError(true);
-      notify.error('Erro ao calcular rota', message);
-    } finally {
-      setIsCalculatingRoute(false);
-    }
+    await autoCalculateDistance(origin, destination);
   };
 
   const validateInputs = () => {
@@ -199,6 +209,11 @@ export const useFreightCalculator = () => {
   };
 
   const resetForm = () => {
+    // Cancel any ongoing requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
     setOrigin('');
     setDestination('');
     setDistance('');
@@ -219,6 +234,7 @@ export const useFreightCalculator = () => {
     setShowCostSimulation(false);
     setRouteCoordinates([]);
     setRouteDuration(undefined);
+    setIsCalculatingRoute(false);
     
     notify.info('Formulário limpo', 'Todos os campos foram resetados');
   };

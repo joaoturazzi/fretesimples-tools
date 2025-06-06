@@ -13,7 +13,6 @@ interface GeocodeResponse {
   address: string;
 }
 
-const HERE_APP_ID = 'Bzof1AaU0q5fVzy4KMii';
 const HERE_API_KEY = 'JeglUu9l7gXwCMcH6x5-FaX0AkwABnmICqMupmCfIng';
 
 export class HereMapsService {
@@ -23,10 +22,13 @@ export class HereMapsService {
   static async geocodeAddress(address: string): Promise<GeocodeResponse | null> {
     try {
       const response = await fetch(
-        `${this.geocodeUrl}/geocode?q=${encodeURIComponent(address)}&apiKey=${HERE_API_KEY}`
+        `${this.geocodeUrl}/geocode?q=${encodeURIComponent(address)}&in=countryCode:BRA&apiKey=${HERE_API_KEY}`
       );
       
-      if (!response.ok) throw new Error('Geocoding failed');
+      if (!response.ok) {
+        console.error('Geocoding response not OK:', response.status);
+        return null;
+      }
       
       const data = await response.json();
       
@@ -48,29 +50,41 @@ export class HereMapsService {
 
   static async calculateRoute(origin: string, destination: string): Promise<RouteResponse | null> {
     try {
+      console.log('Calculating route from', origin, 'to', destination);
+      
       // First geocode the addresses
       const originCoords = await this.geocodeAddress(origin);
       const destCoords = await this.geocodeAddress(destination);
       
       if (!originCoords || !destCoords) {
-        throw new Error('Could not geocode addresses');
+        console.error('Could not geocode addresses');
+        return null;
       }
+
+      console.log('Origin coords:', originCoords);
+      console.log('Destination coords:', destCoords);
 
       const response = await fetch(
         `${this.baseUrl}/routes?transportMode=truck&origin=${originCoords.lat},${originCoords.lng}&destination=${destCoords.lat},${destCoords.lng}&return=summary,polyline&apiKey=${HERE_API_KEY}`
       );
       
-      if (!response.ok) throw new Error('Route calculation failed');
+      if (!response.ok) {
+        console.error('Route calculation response not OK:', response.status);
+        return null;
+      }
       
       const data = await response.json();
+      console.log('Route data:', data);
       
       if (data.routes && data.routes.length > 0) {
         const route = data.routes[0];
+        const summary = route.sections[0].summary;
+        
         return {
-          distance: Math.round(route.sections[0].summary.length / 1000), // Convert to km
-          duration: Math.round(route.sections[0].summary.duration / 60), // Convert to minutes
+          distance: Math.round(summary.length / 1000), // Convert to km
+          duration: Math.round(summary.duration / 60), // Convert to minutes
           route: {
-            geometry: this.decodePolyline(route.sections[0].polyline)
+            geometry: this.decodePolyline(route.sections[0].polyline || '')
           }
         };
       }

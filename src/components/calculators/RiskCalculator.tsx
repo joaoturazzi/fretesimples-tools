@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import Calculator from '@/components/Calculator';
-import { RefreshCw, AlertCircle, CheckCircle, Info } from 'lucide-react';
+import MapComponent from '@/components/MapComponent';
+import { RefreshCw, AlertCircle, CheckCircle, Info, MessageCircle, MapPin, Download } from 'lucide-react';
 
 interface RiskCalculatorProps {
   isActive: boolean;
@@ -10,16 +11,18 @@ interface RiskCalculatorProps {
 const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
   const [cargoType, setCargoType] = useState('alimentos');
   const [cargoValue, setCargoValue] = useState('');
-  const [distance, setDistance] = useState('');
-  const [region, setRegion] = useState('urbana');
+  const [origin, setOrigin] = useState('');
+  const [destination, setDestination] = useState('');
+  const [contractType, setContractType] = useState('frota_propria');
+  const [currentTools, setCurrentTools] = useState('');
   const [result, setResult] = useState<any>(null);
+  const [showMap, setShowMap] = useState(false);
   
   // Risk score calculation
   const calculateRisk = () => {
-    if (!cargoValue || !distance) return;
+    if (!cargoValue || !origin || !destination) return;
     
     const value = parseFloat(cargoValue);
-    const dist = parseFloat(distance);
     
     // Base risk factors
     const cargoRisk = {
@@ -33,10 +36,10 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
       'outros': 3
     };
     
-    const regionRisk = {
-      'urbana': 2,
-      'rodovia': 3,
-      'zona_risco': 5
+    const contractRisk = {
+      'frota_propria': 1,
+      'agregado': 3,
+      'terceiro': 4
     };
     
     // Calculate base risk score (0-100)
@@ -45,16 +48,19 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
     // Value factor (0-40 points)
     const valueFactor = Math.min(40, (value / 50000) * 40);
     
-    // Distance factor (0-15 points)
-    const distanceFactor = Math.min(15, (dist / 1000) * 15);
-    
     // Cargo type factor (0-25 points)
     const cargoFactor = cargoRisk[cargoType as keyof typeof cargoRisk] * 5;
     
-    // Region factor (0-20 points)
-    const regFactor = regionRisk[region as keyof typeof regionRisk] * 4;
+    // Contract type factor (0-20 points)
+    const contractFactor = contractRisk[contractType as keyof typeof contractRisk] * 5;
     
-    riskScore = valueFactor + distanceFactor + cargoFactor + regFactor;
+    // Tools factor (0-15 points) - reduced if tools are mentioned
+    let toolsFactor = 15;
+    if (currentTools.toLowerCase().includes('rastreamento')) toolsFactor -= 5;
+    if (currentTools.toLowerCase().includes('seguro')) toolsFactor -= 5;
+    if (currentTools.toLowerCase().includes('escolta')) toolsFactor -= 5;
+    
+    riskScore = valueFactor + cargoFactor + contractFactor + Math.max(0, toolsFactor);
     
     // Risk level
     let riskLevel = 'Baixo';
@@ -70,7 +76,9 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
         'Seguro de carga com cobertura completa',
         'Motorista experiente para este tipo de rota',
         'Evitar paradas em locais não seguros',
-        'Planejamento detalhado da rota com pontos de descanso seguros'
+        'Planejamento detalhado da rota com pontos de descanso seguros',
+        'Considerar isca ou lacre eletrônico',
+        'Evitar fretebras e plataformas não confiáveis'
       ];
     } else if (riskScore > 40) {
       riskLevel = 'Médio';
@@ -80,7 +88,9 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
         'Seguro de carga adequado',
         'Definir rotas principais e alternativas',
         'Evitar trafegar durante a noite em áreas de risco',
-        'Estabelecer check-ins periódicos'
+        'Estabelecer check-ins periódicos',
+        'Considerar isca para cargas de alto valor',
+        'Evitar fretebras se possível'
       ];
     } else {
       suggestions = [
@@ -97,6 +107,52 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
       riskColor,
       suggestions
     });
+    
+    setShowMap(true);
+  };
+
+  const exportRiskData = () => {
+    if (!result) return;
+    
+    const exportData = {
+      empresa: 'Nome da Empresa', // Seria preenchido pelo usuário
+      origem: origin,
+      destino: destination,
+      tipoCarga: cargoType,
+      valorCarga: cargoValue,
+      tipoContratacao: contractType,
+      ferramentasAtuais: currentTools,
+      nivelRisco: result.riskLevel,
+      pontuacaoRisco: result.riskScore,
+      recomendacoes: result.suggestions,
+      dataAnalise: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json'
+    });
+    
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analise-risco-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const openWhatsApp = () => {
+    const message = `Olá! Gostaria de uma análise completa de risco para transporte.%0A%0A` +
+      `Dados da operação:%0A` +
+      `• Origem: ${origin}%0A` +
+      `• Destino: ${destination}%0A` +
+      `• Tipo de carga: ${cargoType}%0A` +
+      `• Valor da carga: R$ ${cargoValue}%0A` +
+      `• Tipo de contratação: ${contractType}%0A` +
+      `• Nível de risco identificado: ${result?.riskLevel || 'Não calculado'}`;
+    
+    window.open(`https://wa.me/5511999999999?text=${message}`, '_blank');
   };
   
   return (
@@ -108,6 +164,36 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
+          <div className="mb-4">
+            <label htmlFor="origin" className="calculator-label flex items-center gap-1.5">
+              <MapPin size={16} className="text-frete-500" />
+              Origem
+            </label>
+            <input
+              id="origin"
+              type="text"
+              className="input-field"
+              value={origin}
+              onChange={(e) => setOrigin(e.target.value)}
+              placeholder="Ex: São Paulo, SP"
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label htmlFor="destination" className="calculator-label flex items-center gap-1.5">
+              <MapPin size={16} className="text-frete-500" />
+              Destino
+            </label>
+            <input
+              id="destination"
+              type="text"
+              className="input-field"
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              placeholder="Ex: Rio de Janeiro, RJ"
+            />
+          </div>
+
           <div className="mb-4">
             <label htmlFor="cargoType" className="block text-sm font-medium text-gray-700 mb-1">
               Tipo de carga
@@ -147,36 +233,47 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
         
         <div>
           <div className="mb-4">
-            <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-1">
-              Distância (km)
-            </label>
-            <input
-              type="number"
-              id="distance"
-              className="input-field"
-              value={distance}
-              onChange={(e) => setDistance(e.target.value)}
-              placeholder="Ex: 350"
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label htmlFor="region" className="block text-sm font-medium text-gray-700 mb-1">
-              Região da entrega
+            <label htmlFor="contractType" className="block text-sm font-medium text-gray-700 mb-1">
+              Tipo de contratação
             </label>
             <select
-              id="region"
+              id="contractType"
               className="select-field"
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
+              value={contractType}
+              onChange={(e) => setContractType(e.target.value)}
             >
-              <option value="urbana">Urbana</option>
-              <option value="rodovia">Rodovia</option>
-              <option value="zona_risco">Zona de risco</option>
+              <option value="frota_propria">Frota própria</option>
+              <option value="agregado">Agregado</option>
+              <option value="terceiro">Terceiro</option>
             </select>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="currentTools" className="block text-sm font-medium text-gray-700 mb-1">
+              Ferramentas que utiliza hoje
+            </label>
+            <textarea
+              id="currentTools"
+              className="input-field"
+              value={currentTools}
+              onChange={(e) => setCurrentTools(e.target.value)}
+              placeholder="Ex: rastreamento, seguro, escolta..."
+              rows={3}
+            />
           </div>
         </div>
       </div>
+
+      {showMap && origin && destination && (
+        <div className="mt-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Rota da operação</h4>
+          <MapComponent 
+            origin={origin} 
+            destination={destination}
+            className="h-48 w-full rounded-lg border border-gray-200"
+          />
+        </div>
+      )}
       
       <div className="flex flex-wrap gap-3 mt-6">
         <button 
@@ -185,14 +282,39 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
         >
           Calcular risco
         </button>
+
+        {result && (
+          <>
+            <button 
+              className="btn btn-success"
+              onClick={exportRiskData}
+            >
+              <Download size={18} className="mr-2" />
+              Exportar dados
+            </button>
+            
+            <button 
+              className="btn"
+              onClick={openWhatsApp}
+              style={{ backgroundColor: '#25D366', color: 'white' }}
+            >
+              <MessageCircle size={18} className="mr-2" />
+              Análise completa no WhatsApp
+            </button>
+          </>
+        )}
+        
         <button 
           className="btn btn-secondary"
           onClick={() => {
             setCargoType('alimentos');
             setCargoValue('');
-            setDistance('');
-            setRegion('urbana');
+            setOrigin('');
+            setDestination('');
+            setContractType('frota_propria');
+            setCurrentTools('');
             setResult(null);
+            setShowMap(false);
           }}
         >
           <RefreshCw size={18} className="mr-2" />
@@ -247,12 +369,30 @@ const RiskCalculator = ({ isActive }: RiskCalculatorProps) => {
             </div>
           </div>
           
-          <div className="bg-blue-50 text-blue-800 p-4 rounded-lg flex items-start gap-3">
+          <div className="bg-blue-50 text-blue-800 p-4 rounded-lg flex items-start gap-3 mb-4">
             <Info className="text-blue-500 mt-0.5" size={20} />
             <p className="text-sm">
               Esta avaliação de risco é uma estimativa baseada nas informações fornecidas. 
               Sempre consulte profissionais de segurança e sua seguradora para uma análise completa.
             </p>
+          </div>
+
+          <div className="bg-green-50 text-green-800 p-4 rounded-lg flex items-start gap-3">
+            <MessageCircle className="text-green-500 mt-0.5" size={20} />
+            <div>
+              <p className="font-medium mb-1">Quer uma análise de risco completa?</p>
+              <p className="text-sm mb-3">
+                Nossos especialistas podem fazer uma análise detalhada da sua operação e sugerir as melhores práticas de segurança.
+              </p>
+              <button 
+                className="btn btn-sm"
+                onClick={openWhatsApp}
+                style={{ backgroundColor: '#25D366', color: 'white' }}
+              >
+                <MessageCircle size={16} className="mr-2" />
+                Falar com especialista
+              </button>
+            </div>
           </div>
         </div>
       )}

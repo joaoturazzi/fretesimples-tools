@@ -15,6 +15,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   className = "h-64 w-full rounded-lg border border-gray-200" 
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -39,10 +40,21 @@ const MapComponent: React.FC<MapComponentProps> = ({
         const behavior = new window.H.mapview.behavior.Behavior({});
         const ui = new window.H.ui.UI.createDefault(map);
 
+        mapInstanceRef.current = map;
+
+        // Add markers and route if origin and destination are provided
+        if (origin && destination) {
+          // This will be implemented when we have geocoding working
+          console.log('Would show route from', origin, 'to', destination);
+        }
+
         return () => {
           try {
-            map.getViewPort().removeEventListener('resize', () => map.getViewPort().resize());
-            map.dispose();
+            if (mapInstanceRef.current) {
+              mapInstanceRef.current.getViewPort().removeEventListener('resize', () => mapInstanceRef.current.getViewPort().resize());
+              mapInstanceRef.current.dispose();
+              mapInstanceRef.current = null;
+            }
           } catch (error) {
             console.error('Error disposing map:', error);
           }

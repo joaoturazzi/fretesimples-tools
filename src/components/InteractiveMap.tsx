@@ -1,21 +1,10 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import React, { useEffect, useRef, useState, memo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { LatLngExpression } from 'leaflet';
 import L from 'leaflet';
-import { MapPin, AlertCircle } from 'lucide-react';
-import ErrorBoundary from './ErrorBoundary';
-import 'leaflet/dist/leaflet.css';
-
-// Fix default markers for Leaflet with error handling
-try {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  });
-} catch (error) {
-  console.warn('Leaflet icon configuration failed:', error);
-}
+import { LoadingState, LoadingOverlay } from '@/components/ui/loading';
+import { HereMapsService } from '@/services/hereMapsService';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 interface InteractiveMapProps {
   origin: string;
@@ -24,124 +13,74 @@ interface InteractiveMapProps {
   duration?: number;
   routeCoordinates?: Array<{ lat: number; lng: number }>;
   className?: string;
-  onError?: (error: Error) => void;
+  height?: number;
 }
 
-const LoadingState = ({ className }: { className: string }) => (
-  <div className={className}>
-    <div className="w-full h-full rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
-        <p className="text-gray-600 text-sm">Carregando mapa...</p>
-      </div>
-    </div>
-  </div>
-);
+interface GeocodeResult {
+  lat: number;
+  lng: number;
+}
 
-const ErrorState = ({ 
-  className, 
-  error, 
-  onRetry 
-}: { 
-  className: string; 
-  error: string; 
-  onRetry: () => void;
-}) => (
-  <div className={className}>
-    <div className="w-full h-full rounded-lg overflow-hidden border border-red-200 flex items-center justify-center bg-red-50">
-      <div className="text-center p-4">
-        <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-        <p className="text-red-600 text-sm font-medium mb-2">Erro ao carregar mapa</p>
-        <p className="text-red-500 text-xs mb-4">{error}</p>
-        <button
-          onClick={onRetry}
-          className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-        >
-          Tentar novamente
-        </button>
-      </div>
-    </div>
-  </div>
-);
+const greenIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
 
-const MapContent: React.FC<{
-  routeCoordinates: Array<{ lat: number; lng: number }>;
-  origin: string;
-  destination: string;
-  distance?: number;
-  duration?: number;
-}> = ({ routeCoordinates, origin, destination, distance, duration }) => {
-  const mapRef = useRef<L.Map | null>(null);
+const redIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
 
-  const originCoord = routeCoordinates[0];
-  const destinationCoord = routeCoordinates[routeCoordinates.length - 1];
-  const polylinePositions: [number, number][] = routeCoordinates.map(coord => [coord.lat, coord.lng]);
+const RouteLayer = memo(({ coordinates }: { coordinates: Array<{ lat: number; lng: number }> }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (coordinates.length > 0) {
+      const bounds = L.latLngBounds(coordinates.map(coord => [coord.lat, coord.lng]));
+      map.fitBounds(bounds, { padding: [20, 20] });
+    }
+  }, [coordinates, map]);
 
-  // Calculate bounds with proper padding
-  const lats = routeCoordinates.map(coord => coord.lat);
-  const lngs = routeCoordinates.map(coord => coord.lng);
-  const padding = 0.01;
-  const bounds: [[number, number], [number, number]] = [
-    [Math.min(...lats) - padding, Math.min(...lngs) - padding],
-    [Math.max(...lats) + padding, Math.max(...lngs) + padding]
-  ];
+  return coordinates.length > 0 ? (
+    <Polyline 
+      positions={coordinates.map(coord => [coord.lat, coord.lng] as LatLngExpression)}
+      color="#ef4444"
+      weight={4}
+      opacity={0.8}
+    />
+  ) : null;
+});
 
-  return (
-    <MapContainer
-      bounds={bounds}
-      className="w-full h-full"
-      boundsOptions={{ padding: [20, 20] }}
-      ref={mapRef}
-      whenReady={(mapInstance) => {
-        mapRef.current = mapInstance;
-        console.log('Map instance ready successfully');
-      }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        errorTileUrl="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjEyOCIgeT0iMTI4IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuMzVlbSI+Tile Error</text></svg>"
-      />
-      
-      {originCoord && (
-        <Marker position={[originCoord.lat, originCoord.lng]}>
-          <Popup>
-            <div className="text-sm">
-              <strong>Origem:</strong><br />
-              {origin}
-            </div>
-          </Popup>
-        </Marker>
-      )}
-      
-      {destinationCoord && (
-        <Marker position={[destinationCoord.lat, destinationCoord.lng]}>
-          <Popup>
-            <div className="text-sm">
-              <strong>Destino:</strong><br />
-              {destination}
-              {distance && (
-                <div className="mt-1 text-xs text-gray-600">
-                  Distância: {distance} km
-                  {duration && ` • ${Math.floor(duration / 60)}h ${duration % 60}m`}
-                </div>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-      )}
-      
-      {polylinePositions.length > 1 && (
-        <Polyline
-          positions={polylinePositions}
-          color="#ff6b35"
-          weight={4}
-          opacity={0.8}
-        />
-      )}
-    </MapContainer>
-  );
-};
+RouteLayer.displayName = 'RouteLayer';
+
+const MapInitializer = memo(() => {
+  const map = useMap();
+  
+  useEffect(() => {
+    // Fix the callback signature - no parameters needed
+    const handleMapReady = () => {
+      map.invalidateSize();
+    };
+
+    map.whenReady(handleMapReady);
+    
+    return () => {
+      // Cleanup if needed
+    };
+  }, [map]);
+
+  return null;
+});
+
+MapInitializer.displayName = 'MapInitializer';
 
 const InteractiveMap: React.FC<InteractiveMapProps> = ({
   origin,
@@ -149,110 +88,117 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
   distance,
   duration,
   routeCoordinates = [],
-  className = "h-96 w-full rounded-lg",
-  onError
+  className = '',
+  height = 400
 }) => {
-  const [mapState, setMapState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [originCoords, setOriginCoords] = useState<GeocodeResult | null>(null);
+  const [destCoords, setDestCoords] = useState<GeocodeResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
+  const mapRef = useRef<L.Map | null>(null);
+  const { handleError } = useErrorHandler();
 
-  const handleError = useCallback((err: Error) => {
-    console.error('InteractiveMap error:', err);
-    setError(err.message);
-    setMapState('error');
-    onError?.(err);
-  }, [onError]);
-
-  const handleRetry = useCallback(() => {
-    setMapState('loading');
-    setError(null);
-    setRetryCount(prev => prev + 1);
-    
-    // Add a small delay before retrying
-    setTimeout(() => {
-      if (routeCoordinates && routeCoordinates.length > 0) {
-        setMapState('ready');
-      } else {
-        setError('Coordenadas da rota não disponíveis');
-        setMapState('error');
-      }
-    }, 100);
-  }, [routeCoordinates]);
+  const mapCenter: LatLngExpression = [0, 0];
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!routeCoordinates || routeCoordinates.length === 0) {
-        return; // Keep loading state
+    const geocode = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const [originData, destinationData] = await Promise.all([
+          HereMapsService.geocodeAddress(origin),
+          HereMapsService.geocodeAddress(destination)
+        ]);
+        
+        if (originData) {
+          setOriginCoords({ lat: originData.lat, lng: originData.lng });
+        } else {
+          setError(`Não foi possível encontrar as coordenadas para: ${origin}`);
+        }
+        
+        if (destinationData) {
+          setDestCoords({ lat: destinationData.lat, lng: destinationData.lng });
+        } else {
+          setError(`Não foi possível encontrar as coordenadas para: ${destination}`);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Erro ao geolocalizar endereços';
+        setError(message);
+        handleError(err, 'Geocoding');
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      // Validate coordinates
-      const validCoords = routeCoordinates.every(coord => 
-        typeof coord.lat === 'number' && 
-        typeof coord.lng === 'number' &&
-        !isNaN(coord.lat) && 
-        !isNaN(coord.lng) &&
-        coord.lat >= -90 && coord.lat <= 90 &&
-        coord.lng >= -180 && coord.lng <= 180
-      );
-
-      if (!validCoords) {
-        setError('Coordenadas inválidas fornecidas');
-        setMapState('error');
-        return;
-      }
-
-      setMapState('ready');
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, [routeCoordinates, retryCount]);
-
-  if (mapState === 'loading') {
-    return <LoadingState className={className} />;
-  }
-
-  if (mapState === 'error') {
-    return (
-      <ErrorState 
-        className={className} 
-        error={error || 'Erro desconhecido'} 
-        onRetry={handleRetry}
-      />
-    );
-  }
+    if (origin && destination) {
+      geocode();
+    }
+  }, [origin, destination, handleError]);
 
   return (
-    <div className={className}>
-      <div className="w-full h-full rounded-lg overflow-hidden border border-gray-200">
-        <ErrorBoundary
-          onError={handleError}
-          fallback={
-            <ErrorState 
-              className="w-full h-full" 
-              error="Erro interno do componente de mapa" 
-              onRetry={handleRetry}
+    <LoadingOverlay isVisible={isLoading} message="Carregando mapa...">
+      <div className={`relative rounded-lg overflow-hidden border border-gray-200 ${className}`} style={{ height }}>
+        {error ? (
+          <div className="flex items-center justify-center h-full bg-gray-50 text-gray-600">
+            <div className="text-center">
+              <p className="mb-2">⚠️ Erro ao carregar mapa</p>
+              <p className="text-sm">{error}</p>
+            </div>
+          </div>
+        ) : (
+          <MapContainer
+            center={mapCenter}
+            zoom={6}
+            style={{ height: '100%', width: '100%' }}
+            scrollWheelZoom={true}
+            className="z-0"
+          >
+            <MapInitializer />
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-          }
-        >
-          <MapContent
-            routeCoordinates={routeCoordinates}
-            origin={origin}
-            destination={destination}
-            distance={distance}
-            duration={duration}
-          />
-        </ErrorBoundary>
+            
+            {originCoords && (
+              <Marker position={[originCoords.lat, originCoords.lng]} icon={greenIcon}>
+                <Popup>
+                  <strong>Origem:</strong><br />
+                  {origin}
+                </Popup>
+              </Marker>
+            )}
+            
+            {destCoords && (
+              <Marker position={[destCoords.lat, destCoords.lng]} icon={redIcon}>
+                <Popup>
+                  <strong>Destino:</strong><br />
+                  {destination}
+                </Popup>
+              </Marker>
+            )}
+            
+            <RouteLayer coordinates={routeCoordinates} />
+          </MapContainer>
+        )}
+        
+        {(distance || duration) && (
+          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border">
+            {distance && (
+              <div className="text-sm font-medium text-gray-700">
+                📏 Distância: {distance} km
+              </div>
+            )}
+            {duration && (
+              <div className="text-sm text-gray-600">
+                ⏱️ Tempo: {Math.floor(duration / 60)}h {duration % 60}min
+              </div>
+            )}
+          </div>
+        )}
       </div>
-      
-      {distance && (
-        <div className="mt-2 text-center text-sm text-gray-600 flex items-center justify-center gap-2">
-          <MapPin size={14} className="text-orange-500" />
-          Rota calculada: {distance} km
-          {duration && ` • Tempo estimado: ${Math.floor(duration / 60)}h ${duration % 60}m`}
-        </div>
-      )}
-    </div>
+    </LoadingOverlay>
   );
 };
 
-export default InteractiveMap;
+export default memo(InteractiveMap);

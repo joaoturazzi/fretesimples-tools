@@ -28,6 +28,14 @@ export const useFreightCalculator = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [showMap, setShowMap] = useState(false);
 
+  // Helper function to convert input values
+  const convertValue = (value: string | number): number | '' => {
+    if (typeof value === 'number') return value;
+    if (value === '' || value === null || value === undefined) return '';
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? '' : parsed;
+  };
+
   // Auto-calculate distance when both origin and destination are filled
   useEffect(() => {
     const autoCalculateDistance = async () => {
@@ -183,16 +191,16 @@ export const useFreightCalculator = () => {
     // State
     origin, setOrigin,
     destination, setDestination,
-    distance, setDistance: (value: number | string) => setDistance(value),
-    weight, setWeight: (value: number | string) => setWeight(value),
+    distance, setDistance: (value: number | string) => setDistance(convertValue(value)),
+    weight, setWeight: (value: number | string) => setWeight(convertValue(value)),
     vehicleType, setVehicleType,
-    costPerKm, setCostPerKm: (value: number | string) => setCostPerKm(value),
-    fuelPrice, setFuelPrice: (value: number | string) => setFuelPrice(value),
-    consumption, setConsumption: (value: number | string) => setConsumption(value),
-    tollsCost, setTollsCost: (value: number | string) => setTollsCost(value),
-    monthlyMaintenance, setMonthlyMaintenance: (value: number | string) => setMonthlyMaintenance(value),
-    driverSalary, setDriverSalary: (value: number | string) => setDriverSalary(value),
-    monthlyDistance, setMonthlyDistance: (value: number | string) => setMonthlyDistance(value),
+    costPerKm, setCostPerKm: (value: number | string) => setCostPerKm(convertValue(value)),
+    fuelPrice, setFuelPrice: (value: number | string) => setFuelPrice(convertValue(value)),
+    consumption, setConsumption: (value: number | string) => setConsumption(convertValue(value)),
+    tollsCost, setTollsCost: (value: number | string) => setTollsCost(convertValue(value)),
+    monthlyMaintenance, setMonthlyMaintenance: (value: number | string) => setMonthlyMaintenance(convertValue(value)),
+    driverSalary, setDriverSalary: (value: number | string) => setDriverSalary(convertValue(value)),
+    monthlyDistance, setMonthlyDistance: (value: number | string) => setMonthlyDistance(convertValue(value)),
     showCostSimulation, setShowCostSimulation,
     result,
     costSimulationResult,

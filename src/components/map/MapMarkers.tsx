@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Marker, Popup, useMap } from 'react-leaflet';
-import { greenIcon, redIcon } from './MapIcons';
+import { createSafeIcons } from './LocalMapIcons';
 
 interface GeocodeResult {
   lat: number;
@@ -23,7 +23,7 @@ const MapMarkers: React.FC<MapMarkersProps> = ({
 }) => {
   const map = useMap();
   
-  // Verificação mais rigorosa se o mapa está disponível
+  // Verificar se o mapa está disponível
   if (!map) {
     console.warn('MapMarkers: Map não disponível');
     return null;
@@ -49,6 +49,16 @@ const MapMarkers: React.FC<MapMarkersProps> = ({
   const validOrigin = isValidCoord(originCoords);
   const validDest = isValidCoord(destCoords);
   
+  // Criar ícones seguros
+  const icons = React.useMemo(() => {
+    try {
+      return createSafeIcons();
+    } catch (error) {
+      console.warn('MapMarkers: Erro ao criar ícones, usando padrão');
+      return { greenIcon: undefined, redIcon: undefined };
+    }
+  }, []);
+  
   // Ajustar zoom para mostrar ambos os marcadores se ambos forem válidos
   React.useEffect(() => {
     if (validOrigin && validDest && map && typeof map.fitBounds === 'function') {
@@ -58,9 +68,19 @@ const MapMarkers: React.FC<MapMarkersProps> = ({
           [destCoords.lat, destCoords.lng]
         ] as [[number, number], [number, number]];
         
-        // Adicionar padding para melhor visualização
-        map.fitBounds(bounds, { padding: [20, 20] });
-        console.log('MapMarkers: Bounds ajustados com sucesso');
+        // Timeout para aguardar renderização
+        const timeoutId = setTimeout(() => {
+          try {
+            if (map && typeof map.fitBounds === 'function') {
+              map.fitBounds(bounds, { padding: [20, 20] });
+              console.log('MapMarkers: Bounds ajustados com sucesso');
+            }
+          } catch (error) {
+            console.warn('MapMarkers: Erro ao ajustar bounds (timeout):', error);
+          }
+        }, 100);
+        
+        return () => clearTimeout(timeoutId);
       } catch (error) {
         console.warn('MapMarkers: Erro ao ajustar bounds:', error);
       }
@@ -77,7 +97,7 @@ const MapMarkers: React.FC<MapMarkersProps> = ({
       {validOrigin && (
         <Marker 
           position={[originCoords.lat, originCoords.lng]} 
-          icon={greenIcon}
+          icon={icons.greenIcon}
         >
           <Popup>
             <strong>Origem:</strong><br />
@@ -89,7 +109,7 @@ const MapMarkers: React.FC<MapMarkersProps> = ({
       {validDest && (
         <Marker 
           position={[destCoords.lat, destCoords.lng]} 
-          icon={redIcon}
+          icon={icons.redIcon}
         >
           <Popup>
             <strong>Destino:</strong><br />

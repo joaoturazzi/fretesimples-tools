@@ -1,13 +1,8 @@
 
-import React, { memo } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
-import { LatLngExpression } from 'leaflet';
+import React, { memo, Suspense } from 'react';
 import { LoadingState } from '@/components/ui/loading';
-import MapInitializer from './map/MapInitializer';
-import MapMarkers from './map/MapMarkers';
-import RouteLayer from './map/RouteLayer';
-import MapInfoOverlay from './map/MapInfoOverlay';
-import MapErrorBoundary from './map/MapErrorBoundary';
+import { useMapCompatibility } from '@/hooks/useMapCompatibility';
+import SimpleMapFallback from './map/SimpleMapFallback';
 import { useMapGeocoding } from './map/useMapGeocoding';
 
 interface InteractiveMapProps {
@@ -20,6 +15,9 @@ interface InteractiveMapProps {
   height?: number;
 }
 
+// Lazy load do mapa completo apenas quando suportado
+const LazyLeafletMap = React.lazy(() => import('./map/LeafletMapContainer'));
+
 const InteractiveMap: React.FC<InteractiveMapProps> = memo(({
   origin,
   destination,
@@ -29,6 +27,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = memo(({
   className = '',
   height = 400
 }) => {
+  const compatibility = useMapCompatibility();
   const {
     originCoords,
     destCoords,
@@ -37,17 +36,15 @@ const InteractiveMap: React.FC<InteractiveMapProps> = memo(({
     mapReady
   } = useMapGeocoding(origin, destination);
 
-  const mapCenter: LatLngExpression = [-14.235, -51.9253]; // Centro do Brasil
-
   console.log('InteractiveMap render:', { 
     origin, 
     destination, 
-    routeCoordinatesLength: Array.isArray(routeCoordinates) ? routeCoordinates.length : 0,
+    compatibility,
     mapReady,
     isLoading 
   });
 
-  // Validação rigorosa de props
+  // Validação básica de props
   if (!origin?.trim() || !destination?.trim()) {
     return (
       <div className={`flex items-center justify-center h-full bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
@@ -59,18 +56,21 @@ const InteractiveMap: React.FC<InteractiveMapProps> = memo(({
     );
   }
 
-  if (error) {
+  // Se não há compatibilidade ou erro de geocoding, usar fallback
+  if (compatibility.shouldUseSimpleMap || error) {
     return (
-      <div className={`flex items-center justify-center h-full bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
-        <div className="text-center">
-          <p className="mb-2">⚠️ Erro ao carregar mapa</p>
-          <p className="text-sm">{error}</p>
-        </div>
-      </div>
+      <SimpleMapFallback
+        origin={origin}
+        destination={destination}
+        distance={distance}
+        duration={duration}
+        className={className}
+      />
     );
   }
 
-  if (isLoading || !mapReady) {
+  // Loading state
+  if (isLoading || !mapReady || !compatibility.canLoadLeaflet) {
     return (
       <div className={`flex items-center justify-center h-full bg-gray-50 rounded-lg border ${className}`} style={{ height }}>
         <LoadingState message="Carregando mapa..." icon="map" />
@@ -78,71 +78,52 @@ const InteractiveMap: React.FC<InteractiveMapProps> = memo(({
     );
   }
 
-  // Validação de coordenadas antes de renderizar o mapa
+  // Validação de coordenadas
   if (!originCoords || !destCoords || 
       typeof originCoords.lat !== 'number' || typeof originCoords.lng !== 'number' ||
       typeof destCoords.lat !== 'number' || typeof destCoords.lng !== 'number') {
     return (
-      <div className={`flex items-center justify-center h-full bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
-        <div className="text-center">
-          <p className="mb-2">⚠️ Coordenadas inválidas</p>
-          <p className="text-sm">Erro na geolocalização dos endereços</p>
-        </div>
-      </div>
+      <SimpleMapFallback
+        origin={origin}
+        destination={destination}
+        distance={distance}
+        duration={duration}
+        className={className}
+      />
     );
   }
 
-  console.log('InteractiveMap: Rendering MapContainer with valid coordinates');
-  
+  // Renderizar mapa completo com lazy loading e Suspense
   return (
     <div className={`relative rounded-lg overflow-hidden border border-gray-200 ${className}`} style={{ height }}>
-      <MapErrorBoundary>
-        <MapContainer
-          center={mapCenter}
-          zoom={6}
-          style={{ height: '100%', width: '100%' }}
-          scrollWheelZoom={true}
-          className="z-0"
-        >
-          <MapInitializer />
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          
-          <MapMarkers
-            originCoords={originCoords}
-            destCoords={destCoords}
-            origin={origin}
-            destination={destination}
-          />
-          
-          {Array.isArray(routeCoordinates) && routeCoordinates.length > 0 && (
-            <RouteLayer coordinates={routeCoordinates} />
-          )}
-        </MapContainer>
-      </MapErrorBoundary>
-      
-      <MapInfoOverlay distance={distance} duration={duration} />
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-full bg-gray-50">
+          <LoadingState message="Carregando componentes do mapa..." icon="map" />
+        </div>
+      }>
+        <LazyLeafletMap
+          originCoords={originCoords}
+          destCoords={destCoords}
+          origin={origin}
+          destination={destination}
+          routeCoordinates={routeCoordinates}
+          distance={distance}
+          duration={duration}
+        />
+      </Suspense>
     </div>
   );
 }, (prevProps, nextProps) => {
-  // Comparação mais robusta para evitar re-renders desnecessários
+  // Comparação otimizada para evitar re-renders desnecessários
   const routeCoordsEqual = (() => {
     const prev = prevProps.routeCoordinates;
     const next = nextProps.routeCoordinates;
     
-    // Se ambos são undefined/null, são iguais
     if (!prev && !next) return true;
-    
-    // Se um é undefined e outro não, são diferentes
     if (!prev || !next) return false;
-    
-    // Se ambos são arrays, comparar tamanho
     if (Array.isArray(prev) && Array.isArray(next)) {
       return prev.length === next.length;
     }
-    
     return prev === next;
   })();
   

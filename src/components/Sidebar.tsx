@@ -17,7 +17,7 @@ import {
   Linkedin,
   FileText
 } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { isMobileDevice } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -26,14 +26,34 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
-  const isMobile = useIsMobile();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
-    if (!isMobile) {
-      setIsSidebarOpen(true);
-    }
-  }, [isMobile]);
+    const updateMobileState = () => {
+      const mobile = isMobileDevice();
+      setIsMobile(mobile);
+      if (!isInitialized) {
+        setIsSidebarOpen(!mobile);
+        setIsInitialized(true);
+      }
+    };
+
+    updateMobileState();
+
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(updateMobileState, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isInitialized]);
   
   useEffect(() => {
     const handleNavigateSection = (e: CustomEvent) => {
@@ -73,6 +93,11 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
     { id: 'gerador-contratos', label: 'Gerador de Contratos', icon: <FileText size={18} /> },
     { id: 'sobre', label: 'Sobre', icon: <Info size={18} /> },
   ];
+
+  // Não renderizar até estar inicializado
+  if (!isInitialized) {
+    return null;
+  }
   
   return (
     <>

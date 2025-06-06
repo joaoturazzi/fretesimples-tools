@@ -1,8 +1,14 @@
 import * as React from "react"
+import { cn } from "@/lib/utils"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
+
+export const SIDEBAR_WIDTH = "16rem"
+export const SIDEBAR_WIDTH_MOBILE = "18rem"
+export const SIDEBAR_WIDTH_ICON = "3rem"
 
 type SidebarContext = {
   state: "expanded" | "collapsed"
@@ -24,6 +30,12 @@ export function useSidebar() {
 
   return context
 }
+
+// Função para detectar mobile sem hooks - mais estável
+const detectMobile = (breakpoint: number = 768): boolean => {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth < breakpoint;
+};
 
 interface SidebarProviderProps {
   defaultOpen?: boolean
@@ -50,8 +62,33 @@ export const SidebarProvider = React.forwardRef<
     },
     ref
   ) => {
-    const isMobile = useMobileSafely()
+    // Gerenciar estado mobile de forma mais estável
+    const [isMobile, setIsMobile] = React.useState(false);
+    const [isInitialized, setIsInitialized] = React.useState(false);
     const [openMobile, setOpenMobile] = React.useState(false)
+
+    // Inicializar detecção mobile
+    React.useEffect(() => {
+      const updateMobile = () => {
+        const mobile = detectMobile();
+        setIsMobile(mobile);
+        if (!isInitialized) setIsInitialized(true);
+      };
+
+      updateMobile();
+
+      let timeoutId: ReturnType<typeof setTimeout>;
+      const handleResize = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(updateMobile, 100);
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        if (timeoutId) clearTimeout(timeoutId);
+      };
+    }, [isInitialized]);
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
@@ -67,7 +104,9 @@ export const SidebarProvider = React.forwardRef<
         }
 
         // This sets the cookie to keep the sidebar state.
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        if (typeof document !== 'undefined') {
+          document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        }
       },
       [setOpenProp, open]
     )
@@ -104,13 +143,36 @@ export const SidebarProvider = React.forwardRef<
         state,
         open,
         setOpen,
-        isMobile,
+        isMobile: isInitialized ? isMobile : false,
         openMobile,
         setOpenMobile,
         toggleSidebar,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, isInitialized, openMobile, setOpenMobile, toggleSidebar]
     )
+
+    // Só renderizar quando inicializado para prevenir hydration mismatch
+    if (!isInitialized) {
+      return (
+        <div
+          style={
+            {
+              "--sidebar-width": SIDEBAR_WIDTH,
+              "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+              ...style,
+            } as React.CSSProperties
+          }
+          className={cn(
+            "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
+            className
+          )}
+          ref={ref}
+          {...props}
+        >
+          {children}
+        </div>
+      );
+    }
 
     return (
       <SidebarContext.Provider value={contextValue}>
@@ -138,22 +200,3 @@ export const SidebarProvider = React.forwardRef<
   }
 )
 SidebarProvider.displayName = "SidebarProvider"
-
-// Helper functions and constants
-function useMobileSafely() {
-  try {
-    // Try to use the hook
-    return useIsMobile()
-  } catch (error) {
-    // Return a fallback value if the hook fails
-    return false
-  }
-}
-
-import { useIsMobile } from "@/hooks/use-mobile"
-import { cn } from "@/lib/utils"
-import { TooltipProvider } from "@/components/ui/tooltip"
-
-export const SIDEBAR_WIDTH = "16rem"
-export const SIDEBAR_WIDTH_MOBILE = "18rem"
-export const SIDEBAR_WIDTH_ICON = "3rem"

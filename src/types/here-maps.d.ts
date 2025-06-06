@@ -3,25 +3,19 @@ declare global {
   interface Window {
     H: {
       service: {
-        Platform: {
-          new (options: { apikey: string }): HerePlatform;
-        };
+        Platform: new (options: { apikey: string }) => HerePlatform;
       };
-      Map: {
-        new (
-          container: HTMLElement,
-          mapType: any,
-          options: {
-            zoom: number;
-            center: { lat: number; lng: number };
-          }
-        ): HereMap;
-      };
+      Map: new (
+        container: HTMLElement,
+        mapType: any,
+        options: {
+          zoom: number;
+          center: { lat: number; lng: number };
+        }
+      ) => HereMap;
       mapview: {
         behavior: {
-          Behavior: {
-            new (options: any): any;
-          };
+          Behavior: new (options: any) => any;
         };
       };
       ui: {
@@ -30,17 +24,11 @@ declare global {
         };
       };
       map: {
-        Marker: {
-          new (position: { lat: number; lng: number }, options?: any): any;
-        };
-        Polyline: {
-          new (lineString: any, options?: any): any;
-        };
+        Marker: new (position: { lat: number; lng: number }, options?: any) => any;
+        Polyline: new (lineString: any, options?: any) => any;
       };
       geo: {
-        LineString: {
-          new (): HereLineString;
-        };
+        LineString: new () => HereLineString;
       };
     };
   }

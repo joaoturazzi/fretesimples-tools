@@ -7,6 +7,7 @@ import MapInitializer from './map/MapInitializer';
 import MapMarkers from './map/MapMarkers';
 import RouteLayer from './map/RouteLayer';
 import MapInfoOverlay from './map/MapInfoOverlay';
+import MapErrorBoundary from './map/MapErrorBoundary';
 import { useMapGeocoding } from './map/useMapGeocoding';
 
 interface InteractiveMapProps {
@@ -41,12 +42,13 @@ const InteractiveMap: React.FC<InteractiveMapProps> = memo(({
   console.log('InteractiveMap render:', { 
     origin, 
     destination, 
-    routeCoordinatesLength: routeCoordinates?.length,
+    routeCoordinatesLength: Array.isArray(routeCoordinates) ? routeCoordinates.length : 0,
     mapReady,
     isLoading 
   });
 
-  if (!origin || !destination) {
+  // Validação rigorosa de props
+  if (!origin?.trim() || !destination?.trim()) {
     return (
       <div className={`flex items-center justify-center h-full bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
         <div className="text-center">
@@ -76,10 +78,25 @@ const InteractiveMap: React.FC<InteractiveMapProps> = memo(({
     );
   }
 
-  try {
-    console.log('InteractiveMap: Rendering MapContainer');
+  // Validação de coordenadas antes de renderizar o mapa
+  if (!originCoords || !destCoords || 
+      typeof originCoords.lat !== 'number' || typeof originCoords.lng !== 'number' ||
+      typeof destCoords.lat !== 'number' || typeof destCoords.lng !== 'number') {
     return (
-      <div className={`relative rounded-lg overflow-hidden border border-gray-200 ${className}`} style={{ height }}>
+      <div className={`flex items-center justify-center h-full bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
+        <div className="text-center">
+          <p className="mb-2">⚠️ Coordenadas inválidas</p>
+          <p className="text-sm">Erro na geolocalização dos endereços</p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('InteractiveMap: Rendering MapContainer with valid coordinates');
+  
+  return (
+    <div className={`relative rounded-lg overflow-hidden border border-gray-200 ${className}`} style={{ height }}>
+      <MapErrorBoundary>
         <MapContainer
           center={mapCenter}
           zoom={6}
@@ -100,33 +117,29 @@ const InteractiveMap: React.FC<InteractiveMapProps> = memo(({
             destination={destination}
           />
           
-          {routeCoordinates && routeCoordinates.length > 0 && (
+          {Array.isArray(routeCoordinates) && routeCoordinates.length > 0 && (
             <RouteLayer coordinates={routeCoordinates} />
           )}
         </MapContainer>
-        
-        <MapInfoOverlay distance={distance} duration={duration} />
-      </div>
-    );
-  } catch (error) {
-    console.error('InteractiveMap: Error rendering map:', error);
-    return (
-      <div className={`flex items-center justify-center h-full bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
-        <div className="text-center">
-          <p className="mb-2">⚠️ Erro ao renderizar mapa</p>
-          <p className="text-sm">Tente recarregar a página</p>
-        </div>
-      </div>
-    );
-  }
+      </MapErrorBoundary>
+      
+      <MapInfoOverlay distance={distance} duration={duration} />
+    </div>
+  );
 }, (prevProps, nextProps) => {
-  // Custom comparison to prevent unnecessary re-renders
+  // Comparação profunda mais segura para evitar re-renders desnecessários
+  const routeCoordsEqual = (
+    Array.isArray(prevProps.routeCoordinates) && Array.isArray(nextProps.routeCoordinates)
+      ? prevProps.routeCoordinates.length === nextProps.routeCoordinates.length
+      : prevProps.routeCoordinates === nextProps.routeCoordinates
+  );
+  
   return (
     prevProps.origin === nextProps.origin &&
     prevProps.destination === nextProps.destination &&
     prevProps.distance === nextProps.distance &&
     prevProps.duration === nextProps.duration &&
-    prevProps.routeCoordinates?.length === nextProps.routeCoordinates?.length &&
+    routeCoordsEqual &&
     prevProps.className === nextProps.className &&
     prevProps.height === nextProps.height
   );

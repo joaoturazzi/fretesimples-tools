@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Marker, Popup } from 'react-leaflet';
+import { Marker, Popup, useMap } from 'react-leaflet';
 import { greenIcon, redIcon } from './MapIcons';
 
 interface GeocodeResult {
@@ -21,22 +21,67 @@ const MapMarkers: React.FC<MapMarkersProps> = ({
   origin,
   destination
 }) => {
+  const map = useMap();
+  
+  // Verificar se o mapa está disponível e válido
+  if (!map || typeof map.fitBounds !== 'function') {
+    console.warn('MapMarkers: Map not ready or missing fitBounds method');
+    return null;
+  }
+  
+  // Validar coordenadas antes de renderizar
+  const isValidCoord = (coord: GeocodeResult | null): coord is GeocodeResult => {
+    return coord !== null && 
+           typeof coord.lat === 'number' && 
+           typeof coord.lng === 'number' &&
+           !isNaN(coord.lat) && 
+           !isNaN(coord.lng) &&
+           coord.lat >= -90 && coord.lat <= 90 &&
+           coord.lng >= -180 && coord.lng <= 180;
+  };
+
+  const validOrigin = isValidCoord(originCoords);
+  const validDest = isValidCoord(destCoords);
+  
+  // Ajustar zoom para mostrar ambos os marcadores se ambos forem válidos
+  React.useEffect(() => {
+    if (validOrigin && validDest && map && typeof map.fitBounds === 'function') {
+      try {
+        const bounds = [
+          [originCoords.lat, originCoords.lng],
+          [destCoords.lat, destCoords.lng]
+        ] as [[number, number], [number, number]];
+        
+        // Adicionar padding para melhor visualização
+        map.fitBounds(bounds, { padding: [20, 20] });
+      } catch (error) {
+        console.warn('MapMarkers: Error fitting bounds:', error);
+      }
+    }
+  }, [validOrigin, validDest, originCoords, destCoords, map]);
+
   return (
     <>
-      {originCoords && (
-        <Marker position={[originCoords.lat, originCoords.lng]} icon={greenIcon}>
+      {validOrigin && (
+        <Marker 
+          position={[originCoords.lat, originCoords.lng]} 
+          icon={greenIcon}
+        >
           <Popup>
             <strong>Origem:</strong><br />
-            {origin}
+            {origin || 'Endereço não informado'}
           </Popup>
         </Marker>
       )}
       
-      {destCoords && (
-        <Marker position={[destCoords.lat, destCoords.lng]} icon={redIcon}>
+      {validDest && (
+        <Marker 
+          position={[destCoords.lat, destCoords.lng]} 
+          icon={redIcon}
+        >
           <Popup>
             <strong>Destino:</strong><br />
-            {destination}
+            {destination || 'Endereço não informado'}
           </Popup>
         </Marker>
       )}

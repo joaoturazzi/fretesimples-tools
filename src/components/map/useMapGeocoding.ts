@@ -1,11 +1,20 @@
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { mapService } from '@/services/unifiedMapService';
 
 interface GeocodeResult {
   lat: number;
   lng: number;
 }
+
+interface CacheEntry {
+  result: { originCoords: GeocodeResult | null; destCoords: GeocodeResult | null };
+  timestamp: number;
+}
+
+// Cache global para evitar re-geocoding desnecessário
+const geocodeCache = new Map<string, CacheEntry>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
 
 export const useMapGeocoding = (origin: string, destination: string) => {
   const [originCoords, setOriginCoords] = useState<GeocodeResult | null>(null);
@@ -14,103 +23,178 @@ export const useMapGeocoding = (origin: string, destination: string) => {
   const [error, setError] = useState<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   
-  const geocodingInProgress = useRef(false);
-  const lastProcessed = useRef<string>('');
-  const abortController = useRef<AbortController | null>(null);
+  const mountedRef = useRef(true);
+  const currentRequestRef = useRef<string>('');
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Stable error handler without dependencies
-  const handleError = useCallback((err: any) => {
-    const message = err instanceof Error ? err.message : 'Erro ao geolocalizar endereços';
-    console.error('useMapGeocoding: Geocoding error:', err);
-    setError(message);
+  // Função estável para limpar estados - sem dependências
+  const clearStates = useCallback(() => {
+    if (!mountedRef.current) return;
+    setOriginCoords(null);
+    setDestCoords(null);
+    setMapReady(false);
+    setError(null);
   }, []);
 
-  // Clear previous geocoding attempt
-  const clearPreviousRequest = useCallback(() => {
-    if (abortController.current) {
-      abortController.current.abort();
-      abortController.current = null;
-    }
-    geocodingInProgress.current = false;
-  }, []);
-
-  useEffect(() => {
-    const geocode = async () => {
-      const currentKey = `${origin}|${destination}`;
-      
-      // Prevent duplicate processing
-      if (!origin || !destination || currentKey === lastProcessed.current) {
-        return;
-      }
-      
-      // Prevent concurrent geocoding
-      if (geocodingInProgress.current) {
-        console.log('useMapGeocoding: Geocoding already in progress, skipping');
-        return;
-      }
-      
-      console.log('useMapGeocoding: Starting geocoding for:', { origin, destination });
-      
-      // Clear previous state
-      clearPreviousRequest();
-      setOriginCoords(null);
-      setDestCoords(null);
-      setMapReady(false);
-      setError(null);
-      setIsLoading(true);
-      
-      // Mark as in progress and update last processed
-      geocodingInProgress.current = true;
-      lastProcessed.current = currentKey;
-      
-      // Create new abort controller
-      abortController.current = new AbortController();
-      
-      try {
-        console.log('useMapGeocoding: Calling mapService.geocodeAddress');
-        const [originData, destinationData] = await Promise.all([
-          mapService.geocodeAddress(origin),
-          mapService.geocodeAddress(destination)
-        ]);
-        
-        // Check if request was aborted
-        if (abortController.current?.signal.aborted) {
-          return;
-        }
-        
-        console.log('useMapGeocoding: Geocoding results:', { originData, destinationData });
-        
-        if (originData && destinationData) {
-          setOriginCoords({ lat: originData.lat, lng: originData.lng });
-          setDestCoords({ lat: destinationData.lat, lng: destinationData.lng });
-          setMapReady(true);
-          console.log('useMapGeocoding: Map ready to render');
-        } else {
-          if (!originData) {
-            setError(`Não foi possível encontrar as coordenadas para: ${origin}`);
-          } else {
-            setError(`Não foi possível encontrar as coordenadas para: ${destination}`);
-          }
-        }
-      } catch (err) {
-        // Don't handle error if request was aborted
-        if (abortController.current?.signal.aborted) {
-          return;
-        }
-        handleError(err);
-      } finally {
-        setIsLoading(false);
-        geocodingInProgress.current = false;
-      }
-    };
-
-    geocode();
+  // Função estável para tratamento de erro - sem dependências
+  const handleGeocodingError = useCallback((err: any, context: string) => {
+    if (!mountedRef.current) return;
     
-    // Cleanup on unmount or dependency change
+    const message = err instanceof Error ? err.message : 'Erro ao geolocalizar endereços';
+    console.error(`useMapGeocoding ${context}:`, err);
+    setError(message);
+    setIsLoading(false);
+  }, []);
+
+  // Gerar chave de cache estável
+  const cacheKey = useMemo(() => {
+    if (!origin?.trim() || !destination?.trim()) return '';
+    return `${origin.trim().toLowerCase()}|${destination.trim().toLowerCase()}`;
+  }, [origin, destination]);
+
+  // Verificar cache válido
+  const getCachedResult = useCallback((key: string): CacheEntry | null => {
+    const cached = geocodeCache.get(key);
+    if (!cached) return null;
+    
+    const isExpired = Date.now() - cached.timestamp > CACHE_TTL;
+    if (isExpired) {
+      geocodeCache.delete(key);
+      return null;
+    }
+    
+    return cached;
+  }, []);
+
+  // Função principal de geocoding - memoizada
+  const performGeocoding = useCallback(async (requestKey: string) => {
+    if (!mountedRef.current || !cacheKey) return;
+    
+    // Verificar cache primeiro
+    const cached = getCachedResult(cacheKey);
+    if (cached) {
+      console.log('useMapGeocoding: Using cached result for:', cacheKey);
+      setOriginCoords(cached.result.originCoords);
+      setDestCoords(cached.result.destCoords);
+      setMapReady(!!(cached.result.originCoords && cached.result.destCoords));
+      setIsLoading(false);
+      return;
+    }
+
+    // Verificar se ainda é a requisição atual
+    if (currentRequestRef.current !== requestKey || !mountedRef.current) {
+      return;
+    }
+
+    console.log('useMapGeocoding: Starting geocoding for:', { origin, destination });
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const [originData, destinationData] = await Promise.all([
+        mapService.geocodeAddress(origin),
+        mapService.geocodeAddress(destination)
+      ]);
+      
+      // Verificar se ainda é a requisição atual e component está montado
+      if (currentRequestRef.current !== requestKey || !mountedRef.current) {
+        return;
+      }
+      
+      console.log('useMapGeocoding: Geocoding results:', { originData, destinationData });
+      
+      const originCoords = originData ? { lat: originData.lat, lng: originData.lng } : null;
+      const destCoords = destinationData ? { lat: destinationData.lat, lng: destinationData.lng } : null;
+      
+      // Atualizar estados apenas se component ainda estiver montado
+      if (mountedRef.current) {
+        setOriginCoords(originCoords);
+        setDestCoords(destCoords);
+        setMapReady(!!(originCoords && destCoords));
+        
+        // Salvar no cache
+        geocodeCache.set(cacheKey, {
+          result: { originCoords, destCoords },
+          timestamp: Date.now()
+        });
+        
+        if (!originCoords) {
+          setError(`Não foi possível encontrar as coordenadas para: ${origin}`);
+        } else if (!destCoords) {
+          setError(`Não foi possível encontrar as coordenadas para: ${destination}`);
+        }
+      }
+      
+    } catch (err) {
+      // Verificar se ainda é a requisição atual
+      if (currentRequestRef.current === requestKey && mountedRef.current) {
+        handleGeocodingError(err, 'performGeocoding');
+      }
+    } finally {
+      if (mountedRef.current && currentRequestRef.current === requestKey) {
+        setIsLoading(false);
+      }
+    }
+  }, [cacheKey, origin, destination, getCachedResult, handleGeocodingError]);
+
+  // Effect principal - APENAS com cacheKey como dependência
+  useEffect(() => {
+    // Limpar timeout anterior
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
+    // Validar inputs
+    if (!cacheKey || !origin?.trim() || !destination?.trim()) {
+      clearStates();
+      return;
+    }
+
+    // Gerar ID único para esta requisição
+    const requestId = `${cacheKey}_${Date.now()}`;
+    currentRequestRef.current = requestId;
+
+    // Verificar cache imediatamente para resposta instantânea
+    const cached = getCachedResult(cacheKey);
+    if (cached) {
+      console.log('useMapGeocoding: Immediate cache hit for:', cacheKey);
+      setOriginCoords(cached.result.originCoords);
+      setDestCoords(cached.result.destCoords);
+      setMapReady(!!(cached.result.originCoords && cached.result.destCoords));
+      setIsLoading(false);
+      return;
+    }
+
+    // Debounce para novas requisições
+    timeoutRef.current = setTimeout(() => {
+      if (mountedRef.current && currentRequestRef.current === requestId) {
+        performGeocoding(requestId);
+      }
+    }, 1000);
+
+    // Cleanup
     return () => {
-      clearPreviousRequest();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
-  }, [origin, destination, clearPreviousRequest, handleError]);
+  }, [cacheKey]); // APENAS cacheKey como dependência
+
+  // Cleanup no unmount
+  useEffect(() => {
+    mountedRef.current = true;
+    
+    return () => {
+      mountedRef.current = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, []);
 
   return {
     originCoords,

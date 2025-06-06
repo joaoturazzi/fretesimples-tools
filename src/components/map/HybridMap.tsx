@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, memo } from 'react';
 import { useMapProvider } from './UniversalMapProvider';
 import { LoadingState } from '@/components/ui/loading';
@@ -31,12 +30,21 @@ const HybridMap: React.FC<HybridMapProps> = memo(({
   height = 350,
   onRouteCalculated
 }) => {
-  const { provider, isReady } = useMapProvider();
+  const { provider, isReady, isInitialized } = useMapProvider();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const [mapObjects, setMapObjects] = useState<any[]>([]);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
   const [initializationError, setInitializationError] = useState<string | null>(null);
+
+  // Aguardar contexto estar inicializado
+  if (!isInitialized) {
+    return (
+      <div className={`flex items-center justify-center bg-gray-50 rounded-lg border ${className}`} style={{ height }}>
+        <LoadingState message="Inicializando provedor de mapas..." icon="map" />
+      </div>
+    );
+  }
 
   // Initialize HERE Map when provider and container are ready
   useEffect(() => {

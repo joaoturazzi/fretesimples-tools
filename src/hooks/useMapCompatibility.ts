@@ -10,19 +10,17 @@ interface MapCompatibility {
 
 export const useMapCompatibility = (): MapCompatibility => {
   const [compatibility, setCompatibility] = useState<MapCompatibility>({
-    isSupported: false,
+    isSupported: true,
     isMobile: false,
-    canLoadLeaflet: false,
+    canLoadLeaflet: true,
     shouldUseSimpleMap: false
   });
 
   useEffect(() => {
     const checkCompatibility = async () => {
-      // Detectar dispositivo móvel
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      // Verificar se Leaflet está disponível
-      let canLoadLeaflet = false;
+      let canLoadLeaflet = true;
       try {
         const L = await import('leaflet');
         canLoadLeaflet = !!(L && L.Map && typeof L.Map === 'function');
@@ -31,15 +29,13 @@ export const useMapCompatibility = (): MapCompatibility => {
         canLoadLeaflet = false;
       }
 
-      // Determinar suporte básico
       const isSupported = !!(
         window.document &&
         window.document.createElement &&
         window.requestAnimationFrame
       );
 
-      // Ser menos restritivo - permitir mapas em mais dispositivos
-      // Só usar mapa simples se realmente não há suporte ou se está offline
+      // Apenas usar mapa simples se realmente não há suporte
       const shouldUseSimpleMap = !isSupported || !navigator.onLine;
 
       setCompatibility({

@@ -9,6 +9,7 @@ interface MapProviderContextType {
   isReady: boolean;
   error: string | null;
   switchProvider: (provider: MapProvider) => void;
+  isInitialized: boolean;
 }
 
 const MapProviderContext = createContext<MapProviderContextType | null>(null);
@@ -16,7 +17,15 @@ const MapProviderContext = createContext<MapProviderContextType | null>(null);
 export const useMapProvider = () => {
   const context = useContext(MapProviderContext);
   if (!context) {
-    throw new Error('useMapProvider must be used within MapProviderProvider');
+    // Retornar valores padrão enquanto o contexto não está pronto
+    console.warn('useMapProvider called before MapProviderProvider is ready, using fallback');
+    return {
+      provider: 'fallback' as MapProvider,
+      isReady: true,
+      error: null,
+      switchProvider: () => {},
+      isInitialized: false
+    };
   }
   return context;
 };
@@ -33,18 +42,23 @@ export const MapProviderProvider: React.FC<MapProviderProviderProps> = ({
   const [provider, setProvider] = useState<MapProvider>(preferredProvider);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const compatibility = useMapCompatibility();
 
   useEffect(() => {
     const initializeProvider = async () => {
+      console.log('Initializing map provider:', provider);
       setIsReady(false);
       setError(null);
-      console.log('Initializing map provider:', provider);
 
       try {
         if (provider === 'here') {
           console.log('Attempting to load HERE Maps...');
-          await loadHereMapsWithTimeout();
+          const timeout = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('HERE Maps timeout')), 8000)
+          );
+          
+          await Promise.race([loadHereMapsWithTimeout(), timeout]);
           console.log('HERE Maps loaded successfully');
           setIsReady(true);
         } else if (provider === 'leaflet') {
@@ -61,20 +75,22 @@ export const MapProviderProvider: React.FC<MapProviderProviderProps> = ({
       } catch (err) {
         console.warn(`Failed to load ${provider}:`, err);
         
-        // Automatic fallback sequence: HERE -> Leaflet -> Simple Fallback
+        // Fallback automático: HERE -> Leaflet -> Simple Fallback
         if (provider === 'here' && compatibility.canLoadLeaflet) {
-          console.log('Falling back to Leaflet...');
+          console.log('Auto-falling back to Leaflet...');
           setProvider('leaflet');
           return;
         } else if (provider === 'here' || provider === 'leaflet') {
-          console.log('Falling back to simple map...');
+          console.log('Auto-falling back to simple map...');
           setProvider('fallback');
           return;
         }
         
-        // If we're already on fallback, just mark as ready
+        // Se já estamos no fallback, marcar como pronto
         setIsReady(true);
         setError(err instanceof Error ? err.message : 'Map initialization failed');
+      } finally {
+        setIsInitialized(true);
       }
     };
 
@@ -83,21 +99,18 @@ export const MapProviderProvider: React.FC<MapProviderProviderProps> = ({
 
   const loadHereMapsWithTimeout = (): Promise<void> => {
     return new Promise((resolve, reject) => {
-      // Set timeout for loading
-      const timeout = setTimeout(() => {
-        reject(new Error('HERE Maps loading timeout'));
-      }, 10000); // 10 seconds timeout
-
-      const cleanup = () => clearTimeout(timeout);
-
-      if (window.H) {
-        cleanup();
+      if (window.H && window.H.Map && window.H.service) {
         resolve();
         return;
       }
 
       const loadScript = (src: string): Promise<void> => {
         return new Promise((scriptResolve, scriptReject) => {
+          if (document.querySelector(`script[src="${src}"]`)) {
+            scriptResolve();
+            return;
+          }
+          
           const script = document.createElement('script');
           script.src = src;
           script.async = true;
@@ -108,14 +121,15 @@ export const MapProviderProvider: React.FC<MapProviderProviderProps> = ({
       };
 
       const loadStyles = () => {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = 'https://js.api.here.com/v3/3.1/mapsjs-ui.css';
-        document.head.appendChild(link);
+        if (!document.querySelector('link[href*="mapsjs-ui.css"]')) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.type = 'text/css';
+          link.href = 'https://js.api.here.com/v3/3.1/mapsjs-ui.css';
+          document.head.appendChild(link);
+        }
       };
 
-      // Load scripts sequentially
       const loadSequence = async () => {
         try {
           await loadScript('https://js.api.here.com/v3/3.1/mapsjs-core.js');
@@ -124,15 +138,15 @@ export const MapProviderProvider: React.FC<MapProviderProviderProps> = ({
           await loadScript('https://js.api.here.com/v3/3.1/mapsjs-mapevents.js');
           loadStyles();
           
-          // Verify HERE Maps is actually available
+          // Aguardar um pouco para garantir que os scripts foram processados
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
           if (!window.H || !window.H.Map || !window.H.service) {
             throw new Error('HERE Maps components not properly loaded');
           }
           
-          cleanup();
           resolve();
         } catch (error) {
-          cleanup();
           reject(error);
         }
       };
@@ -146,13 +160,16 @@ export const MapProviderProvider: React.FC<MapProviderProviderProps> = ({
     setProvider(newProvider);
   };
 
+  const contextValue: MapProviderContextType = {
+    provider,
+    isReady,
+    error,
+    switchProvider,
+    isInitialized
+  };
+
   return (
-    <MapProviderContext.Provider value={{
-      provider,
-      isReady,
-      error,
-      switchProvider
-    }}>
+    <MapProviderContext.Provider value={contextValue}>
       {children}
     </MapProviderContext.Provider>
   );

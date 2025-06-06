@@ -7,6 +7,7 @@ import { calculateFreight, calculateCostSimulation, getDefaultCostPerKm, Freight
 export const useFreightCalculator = () => {
   const notify = useNotify();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
@@ -42,14 +43,25 @@ export const useFreightCalculator = () => {
     return isNaN(parsed) ? '' : parsed;
   };
 
-  // Auto-calculate distance with improved debouncing and cancellation
+  // Auto-calculate distance with improved debouncing and error handling
   const autoCalculateDistance = useCallback(async (originAddr: string, destinationAddr: string) => {
+    console.log('autoCalculateDistance called:', { originAddr, destinationAddr });
+    
     // Cancel previous request
     if (abortControllerRef.current) {
+      console.log('Aborting previous request');
       abortControllerRef.current.abort();
     }
     
-    if (!originAddr.trim() || !destinationAddr.trim() || originAddr === destinationAddr) {
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    
+    // Validate inputs
+    if (!originAddr?.trim() || !destinationAddr?.trim() || originAddr === destinationAddr) {
+      console.log('Invalid inputs, resetting map state');
       setShowMap(false);
       setRouteCoordinates([]);
       setRouteDuration(undefined);
@@ -57,6 +69,13 @@ export const useFreightCalculator = () => {
       return;
     }
 
+    // Prevent concurrent calculations
+    if (isCalculatingRoute) {
+      console.log('Already calculating route, skipping');
+      return;
+    }
+
+    console.log('Starting route calculation');
     setIsCalculatingRoute(true);
     setHasError(false);
     
@@ -64,47 +83,67 @@ export const useFreightCalculator = () => {
     abortControllerRef.current = new AbortController();
     
     try {
+      console.log('Calling mapService.calculateRoute');
       const route = await mapService.calculateRoute(originAddr, destinationAddr);
       
       // Check if request was aborted
       if (abortControllerRef.current?.signal.aborted) {
+        console.log('Request was aborted');
         return;
       }
       
       if (route) {
+        console.log('Route calculated successfully:', route);
         setDistance(route.distance);
         setRouteDuration(route.duration);
         setRouteCoordinates(route.route.geometry);
         setShowMap(true);
-        console.log('Auto-calculated distance:', route.distance, 'km');
         
         notify.success(
           'Rota calculada!',
           `Distância: ${route.distance} km • Tempo: ${Math.floor(route.duration / 60)}h ${route.duration % 60}m`
         );
+      } else {
+        console.log('No route returned from service');
+        setShowMap(false);
       }
     } catch (error) {
       // Don't show error if request was aborted
       if (abortControllerRef.current?.signal.aborted) {
+        console.log('Request aborted, not showing error');
         return;
       }
       
       console.error('Error auto-calculating distance:', error);
       const message = error instanceof Error ? error.message : 'Erro ao calcular rota';
       notify.warning('Rota não calculada', message);
+      setShowMap(false);
     } finally {
       setIsCalculatingRoute(false);
+      console.log('Route calculation finished');
     }
-  }, [notify]);
+  }, [notify, isCalculatingRoute]);
 
   // Auto-calculate distance when both origin and destination are filled
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
+    console.log('useEffect triggered:', { origin, destination });
+    
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    // Set new timer with longer debounce
+    debounceTimerRef.current = setTimeout(() => {
+      console.log('Debounce timer triggered, calling autoCalculateDistance');
       autoCalculateDistance(origin, destination);
-    }, 2000); // Increased debounce time
+    }, 3000); // Increased debounce time
 
     return () => {
-      clearTimeout(timeoutId);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
       // Cancel ongoing request when effect cleans up
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -147,6 +186,8 @@ export const useFreightCalculator = () => {
   };
 
   const performCalculation = () => {
+    console.log('performCalculation called');
+    
     if (!validateInputs()) return;
 
     setIsCalculating(true);
@@ -160,6 +201,13 @@ export const useFreightCalculator = () => {
         const consumptionValue = typeof consumption === 'number' ? consumption : 0;
         const tollsCostValue = typeof tollsCost === 'number' ? tollsCost : 0;
         const costPerKmValue = typeof costPerKm === 'number' ? costPerKm : getDefaultCostPerKm(vehicleType);
+
+        console.log('Calculating freight with:', {
+          distanceValue,
+          weightValue,
+          vehicleType,
+          costPerKmValue
+        });
 
         const calculatedResult = calculateFreight(
           distanceValue,
@@ -191,6 +239,7 @@ export const useFreightCalculator = () => {
           setCostSimulationResult(costSim);
         }
 
+        console.log('Calculation completed successfully');
         notify.success(
           'Cálculo concluído!',
           `Valor do frete: R$ ${calculatedResult.totalFreight.toFixed(2)}`
@@ -209,9 +258,17 @@ export const useFreightCalculator = () => {
   };
 
   const resetForm = () => {
+    console.log('resetForm called');
+    
     // Cancel any ongoing requests
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+    }
+    
+    // Clear debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
     
     setOrigin('');

@@ -45,50 +45,80 @@ const RouteLayer = ({ coordinates }: { coordinates: Array<{ lat: number; lng: nu
   const map = useMap();
   
   useEffect(() => {
-    if (coordinates.length > 0 && map) {
-      try {
-        const bounds = L.latLngBounds(coordinates.map(coord => [coord.lat, coord.lng]));
-        const timeoutId = setTimeout(() => {
-          if (map && map.getContainer()) {
+    if (!coordinates || coordinates.length === 0 || !map) {
+      console.log('RouteLayer: Invalid coordinates or map not ready');
+      return;
+    }
+
+    try {
+      console.log('RouteLayer: Fitting bounds for coordinates:', coordinates.length);
+      const bounds = L.latLngBounds(coordinates.map(coord => [coord.lat, coord.lng]));
+      
+      const timeoutId = setTimeout(() => {
+        try {
+          if (map && map.getContainer() && typeof map.fitBounds === 'function') {
             map.fitBounds(bounds, { padding: [20, 20] });
+            console.log('RouteLayer: Bounds fitted successfully');
           }
-        }, 100);
-        
-        return () => clearTimeout(timeoutId);
-      } catch (error) {
-        console.warn('Error fitting bounds:', error);
-      }
+        } catch (error) {
+          console.warn('RouteLayer: Error fitting bounds in timeout:', error);
+        }
+      }, 200);
+      
+      return () => clearTimeout(timeoutId);
+    } catch (error) {
+      console.warn('RouteLayer: Error creating bounds:', error);
     }
   }, [coordinates, map]);
 
-  return coordinates.length > 0 ? (
-    <Polyline 
-      positions={coordinates.map(coord => [coord.lat, coord.lng] as LatLngExpression)}
-      color="#ef4444"
-      weight={4}
-      opacity={0.8}
-    />
-  ) : null;
+  if (!coordinates || coordinates.length === 0) {
+    console.log('RouteLayer: No coordinates to render');
+    return null;
+  }
+
+  try {
+    const positions = coordinates.map(coord => [coord.lat, coord.lng] as LatLngExpression);
+    console.log('RouteLayer: Rendering polyline with', positions.length, 'points');
+    
+    return (
+      <Polyline 
+        positions={positions}
+        color="#ef4444"
+        weight={4}
+        opacity={0.8}
+      />
+    );
+  } catch (error) {
+    console.error('RouteLayer: Error rendering polyline:', error);
+    return null;
+  }
 };
 
 const MapInitializer = () => {
   const map = useMap();
+  const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
-    if (!map) return;
+    if (!map || isInitialized) {
+      return;
+    }
+    
+    console.log('MapInitializer: Initializing map');
     
     const timeoutId = setTimeout(() => {
       try {
         if (map && map.getContainer() && typeof map.invalidateSize === 'function') {
           map.invalidateSize();
+          setIsInitialized(true);
+          console.log('MapInitializer: Map initialized successfully');
         }
       } catch (error) {
-        console.warn('Error invalidating map size:', error);
+        console.warn('MapInitializer: Error invalidating map size:', error);
       }
-    }, 200);
+    }, 300);
     
     return () => clearTimeout(timeoutId);
-  }, [map]);
+  }, [map, isInitialized]);
 
   return null;
 };
@@ -108,22 +138,47 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const { handleError } = useErrorHandler();
+  const geocodingInProgress = useRef(false);
 
   const mapCenter: LatLngExpression = [-14.235, -51.9253]; // Centro do Brasil
 
+  console.log('InteractiveMap render:', { 
+    origin, 
+    destination, 
+    routeCoordinatesLength: routeCoordinates?.length,
+    mapReady,
+    isLoading 
+  });
+
   useEffect(() => {
     const geocode = async () => {
-      if (!origin || !destination) return;
+      if (!origin || !destination) {
+        console.log('InteractiveMap: Missing origin or destination');
+        setOriginCoords(null);
+        setDestCoords(null);
+        setMapReady(false);
+        return;
+      }
       
+      if (geocodingInProgress.current) {
+        console.log('InteractiveMap: Geocoding already in progress');
+        return;
+      }
+      
+      console.log('InteractiveMap: Starting geocoding for:', { origin, destination });
+      geocodingInProgress.current = true;
       setIsLoading(true);
       setError(null);
       setMapReady(false);
       
       try {
+        console.log('InteractiveMap: Calling mapService.geocodeAddress');
         const [originData, destinationData] = await Promise.all([
           mapService.geocodeAddress(origin),
           mapService.geocodeAddress(destination)
         ]);
+        
+        console.log('InteractiveMap: Geocoding results:', { originData, destinationData });
         
         if (originData) {
           setOriginCoords({ lat: originData.lat, lng: originData.lng });
@@ -137,23 +192,22 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
           setError(`Não foi possível encontrar as coordenadas para: ${destination}`);
         }
         
-        setMapReady(true);
+        if (originData && destinationData) {
+          setMapReady(true);
+          console.log('InteractiveMap: Map ready to render');
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Erro ao geolocalizar endereços';
+        console.error('InteractiveMap: Geocoding error:', err);
         setError(message);
         handleError(err, 'Geocoding');
       } finally {
         setIsLoading(false);
+        geocodingInProgress.current = false;
       }
     };
 
-    if (origin && destination) {
-      geocode();
-    } else {
-      setOriginCoords(null);
-      setDestCoords(null);
-      setMapReady(false);
-    }
+    geocode();
   }, [origin, destination, handleError]);
 
   if (!origin || !destination) {
@@ -167,75 +221,92 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
     );
   }
 
-  return (
-    <ErrorBoundary>
-      <LoadingOverlay isVisible={isLoading} message="Carregando mapa...">
-        <div className={`relative rounded-lg overflow-hidden border border-gray-200 ${className}`} style={{ height }}>
-          {error ? (
-            <div className="flex items-center justify-center h-full bg-gray-50 text-gray-600">
-              <div className="text-center">
-                <p className="mb-2">⚠️ Erro ao carregar mapa</p>
-                <p className="text-sm">{error}</p>
-              </div>
-            </div>
-          ) : mapReady ? (
-            <MapContainer
-              center={mapCenter}
-              zoom={6}
-              style={{ height: '100%', width: '100%' }}
-              scrollWheelZoom={true}
-              className="z-0"
-            >
-              <MapInitializer />
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              
-              {originCoords && (
-                <Marker position={[originCoords.lat, originCoords.lng]} icon={greenIcon}>
-                  <Popup>
-                    <strong>Origem:</strong><br />
-                    {origin}
-                  </Popup>
-                </Marker>
-              )}
-              
-              {destCoords && (
-                <Marker position={[destCoords.lat, destCoords.lng]} icon={redIcon}>
-                  <Popup>
-                    <strong>Destino:</strong><br />
-                    {destination}
-                  </Popup>
-                </Marker>
-              )}
-              
-              <RouteLayer coordinates={routeCoordinates} />
-            </MapContainer>
-          ) : (
-            <div className="flex items-center justify-center h-full bg-gray-50">
-              <LoadingState message="Preparando mapa..." icon="map" />
-            </div>
+  if (error) {
+    return (
+      <div className={`flex items-center justify-center h-full bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
+        <div className="text-center">
+          <p className="mb-2">⚠️ Erro ao carregar mapa</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading || !mapReady) {
+    return (
+      <div className={`flex items-center justify-center h-full bg-gray-50 rounded-lg border ${className}`} style={{ height }}>
+        <LoadingState message="Carregando mapa..." icon="map" />
+      </div>
+    );
+  }
+
+  try {
+    console.log('InteractiveMap: Rendering MapContainer');
+    return (
+      <div className={`relative rounded-lg overflow-hidden border border-gray-200 ${className}`} style={{ height }}>
+        <MapContainer
+          center={mapCenter}
+          zoom={6}
+          style={{ height: '100%', width: '100%' }}
+          scrollWheelZoom={true}
+          className="z-0"
+        >
+          <MapInitializer />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          
+          {originCoords && (
+            <Marker position={[originCoords.lat, originCoords.lng]} icon={greenIcon}>
+              <Popup>
+                <strong>Origem:</strong><br />
+                {origin}
+              </Popup>
+            </Marker>
           )}
           
-          {(distance || duration) && (
-            <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border">
-              {distance && (
-                <div className="text-sm font-medium text-gray-700">
-                  📏 Distância: {distance} km
-                </div>
-              )}
-              {duration && (
-                <div className="text-sm text-gray-600">
-                  ⏱️ Tempo: {Math.floor(duration / 60)}h {duration % 60}min
-                </div>
-              )}
-            </div>
+          {destCoords && (
+            <Marker position={[destCoords.lat, destCoords.lng]} icon={redIcon}>
+              <Popup>
+                <strong>Destino:</strong><br />
+                {destination}
+              </Popup>
+            </Marker>
           )}
+          
+          {routeCoordinates && routeCoordinates.length > 0 && (
+            <RouteLayer coordinates={routeCoordinates} />
+          )}
+        </MapContainer>
+        
+        {(distance || duration) && (
+          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border">
+            {distance && (
+              <div className="text-sm font-medium text-gray-700">
+                📏 Distância: {distance} km
+              </div>
+            )}
+            {duration && (
+              <div className="text-sm text-gray-600">
+                ⏱️ Tempo: {Math.floor(duration / 60)}h {duration % 60}min
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  } catch (error) {
+    console.error('InteractiveMap: Error rendering map:', error);
+    return (
+      <div className={`flex items-center justify-center h-full bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
+        <div className="text-center">
+          <p className="mb-2">⚠️ Erro ao renderizar mapa</p>
+          <p className="text-sm">Tente recarregar a página</p>
         </div>
-      </LoadingOverlay>
-    </ErrorBoundary>
-  );
+      </div>
+    );
+  }
 };
 
 export default InteractiveMap;

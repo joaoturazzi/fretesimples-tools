@@ -1,14 +1,15 @@
+
 import React from 'react';
 import { Truck, DollarSign, BarChart3, RefreshCw, CalculatorIcon, CheckCircle, Save } from 'lucide-react';
 import CalculatorSection from '../Calculator';
 import ResultBox from './ResultBox';
-import RouteVisualization from '../RouteVisualization';
 import LocationInputs from './freight/LocationInputs';
 import CostSimulation from './freight/CostSimulation';
 import { useFreightCalculator } from './freight/useFreightCalculator';
 import { formatCurrency } from '@/lib/utils';
 import useSharedData from '@/hooks/useSharedData';
 import InteractiveMap from '../InteractiveMap';
+import ErrorBoundary from '../ErrorBoundary';
 
 const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
   const {
@@ -41,6 +42,14 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
   } = useFreightCalculator();
 
   const { saveFreightData } = useSharedData();
+
+  console.log('FreightCalculator render:', { 
+    showMap, 
+    origin, 
+    destination, 
+    routeCoordinatesLength: routeCoordinates?.length,
+    isCalculatingRoute 
+  });
 
   const saveCalculation = () => {
     if (!result) return;
@@ -200,36 +209,29 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
         costSimulationResult={costSimulationResult}
       />
 
-      {showMap && origin && destination && routeCoordinates && routeCoordinates.length > 0 && (
+      {/* Simplified map rendering - only one InteractiveMap */}
+      {showMap && origin && destination && (
         <div className="mt-6">
           <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
             <span>🗺️</span>
             Mapa da Rota: {origin} → {destination}
           </h4>
-          <InteractiveMap 
-            origin={origin} 
-            destination={destination}
-            distance={typeof distance === 'number' ? distance : undefined}
-            duration={routeDuration}
-            routeCoordinates={routeCoordinates}
-            className="h-96 w-full rounded-lg"
-          />
-        </div>
-      )}
-
-      {showMap && origin && destination && (!routeCoordinates || routeCoordinates.length === 0) && (
-        <div className="mt-6">
-          <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-            <span>🗺️</span>
-            Visualização da Rota: {origin} → {destination}
-          </h4>
-          <RouteVisualization 
-            origin={origin} 
-            destination={destination}
-            distance={typeof distance === 'number' ? distance : undefined}
-            duration={routeDuration}
-            className="h-48 w-full rounded-lg border border-gray-200"
-          />
+          <ErrorBoundary 
+            fallback={
+              <div className="h-96 w-full rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center">
+                <p className="text-gray-500">Erro ao carregar mapa. Tente novamente.</p>
+              </div>
+            }
+          >
+            <InteractiveMap 
+              origin={origin} 
+              destination={destination}
+              distance={typeof distance === 'number' ? distance : undefined}
+              duration={routeDuration}
+              routeCoordinates={routeCoordinates}
+              className="h-96 w-full rounded-lg"
+            />
+          </ErrorBoundary>
         </div>
       )}
       

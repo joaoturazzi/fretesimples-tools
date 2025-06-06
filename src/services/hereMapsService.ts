@@ -1,5 +1,5 @@
-
 import env from '@/config/env';
+import { CacheService } from './cacheService';
 
 interface RouteResponse {
   distance: number;
@@ -15,10 +15,15 @@ interface GeocodeResponse {
   address: string;
 }
 
-interface ApiError {
-  message: string;
-  status?: number;
-  code?: string;
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status?: number,
+    public code?: string
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
 }
 
 class HereMapsServiceClass {
@@ -102,24 +107,31 @@ class HereMapsServiceClass {
       throw new ApiError('Address is required');
     }
 
-    try {
-      const url = `${this.geocodeUrl}/geocode?q=${encodeURIComponent(address)}&in=countryCode:BRA&apiKey=${this.apiKey}`;
-      const data = await this.makeRequest<any>(url);
-      
-      if (data.items && data.items.length > 0) {
-        const item = data.items[0];
-        return {
-          lat: item.position.lat,
-          lng: item.position.lng,
-          address: item.address.label
-        };
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Geocoding error:', error);
-      throw error instanceof ApiError ? error : new ApiError('Failed to geocode address');
-    }
+    return CacheService.cacheApiCall(
+      'geocode',
+      { address: address.trim().toLowerCase() },
+      async () => {
+        try {
+          const url = `${this.geocodeUrl}/geocode?q=${encodeURIComponent(address)}&in=countryCode:BRA&apiKey=${this.apiKey}`;
+          const data = await this.makeRequest<any>(url);
+          
+          if (data.items && data.items.length > 0) {
+            const item = data.items[0];
+            return {
+              lat: item.position.lat,
+              lng: item.position.lng,
+              address: item.address.label
+            };
+          }
+          
+          return null;
+        } catch (error) {
+          console.error('Geocoding error:', error);
+          throw error instanceof ApiError ? error : new ApiError('Failed to geocode address');
+        }
+      },
+      30 * 60 * 1000 // Cache geocoding for 30 minutes
+    );
   }
 
   async calculateRoute(origin: string, destination: string): Promise<RouteResponse | null> {
@@ -131,48 +143,58 @@ class HereMapsServiceClass {
       throw new ApiError('Origin and destination cannot be the same');
     }
 
-    try {
-      console.log('Calculating route from', origin, 'to', destination);
-      
-      // Geocode both addresses
-      const [originCoords, destCoords] = await Promise.all([
-        this.geocodeAddress(origin),
-        this.geocodeAddress(destination)
-      ]);
-      
-      if (!originCoords) {
-        throw new ApiError(`Could not find location for: ${origin}`);
-      }
-      
-      if (!destCoords) {
-        throw new ApiError(`Could not find location for: ${destination}`);
-      }
-
-      console.log('Origin coords:', originCoords);
-      console.log('Destination coords:', destCoords);
-
-      const url = `${this.baseUrl}/routes?transportMode=truck&origin=${originCoords.lat},${originCoords.lng}&destination=${destCoords.lat},${destCoords.lng}&return=summary,polyline&apiKey=${this.apiKey}`;
-      const data = await this.makeRequest<any>(url);
-      
-      if (data.routes && data.routes.length > 0) {
-        const route = data.routes[0];
-        const summary = route.sections[0].summary;
-        const polyline = route.sections[0].polyline;
-        
-        return {
-          distance: Math.round(summary.length / 1000), // Convert to km
-          duration: Math.round(summary.duration / 60), // Convert to minutes
-          route: {
-            geometry: this.decodePolyline(polyline || '')
+    return CacheService.cacheApiCall(
+      'route',
+      { 
+        origin: origin.trim().toLowerCase(), 
+        destination: destination.trim().toLowerCase() 
+      },
+      async () => {
+        try {
+          console.log('Calculating route from', origin, 'to', destination);
+          
+          // Geocode both addresses
+          const [originCoords, destCoords] = await Promise.all([
+            this.geocodeAddress(origin),
+            this.geocodeAddress(destination)
+          ]);
+          
+          if (!originCoords) {
+            throw new ApiError(`Could not find location for: ${origin}`);
           }
-        };
-      }
-      
-      throw new ApiError('No route found between the specified locations');
-    } catch (error) {
-      console.error('Route calculation error:', error);
-      throw error instanceof ApiError ? error : new ApiError('Failed to calculate route');
-    }
+          
+          if (!destCoords) {
+            throw new ApiError(`Could not find location for: ${destination}`);
+          }
+
+          console.log('Origin coords:', originCoords);
+          console.log('Destination coords:', destCoords);
+
+          const url = `${this.baseUrl}/routes?transportMode=truck&origin=${originCoords.lat},${originCoords.lng}&destination=${destCoords.lat},${destCoords.lng}&return=summary,polyline&apiKey=${this.apiKey}`;
+          const data = await this.makeRequest<any>(url);
+          
+          if (data.routes && data.routes.length > 0) {
+            const route = data.routes[0];
+            const summary = route.sections[0].summary;
+            const polyline = route.sections[0].polyline;
+            
+            return {
+              distance: Math.round(summary.length / 1000), // Convert to km
+              duration: Math.round(summary.duration / 60), // Convert to minutes
+              route: {
+                geometry: this.decodePolyline(polyline || '')
+              }
+            };
+          }
+          
+          throw new ApiError('No route found between the specified locations');
+        } catch (error) {
+          console.error('Route calculation error:', error);
+          throw error instanceof ApiError ? error : new ApiError('Failed to calculate route');
+        }
+      },
+      15 * 60 * 1000 // Cache routes for 15 minutes
+    );
   }
 
   private decodePolyline(encoded: string): Array<{ lat: number; lng: number }> {
@@ -218,6 +240,17 @@ class HereMapsServiceClass {
       return [];
     }
   }
+
+  // Clear cache method for manual cache management
+  clearCache(): void {
+    CacheService.clear('geocode');
+    CacheService.clear('route');
+  }
+
+  // Get cache statistics
+  getCacheStats() {
+    return CacheService.getStats();
+  }
 }
 
 // Export singleton instance
@@ -227,4 +260,5 @@ export const HereMapsService = new HereMapsServiceClass();
 export { HereMapsService as default };
 
 // Export types
-export type { RouteResponse, GeocodeResponse, ApiError };
+export type { RouteResponse, GeocodeResponse };
+export { ApiError };

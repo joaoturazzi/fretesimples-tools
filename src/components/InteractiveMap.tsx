@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
@@ -93,9 +92,9 @@ const MapContent: React.FC<{
       className="w-full h-full"
       boundsOptions={{ padding: [20, 20] }}
       ref={mapRef}
-      whenCreated={(mapInstance) => {
+      whenReady={(mapInstance) => {
         mapRef.current = mapInstance;
-        console.log('Map instance created successfully');
+        console.log('Map instance ready successfully');
       }}
     >
       <TileLayer

@@ -1,4 +1,3 @@
-
 import env from '@/config/env';
 
 interface RouteResponse {
@@ -18,6 +17,8 @@ interface GeocodeResponse {
 class UnifiedMapService {
   private requestCount = 0;
   private lastResetTime = Date.now();
+  private geocodeCache = new Map<string, any>();
+  private routeCache = new Map<string, any>();
 
   private checkRateLimit(): boolean {
     const now = Date.now();
@@ -38,41 +39,13 @@ class UnifiedMapService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  // JSONP para HERE Maps (evita CORS)
-  private jsonpRequest(url: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const callbackName = 'hereMapsCallback' + Date.now();
-      const script = document.createElement('script');
-      
-      // Define callback global
-      (window as any)[callbackName] = (data: any) => {
-        document.head.removeChild(script);
-        delete (window as any)[callbackName];
-        resolve(data);
-      };
-
-      script.onerror = () => {
-        document.head.removeChild(script);
-        delete (window as any)[callbackName];
-        reject(new Error('JSONP request failed'));
-      };
-
-      script.src = `${url}&jsoncallback=${callbackName}`;
-      document.head.appendChild(script);
-
-      // Timeout after 10 seconds
-      setTimeout(() => {
-        if ((window as any)[callbackName]) {
-          document.head.removeChild(script);
-          delete (window as any)[callbackName];
-          reject(new Error('JSONP request timeout'));
-        }
-      }, 10000);
-    });
-  }
-
   // Geocoding com HERE Maps usando JSONP
   private async geocodeWithHere(address: string): Promise<GeocodeResponse | null> {
+    const cacheKey = `here_${address.toLowerCase()}`;
+    if (this.geocodeCache.has(cacheKey)) {
+      return this.geocodeCache.get(cacheKey);
+    }
+
     try {
       if (!this.checkRateLimit()) {
         await this.delay(60000);
@@ -87,11 +60,17 @@ class UnifiedMapService {
           const data = await response.json();
           if (data.items && data.items.length > 0) {
             const item = data.items[0];
-            return {
+            const result = {
               lat: item.position.lat,
               lng: item.position.lng,
               address: item.address.label
             };
+            
+            // Cache por 1 hora
+            this.geocodeCache.set(cacheKey, result);
+            setTimeout(() => this.geocodeCache.delete(cacheKey), 3600000);
+            
+            return result;
           }
         }
       } catch (corsError) {
@@ -107,6 +86,11 @@ class UnifiedMapService {
 
   // Fallback com Nominatim (suporta CORS)
   private async geocodeWithNominatim(address: string): Promise<GeocodeResponse | null> {
+    const cacheKey = `nominatim_${address.toLowerCase()}`;
+    if (this.geocodeCache.has(cacheKey)) {
+      return this.geocodeCache.get(cacheKey);
+    }
+
     try {
       await this.delay(1000); // Respeita rate limits do Nominatim
       
@@ -121,11 +105,17 @@ class UnifiedMapService {
         const data = await response.json();
         if (data && data.length > 0) {
           const item = data[0];
-          return {
+          const result = {
             lat: parseFloat(item.lat),
             lng: parseFloat(item.lon),
             address: item.display_name
           };
+          
+          // Cache por 1 hora
+          this.geocodeCache.set(cacheKey, result);
+          setTimeout(() => this.geocodeCache.delete(cacheKey), 3600000);
+          
+          return result;
         }
       }
       return null;
@@ -148,7 +138,7 @@ class UnifiedMapService {
     }
 
     if (!result) {
-      throw new Error(`Could not geocode address: ${address}`);
+      throw new Error(`Could not find location for: ${address}`);
     }
 
     return result;
@@ -177,6 +167,11 @@ class UnifiedMapService {
       throw new Error('Origin and destination cannot be the same');
     }
 
+    const cacheKey = `route_${origin.toLowerCase()}_${destination.toLowerCase()}`;
+    if (this.routeCache.has(cacheKey)) {
+      return this.routeCache.get(cacheKey);
+    }
+
     try {
       // Geocode both addresses
       const [originCoords, destCoords] = await Promise.all([
@@ -203,7 +198,7 @@ class UnifiedMapService {
 
       // Gera geometria simples da rota (linha reta com pontos intermediários)
       const geometry: Array<{ lat: number; lng: number }> = [];
-      const steps = 20;
+      const steps = Math.min(20, Math.max(5, Math.floor(distance / 50))); // Pontos baseados na distância
       for (let i = 0; i <= steps; i++) {
         const ratio = i / steps;
         const lat = originCoords.lat + (destCoords.lat - originCoords.lat) * ratio;
@@ -211,11 +206,17 @@ class UnifiedMapService {
         geometry.push({ lat, lng });
       }
       
-      return {
+      const result = {
         distance,
         duration,
         route: { geometry }
       };
+
+      // Cache por 1 hora
+      this.routeCache.set(cacheKey, result);
+      setTimeout(() => this.routeCache.delete(cacheKey), 3600000);
+      
+      return result;
     } catch (error) {
       throw error instanceof Error ? error : new Error('Failed to calculate route');
     }
@@ -224,13 +225,31 @@ class UnifiedMapService {
   clearCache(): void {
     this.requestCount = 0;
     this.lastResetTime = Date.now();
+    this.geocodeCache.clear();
+    this.routeCache.clear();
   }
 
   getCacheStats() {
     return {
       requestCount: this.requestCount,
-      lastReset: this.lastResetTime
+      lastReset: this.lastResetTime,
+      geocodeCacheSize: this.geocodeCache.size,
+      routeCacheSize: this.routeCache.size
     };
+  }
+
+  // Cálculo de distância usando fórmula haversine
+  private calculateHaversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371; // Raio da Terra em km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return Math.round(R * c);
   }
 }
 

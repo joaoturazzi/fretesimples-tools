@@ -19,24 +19,22 @@ export const useFreightRouteCalculation = (
   const abortControllerRef = useRef<AbortController | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastCalculatedRef = useRef<string>('');
-  const isInitialMount = useRef(true);
+  const isFirstRender = useRef(true);
 
   // Cleanup function
   const cleanupRouteCalculation = useCallback(() => {
-    // Cancel any ongoing requests
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
     
-    // Clear debounce timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
     }
   }, []);
 
-  // Main calculation function
+  // Main calculation function with useCallback to prevent recreation
   const performRouteCalculation = useCallback(async (originAddr: string, destinationAddr: string) => {
     const routeKey = `${originAddr}|${destinationAddr}`;
     
@@ -83,11 +81,12 @@ export const useFreightRouteCalculation = (
         setShowMap(true);
         
         notify.success(
-          'Rota calculada!',
-          `Distância: ${route.distance} km • Tempo: ${Math.floor(route.duration / 60)}h ${route.duration % 60}m`
+          'Rota calculada com sucesso!',
+          `Distância: ${route.distance} km • Tempo estimado: ${Math.floor(route.duration / 60)}h ${route.duration % 60}m`
         );
       } else {
         setShowMap(false);
+        notify.warning('Aviso', 'Não foi possível calcular a rota automaticamente. Insira a distância manualmente.');
       }
     } catch (error) {
       // Don't show error if request was aborted
@@ -96,18 +95,40 @@ export const useFreightRouteCalculation = (
       }
       
       const message = error instanceof Error ? error.message : 'Erro ao calcular rota';
-      notify.warning('Rota não calculada', message);
+      console.warn('Erro no cálculo da rota:', error);
+      
+      // Determine if it's a geocoding or routing error for better feedback
+      if (message.includes('Could not find location')) {
+        notify.error('Endereço não encontrado', 'Verifique se os endereços de origem e destino estão corretos.');
+        setErrorMessage('Endereço não encontrado. Verifique se os endereços estão corretos.');
+      } else {
+        notify.warning('Rota não calculada', 'Insira a distância manualmente ou tente novamente.');
+        setErrorMessage('Erro ao calcular rota. Tente inserir a distância manualmente.');
+      }
+      
+      setHasError(true);
       setShowMap(false);
     } finally {
       setIsCalculatingRoute(false);
     }
-  }, [isCalculatingRoute, setDistance, setRouteDuration, setRouteCoordinates, setShowMap, setHasError, setIsCalculatingRoute, notify, cleanupRouteCalculation]);
+  }, [
+    isCalculatingRoute, 
+    setDistance, 
+    setRouteDuration, 
+    setRouteCoordinates, 
+    setShowMap, 
+    setHasError, 
+    setErrorMessage,
+    setIsCalculatingRoute, 
+    notify, 
+    cleanupRouteCalculation
+  ]);
 
   // Auto-calculate with improved debouncing
   useEffect(() => {
-    // Skip on initial mount to prevent immediate calculation
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
+    // Skip on first render to prevent immediate calculation
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
       return;
     }
     
@@ -116,30 +137,46 @@ export const useFreightRouteCalculation = (
       clearTimeout(debounceTimerRef.current);
     }
     
-    // Set new timer with longer debounce
-    debounceTimerRef.current = setTimeout(() => {
-      performRouteCalculation(origin, destination);
-    }, 5000); // Increased debounce time to 5 seconds
+    // Only calculate if both fields have meaningful content
+    if (origin?.trim() && destination?.trim() && origin !== destination) {
+      // Reduced debounce time for better UX
+      debounceTimerRef.current = setTimeout(() => {
+        performRouteCalculation(origin, destination);
+      }, 2000); // Reduced from 5 seconds to 2 seconds
+    } else {
+      // Clear map and route data if inputs are invalid
+      setShowMap(false);
+      setRouteCoordinates([]);
+      setRouteDuration(undefined);
+    }
 
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [origin, destination]); // Removed performRouteCalculation from dependencies to prevent loop
+  }, [origin, destination, performRouteCalculation]);
 
   // Manual calculation function
-  const calculateDistanceFromRoute = async () => {
-    if (!origin || !destination) {
+  const calculateDistanceFromRoute = useCallback(async () => {
+    if (!origin?.trim() || !destination?.trim()) {
       const message = 'Por favor, informe origem e destino para calcular a rota.';
       setErrorMessage(message);
       setHasError(true);
-      notify.error('Erro de validação', message);
+      notify.error('Campos obrigatórios', message);
+      return;
+    }
+
+    if (origin.trim() === destination.trim()) {
+      const message = 'Origem e destino não podem ser iguais.';
+      setErrorMessage(message);
+      setHasError(true);
+      notify.error('Dados inválidos', message);
       return;
     }
 
     await performRouteCalculation(origin, destination);
-  };
+  }, [origin, destination, performRouteCalculation, setErrorMessage, setHasError, notify]);
 
   // Cleanup on unmount
   useEffect(() => {

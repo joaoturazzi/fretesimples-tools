@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MapPin, Truck } from 'lucide-react';
+import { MapPin, Truck, AlertCircle } from 'lucide-react';
 
 interface LocationInputsProps {
   origin: string;
@@ -28,7 +28,7 @@ const LocationInputs: React.FC<LocationInputsProps> = ({
       <div className="calculator-input-group">
         <label htmlFor="origin" className="calculator-label flex items-center gap-1.5">
           <MapPin size={16} className="text-frete-500" />
-          Origem
+          Cidade de Origem
         </label>
         <input
           id="origin"
@@ -37,13 +37,17 @@ const LocationInputs: React.FC<LocationInputsProps> = ({
           value={origin}
           onChange={(e) => setOrigin(e.target.value)}
           placeholder="Ex: São Paulo, SP"
+          disabled={isCalculatingRoute}
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Digite o nome da cidade e estado (ex: São Paulo, SP)
+        </p>
       </div>
       
       <div className="calculator-input-group">
         <label htmlFor="destination" className="calculator-label flex items-center gap-1.5">
           <MapPin size={16} className="text-frete-500" />
-          Destino
+          Cidade de Destino
         </label>
         <input
           id="destination"
@@ -52,13 +56,23 @@ const LocationInputs: React.FC<LocationInputsProps> = ({
           value={destination}
           onChange={(e) => setDestination(e.target.value)}
           placeholder="Ex: Rio de Janeiro, RJ"
+          disabled={isCalculatingRoute}
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Digite o nome da cidade e estado (ex: Rio de Janeiro, RJ)
+        </p>
       </div>
 
       <div className="calculator-input-group">
         <label htmlFor="distance" className="calculator-label flex items-center gap-1.5">
           <Truck size={16} className="text-frete-500" />
-          Distância (km) {isCalculatingRoute && <span className="text-sm text-gray-500">- Calculando...</span>}
+          Distância (km)
+          {isCalculatingRoute && (
+            <span className="text-sm text-orange-600 flex items-center gap-1">
+              <div className="animate-spin h-3 w-3 border border-orange-600 border-t-transparent rounded-full"></div>
+              Calculando rota...
+            </span>
+          )}
         </label>
         <div className="flex gap-2">
           <input
@@ -67,21 +81,35 @@ const LocationInputs: React.FC<LocationInputsProps> = ({
             className="input-field"
             value={distance}
             min={0}
+            max={5000}
             onChange={(e) => setDistance(e.target.value ? parseFloat(e.target.value) : '')}
-            placeholder="Ex: 100"
+            placeholder="Ex: 450"
+            disabled={isCalculatingRoute}
           />
           <button
             onClick={onCalculateDistance}
-            disabled={isCalculatingRoute}
-            className="btn btn-secondary px-3"
-            title="Calcular distância manualmente"
+            disabled={isCalculatingRoute || !origin?.trim() || !destination?.trim()}
+            className="btn btn-secondary px-3 flex items-center gap-1"
+            title="Calcular distância automaticamente"
           >
-            {isCalculatingRoute ? '...' : '📍'}
+            {isCalculatingRoute ? (
+              <div className="animate-spin h-4 w-4 border border-current border-t-transparent rounded-full"></div>
+            ) : (
+              '🗺️'
+            )}
           </button>
         </div>
-        {origin && destination && (
+        
+        {origin?.trim() && destination?.trim() && (
+          <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+            <AlertCircle size={12} />
+            A distância será calculada automaticamente em 2 segundos
+          </div>
+        )}
+        
+        {(!origin?.trim() || !destination?.trim()) && (
           <p className="text-xs text-gray-500 mt-1">
-            A distância será calculada automaticamente baseada na rota.
+            Informe origem e destino para cálculo automático da distância
           </p>
         )}
       </div>

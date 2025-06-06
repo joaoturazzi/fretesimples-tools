@@ -19,29 +19,39 @@ const MapComponent: React.FC<MapComponentProps> = ({
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Initialize HERE Map
-    if (window.H) {
-      const platform = new window.H.service.Platform({
-        'apikey': 'JeglUu9l7gXwCMcH6x5-FaX0AkwABnmICqMupmCfIng'
-      });
+    // Check if HERE Maps is loaded
+    if (typeof window !== 'undefined' && window.H) {
+      try {
+        const platform = new window.H.service.Platform({
+          'apikey': 'JeglUu9l7gXwCMcH6x5-FaX0AkwABnmICqMupmCfIng'
+        });
 
-      const defaultMapTypes = platform.createDefaultMapTypes();
-      const map = new window.H.Map(
-        mapRef.current,
-        defaultMapTypes.vector.normal.map,
-        {
-          zoom: 6,
-          center: { lat: -14.235, lng: -51.9253 } // Centro do Brasil
-        }
-      );
+        const defaultMapTypes = platform.createDefaultMapTypes();
+        const map = new window.H.Map(
+          mapRef.current,
+          defaultMapTypes.vector.normal.map,
+          {
+            zoom: 6,
+            center: { lat: -14.235, lng: -51.9253 } // Centro do Brasil
+          }
+        );
 
-      const behavior = new window.H.mapview.behavior.Behavior({});
-      const ui = new window.H.ui.UI.createDefault(map);
+        const behavior = new window.H.mapview.behavior.Behavior({});
+        const ui = new window.H.ui.UI.createDefault(map);
 
-      return () => {
-        map.getViewPort().removeEventListener('resize', () => map.getViewPort().resize());
-        map.dispose();
-      };
+        return () => {
+          try {
+            map.getViewPort().removeEventListener('resize', () => map.getViewPort().resize());
+            map.dispose();
+          } catch (error) {
+            console.error('Error disposing map:', error);
+          }
+        };
+      } catch (error) {
+        console.error('Error initializing HERE Map:', error);
+      }
+    } else {
+      console.warn('HERE Maps API not loaded');
     }
   }, [origin, destination]);
 

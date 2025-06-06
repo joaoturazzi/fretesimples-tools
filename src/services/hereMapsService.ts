@@ -1,4 +1,6 @@
 
+import env from '@/config/env';
+
 interface RouteResponse {
   distance: number;
   duration: number;
@@ -13,24 +15,96 @@ interface GeocodeResponse {
   address: string;
 }
 
-const HERE_API_KEY = 'JeglUu9l7gXwCMcH6x5-FaX0AkwABnmICqMupmCfIng';
+interface ApiError {
+  message: string;
+  status?: number;
+  code?: string;
+}
 
-export class HereMapsService {
-  private static baseUrl = 'https://router.hereapi.com/v8';
-  private static geocodeUrl = 'https://geocode.search.hereapi.com/v1';
+class HereMapsServiceClass {
+  private readonly baseUrl = env.HERE_ROUTER_API;
+  private readonly geocodeUrl = env.HERE_GEOCODE_API;
+  private readonly apiKey = env.HERE_API_KEY;
+  private requestCount = 0;
+  private lastResetTime = Date.now();
 
-  static async geocodeAddress(address: string): Promise<GeocodeResponse | null> {
+  private async delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private checkRateLimit(): boolean {
+    const now = Date.now();
+    if (now - this.lastResetTime >= 60000) {
+      this.requestCount = 0;
+      this.lastResetTime = now;
+    }
+    
+    if (this.requestCount >= env.API_RATE_LIMIT) {
+      console.warn('HERE Maps API rate limit exceeded');
+      return false;
+    }
+    
+    this.requestCount++;
+    return true;
+  }
+
+  private async makeRequest<T>(
+    url: string, 
+    options: RequestInit = {},
+    retryCount = 0
+  ): Promise<T> {
+    if (!this.checkRateLimit()) {
+      throw new ApiError('Rate limit exceeded. Please try again later.');
+    }
+
     try {
-      const response = await fetch(
-        `${this.geocodeUrl}/geocode?q=${encodeURIComponent(address)}&in=countryCode:BRA&apiKey=${HERE_API_KEY}`
-      );
+      console.log(`Making request to: ${url}`);
       
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+      });
+
       if (!response.ok) {
-        console.error('Geocoding response not OK:', response.status);
-        return null;
+        const errorData = await response.text();
+        console.error(`API Error ${response.status}:`, errorData);
+        
+        throw new ApiError(
+          `API request failed: ${response.statusText}`,
+          response.status
+        );
+      }
+
+      const data = await response.json();
+      console.log('API Response:', data);
+      return data;
+    } catch (error) {
+      console.error(`Request failed (attempt ${retryCount + 1}):`, error);
+      
+      if (retryCount < env.API_RETRY_ATTEMPTS - 1) {
+        const delay = env.API_RETRY_DELAY * Math.pow(2, retryCount);
+        console.log(`Retrying in ${delay}ms...`);
+        await this.delay(delay);
+        return this.makeRequest<T>(url, options, retryCount + 1);
       }
       
-      const data = await response.json();
+      throw error instanceof ApiError ? error : new ApiError(
+        error instanceof Error ? error.message : 'Unknown error occurred'
+      );
+    }
+  }
+
+  async geocodeAddress(address: string): Promise<GeocodeResponse | null> {
+    if (!address?.trim()) {
+      throw new ApiError('Address is required');
+    }
+
+    try {
+      const url = `${this.geocodeUrl}/geocode?q=${encodeURIComponent(address)}&in=countryCode:BRA&apiKey=${this.apiKey}`;
+      const data = await this.makeRequest<any>(url);
       
       if (data.items && data.items.length > 0) {
         const item = data.items[0];
@@ -44,37 +118,41 @@ export class HereMapsService {
       return null;
     } catch (error) {
       console.error('Geocoding error:', error);
-      return null;
+      throw error instanceof ApiError ? error : new ApiError('Failed to geocode address');
     }
   }
 
-  static async calculateRoute(origin: string, destination: string): Promise<RouteResponse | null> {
+  async calculateRoute(origin: string, destination: string): Promise<RouteResponse | null> {
+    if (!origin?.trim() || !destination?.trim()) {
+      throw new ApiError('Both origin and destination are required');
+    }
+
+    if (origin.trim() === destination.trim()) {
+      throw new ApiError('Origin and destination cannot be the same');
+    }
+
     try {
       console.log('Calculating route from', origin, 'to', destination);
       
-      // First geocode the addresses
-      const originCoords = await this.geocodeAddress(origin);
-      const destCoords = await this.geocodeAddress(destination);
+      // Geocode both addresses
+      const [originCoords, destCoords] = await Promise.all([
+        this.geocodeAddress(origin),
+        this.geocodeAddress(destination)
+      ]);
       
-      if (!originCoords || !destCoords) {
-        console.error('Could not geocode addresses');
-        return null;
+      if (!originCoords) {
+        throw new ApiError(`Could not find location for: ${origin}`);
+      }
+      
+      if (!destCoords) {
+        throw new ApiError(`Could not find location for: ${destination}`);
       }
 
       console.log('Origin coords:', originCoords);
       console.log('Destination coords:', destCoords);
 
-      const response = await fetch(
-        `${this.baseUrl}/routes?transportMode=truck&origin=${originCoords.lat},${originCoords.lng}&destination=${destCoords.lat},${destCoords.lng}&return=summary,polyline&apiKey=${HERE_API_KEY}`
-      );
-      
-      if (!response.ok) {
-        console.error('Route calculation response not OK:', response.status);
-        return null;
-      }
-      
-      const data = await response.json();
-      console.log('Route data:', data);
+      const url = `${this.baseUrl}/routes?transportMode=truck&origin=${originCoords.lat},${originCoords.lng}&destination=${destCoords.lat},${destCoords.lng}&return=summary,polyline&apiKey=${this.apiKey}`;
+      const data = await this.makeRequest<any>(url);
       
       if (data.routes && data.routes.length > 0) {
         const route = data.routes[0];
@@ -90,19 +168,17 @@ export class HereMapsService {
         };
       }
       
-      return null;
+      throw new ApiError('No route found between the specified locations');
     } catch (error) {
       console.error('Route calculation error:', error);
-      return null;
+      throw error instanceof ApiError ? error : new ApiError('Failed to calculate route');
     }
   }
 
-  private static decodePolyline(encoded: string): Array<{ lat: number; lng: number }> {
+  private decodePolyline(encoded: string): Array<{ lat: number; lng: number }> {
     if (!encoded) return [];
     
     try {
-      // HERE Maps uses flexible polyline encoding
-      // This is a simplified decoder for basic functionality
       const coords: Array<{ lat: number; lng: number }> = [];
       let index = 0;
       let lat = 0;
@@ -143,3 +219,12 @@ export class HereMapsService {
     }
   }
 }
+
+// Export singleton instance
+export const HereMapsService = new HereMapsServiceClass();
+
+// For backward compatibility
+export { HereMapsService as default };
+
+// Export types
+export type { RouteResponse, GeocodeResponse, ApiError };

@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -17,6 +18,25 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  define: {
+    // Expose env variables to the client
+    __DEV__: mode === 'development',
+  },
+  optimizeDeps: {
+    include: ['leaflet', 'react-leaflet'],
+  },
+  build: {
+    sourcemap: mode === 'development',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom'],
+          'maps': ['leaflet', 'react-leaflet'],
+          'ui': ['lucide-react', '@radix-ui/react-toast'],
+        },
+      },
     },
   },
 }));

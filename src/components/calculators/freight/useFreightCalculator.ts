@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { HereMapsService } from '@/services/hereMapsService';
+import { useNotify } from '@/components/ui/notification';
 import { calculateFreight, calculateCostSimulation, getDefaultCostPerKm, FreightCalculationResult, CostSimulationResult } from './freightCalculations';
 
 export const useFreightCalculator = () => {
+  const notify = useNotify();
+  
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
   const [distance, setDistance] = useState<number | ''>('');
@@ -52,11 +55,16 @@ export const useFreightCalculator = () => {
             setRouteCoordinates(route.route.geometry);
             setShowMap(true);
             console.log('Auto-calculated distance:', route.distance, 'km');
-          } else {
-            console.log('Could not auto-calculate distance for:', origin, 'to', destination);
+            
+            notify.success(
+              'Rota calculada!',
+              `Distância: ${route.distance} km • Tempo: ${Math.floor(route.duration / 60)}h ${route.duration % 60}m`
+            );
           }
         } catch (error) {
           console.error('Error auto-calculating distance:', error);
+          const message = error instanceof Error ? error.message : 'Erro ao calcular rota';
+          notify.warning('Rota não calculada', message);
         } finally {
           setIsCalculatingRoute(false);
         }
@@ -69,12 +77,14 @@ export const useFreightCalculator = () => {
 
     const timeoutId = setTimeout(autoCalculateDistance, 1500);
     return () => clearTimeout(timeoutId);
-  }, [origin, destination]);
+  }, [origin, destination, notify]);
 
   const calculateDistanceFromRoute = async () => {
     if (!origin || !destination) {
-      setErrorMessage('Por favor, informe origem e destino para calcular a rota.');
+      const message = 'Por favor, informe origem e destino para calcular a rota.';
+      setErrorMessage(message);
       setHasError(true);
+      notify.error('Erro de validação', message);
       return;
     }
 
@@ -88,13 +98,17 @@ export const useFreightCalculator = () => {
         setRouteDuration(route.duration);
         setRouteCoordinates(route.route.geometry);
         setShowMap(true);
-      } else {
-        setErrorMessage('Não foi possível calcular a rota. Verifique os endereços informados.');
-        setHasError(true);
+        
+        notify.success(
+          'Rota calculada com sucesso!',
+          `${route.distance} km • ${Math.floor(route.duration / 60)}h ${route.duration % 60}m`
+        );
       }
     } catch (error) {
-      setErrorMessage('Erro ao calcular rota. Tente novamente.');
+      const message = error instanceof Error ? error.message : 'Erro ao calcular rota. Tente novamente.';
+      setErrorMessage(message);
       setHasError(true);
+      notify.error('Erro ao calcular rota', message);
     } finally {
       setIsCalculatingRoute(false);
     }
@@ -102,14 +116,18 @@ export const useFreightCalculator = () => {
 
   const validateInputs = () => {
     if (distance === '' || distance <= 0) {
-      setErrorMessage('Por favor, informe uma distância válida.');
+      const message = 'Por favor, informe uma distância válida.';
+      setErrorMessage(message);
       setHasError(true);
+      notify.error('Erro de validação', message);
       return false;
     }
 
     if (weight === '' || weight <= 0) {
-      setErrorMessage('Por favor, informe um peso válido.');
+      const message = 'Por favor, informe um peso válido.';
+      setErrorMessage(message);
       setHasError(true);
+      notify.error('Erro de validação', message);
       return false;
     }
 
@@ -163,9 +181,16 @@ export const useFreightCalculator = () => {
           setCostSimulationResult(costSim);
         }
 
+        notify.success(
+          'Cálculo concluído!',
+          `Valor do frete: R$ ${calculatedResult.totalFreight.toFixed(2)}`
+        );
+
       } catch (error) {
+        const message = 'Ocorreu um erro ao calcular o frete. Por favor, tente novamente.';
         setHasError(true);
-        setErrorMessage('Ocorreu um erro ao calcular o frete. Por favor, tente novamente.');
+        setErrorMessage(message);
+        notify.error('Erro no cálculo', message);
         console.error('Erro ao calcular frete:', error);
       } finally {
         setIsCalculating(false);
@@ -194,6 +219,8 @@ export const useFreightCalculator = () => {
     setShowCostSimulation(false);
     setRouteCoordinates([]);
     setRouteDuration(undefined);
+    
+    notify.info('Formulário limpo', 'Todos os campos foram resetados');
   };
 
   return {

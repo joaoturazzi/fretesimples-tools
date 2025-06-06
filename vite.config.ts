@@ -35,8 +35,20 @@ export default defineConfig(({ mode }) => ({
           'vendor': ['react', 'react-dom', 'react-router-dom'],
           'maps': ['leaflet', 'react-leaflet'],
           'ui': ['lucide-react', '@radix-ui/react-toast'],
+          'analytics': ['react-helmet-async'],
         },
       },
     },
+    // Performance optimizations
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: mode === 'production',
+      },
+    },
+    // Enable gzip compression
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 1000,
   },
 }));

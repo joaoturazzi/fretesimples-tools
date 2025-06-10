@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import Header from '@/components/Header';
-import Sidebar from '@/components/Sidebar';
+import ResponsiveSidebar from '@/components/ResponsiveSidebar';
 import { 
   FreightCalculator,
   ProfitSimulator,
@@ -16,14 +15,16 @@ import {
   ContractGenerator
 } from '@/components/Tools';
 import ChatAssistant from '@/components/ChatAssistant';
+import TestingUtils from '@/components/TestingUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSEO } from '@/hooks/useSEO';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import AboutSection from '@/components/AboutSection';
-import LazyImage from '@/components/ui/LazyImage';
+import CciLogo from '@/components/ui/CciLogo';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('calculadora-frete');
+  const [showTestingUtils, setShowTestingUtils] = useState(false);
   const isMobile = useIsMobile();
   const { trackPageView, trackCalculatorStart, trackUserInteraction } = useAnalytics();
   
@@ -49,22 +50,34 @@ const Index = () => {
     trackUserInteraction('section_change', 'sidebar_menu', section);
     setActiveSection(section);
   };
+
+  // Show testing utils in development
+  useEffect(() => {
+    const showTests = localStorage.getItem('show-testing-utils') === 'true' ||
+                     window.location.search.includes('debug=true');
+    setShowTestingUtils(showTests);
+  }, []);
   
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Header />
-      
-      <Sidebar 
+      <ResponsiveSidebar 
         activeSection={activeSection} 
         setActiveSection={handleSectionChange} 
       />
       
       <main 
-        className={`pt-4 pb-16 transition-all duration-300 ${
+        className={`pt-20 pb-16 transition-all duration-300 ${
           isMobile ? 'ml-0' : 'ml-72'
         }`}
       >
         <div className="content-container px-4 sm:px-6">
+          {/* Testing Utils (Development Only) */}
+          {showTestingUtils && (
+            <div className="mb-8">
+              <TestingUtils />
+            </div>
+          )}
+
           <div className="tools-container">
             <FreightCalculator isActive={activeSection === 'calculadora-frete'} />
             <ProfitSimulator isActive={activeSection === 'simulador-lucro'} />
@@ -84,12 +97,7 @@ const Index = () => {
           <footer id="footer" className="text-center text-gray-500 text-sm py-8 border-t border-gray-100 mt-12">
             <div className="flex justify-center items-center mb-4">
               <div className="bg-white p-2 rounded-full mr-3 shadow-sm">
-                <LazyImage 
-                  src="https://i.postimg.cc/C5bzFpj8/Logo-CCI.png" 
-                  alt="CCI Logo" 
-                  className="h-8 w-auto object-contain" 
-                  skeleton={true}
-                />
+                <CciLogo size="sm" showText={false} />
               </div>
               <div className="text-left">
                 <span className="font-semibold text-gray-700 block">FreteDigital BY CCI</span>

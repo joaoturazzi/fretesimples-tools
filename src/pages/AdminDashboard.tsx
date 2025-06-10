@@ -13,6 +13,7 @@ import AdvancedDashboard from './admin/components/AdvancedDashboard';
 import ReportGenerator from './admin/components/ReportGenerator';
 import { Bell, BarChart3, FileText, Users, Calculator } from 'lucide-react';
 import { useNotifications } from './admin/hooks/useNotifications';
+import CciLogo from '@/components/ui/CciLogo';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -32,26 +33,18 @@ const AdminDashboard = () => {
     return (
       <div className="p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <img 
-            src="https://i.postimg.cc/C5bzFpj8/Logo-CCI.png" 
-            alt="CCI Logo" 
-            className="h-12 w-auto object-contain mx-auto mb-4"
-          />
-          <p className="text-gray-600">Carregando dados...</p>
+          <CciLogo size="md" className="mx-auto mb-4" />
+          <p className="text-gray-600">Carregando dados administrativos...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-full mx-auto">
+    <div className="p-6 space-y-6 max-w-full mx-auto pt-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <img 
-            src="https://i.postimg.cc/C5bzFpj8/Logo-CCI.png" 
-            alt="CCI Logo" 
-            className="h-10 w-auto object-contain"
-          />
+          <CciLogo size="lg" />
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Painel Administrativo</h1>
             <p className="text-gray-600">FreteDigital BY CCI - Sistema Avançado de Gestão</p>

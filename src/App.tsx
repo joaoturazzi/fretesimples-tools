@@ -9,7 +9,7 @@ import { Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from "@/hooks/useAuth";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import Header from "@/components/Header";
+import UnifiedHeader from "@/components/UnifiedHeader";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -35,7 +35,7 @@ const App: React.FC = () => (
           <NotificationProvider>
             <AuthProvider>
               <SEO />
-              <Header />
+              <UnifiedHeader />
               <Toaster />
               <Sonner />
               <Routes>

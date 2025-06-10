@@ -1,0 +1,209 @@
+
+@layer components {
+  /* Responsive Breakpoints */
+  .responsive-container {
+    @apply w-full mx-auto px-4;
+  }
+  
+  @screen sm {
+    .responsive-container {
+      @apply max-w-screen-sm px-6;
+    }
+  }
+  
+  @screen md {
+    .responsive-container {
+      @apply max-w-screen-md px-8;
+    }
+  }
+  
+  @screen lg {
+    .responsive-container {
+      @apply max-w-screen-lg px-8;
+    }
+  }
+  
+  @screen xl {
+    .responsive-container {
+      @apply max-w-screen-xl px-8;
+    }
+  }
+
+  /* Mobile-First Navigation */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40;
+  }
+  
+  .mobile-nav-item {
+    @apply flex-1 flex flex-col items-center justify-center py-2 px-1 text-xs;
+  }
+  
+  .mobile-nav-item.active {
+    @apply text-orange-600 bg-orange-50;
+  }
+
+  /* Touch-Friendly Elements */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+  
+  .mobile-button {
+    @apply touch-target px-4 py-3 text-base font-medium rounded-lg;
+  }
+
+  /* Responsive Typography */
+  .responsive-heading {
+    @apply text-lg font-bold;
+  }
+  
+  @screen sm {
+    .responsive-heading {
+      @apply text-xl;
+    }
+  }
+  
+  @screen md {
+    .responsive-heading {
+      @apply text-2xl;
+    }
+  }
+  
+  @screen lg {
+    .responsive-heading {
+      @apply text-3xl;
+    }
+  }
+
+  /* Responsive Grid */
+  .responsive-grid {
+    @apply grid grid-cols-1 gap-4;
+  }
+  
+  @screen sm {
+    .responsive-grid {
+      @apply grid-cols-2 gap-6;
+    }
+  }
+  
+  @screen lg {
+    .responsive-grid {
+      @apply grid-cols-3;
+    }
+  }
+  
+  @screen xl {
+    .responsive-grid {
+      @apply grid-cols-4;
+    }
+  }
+
+  /* Mobile Form Optimization */
+  .mobile-form-input {
+    @apply w-full px-4 py-3 text-base border border-gray-300 rounded-lg;
+    @apply focus:ring-2 focus:ring-orange-500 focus:border-transparent;
+  }
+  
+  .mobile-form-label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+
+  /* Responsive Spacing */
+  .section-spacing-mobile {
+    @apply py-6 space-y-6;
+  }
+  
+  @screen md {
+    .section-spacing-mobile {
+      @apply py-8 space-y-8;
+    }
+  }
+  
+  @screen lg {
+    .section-spacing-mobile {
+      @apply py-12 space-y-10;
+    }
+  }
+
+  /* Hide/Show Based on Screen Size */
+  .mobile-only {
+    @apply block;
+  }
+  
+  @screen md {
+    .mobile-only {
+      @apply hidden;
+    }
+  }
+  
+  .desktop-only {
+    @apply hidden;
+  }
+  
+  @screen md {
+    .desktop-only {
+      @apply block;
+    }
+  }
+
+  /* Responsive Sidebar */
+  .sidebar-responsive {
+    @apply fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300;
+    @apply -translate-x-full;
+  }
+  
+  .sidebar-responsive.open {
+    @apply translate-x-0;
+  }
+  
+  @screen md {
+    .sidebar-responsive {
+      @apply relative translate-x-0;
+    }
+  }
+
+  /* Responsive Cards */
+  .responsive-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4;
+  }
+  
+  @screen sm {
+    .responsive-card {
+      @apply p-6;
+    }
+  }
+  
+  @screen lg {
+    .responsive-card {
+      @apply p-8;
+    }
+  }
+
+  /* Performance Optimizations */
+  .lazy-load {
+    @apply opacity-0 transition-opacity duration-300;
+  }
+  
+  .lazy-load.loaded {
+    @apply opacity-100;
+  }
+  
+  /* Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* High Contrast Support */
+  @media (prefers-contrast: high) {
+    .responsive-card {
+      @apply border-2 border-gray-900;
+    }
+    
+    .mobile-button {
+      @apply border-2 border-current;
+    }
+  }
+}

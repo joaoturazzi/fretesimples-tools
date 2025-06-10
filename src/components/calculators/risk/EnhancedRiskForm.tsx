@@ -139,7 +139,7 @@ const EnhancedRiskForm: React.FC<EnhancedRiskFormProps> = ({
               type="text"
               value={origin}
               onChange={(e) => setOrigin(e.target.value)}
-              className={cn("input-field", validationErrors.origin && "error")}
+              className={cn("input-field", !!validationErrors.origin && "error")}
               placeholder="Ex: São Paulo, SP"
             />
             {validationErrors.origin && (
@@ -159,7 +159,7 @@ const EnhancedRiskForm: React.FC<EnhancedRiskFormProps> = ({
               type="text"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              className={cn("input-field", validationErrors.destination && "error")}
+              className={cn("input-field", !!validationErrors.destination && "error")}
               placeholder="Ex: Rio de Janeiro, RJ"
             />
             {validationErrors.destination && (
@@ -219,7 +219,7 @@ const EnhancedRiskForm: React.FC<EnhancedRiskFormProps> = ({
               type="text"
               value={cargoValue ? formatCurrency(cargoValue) : ''}
               onChange={handleCurrencyChange}
-              className={cn("input-field", validationErrors.cargoValue && "error")}
+              className={cn("input-field", !!validationErrors.cargoValue && "error")}
               placeholder="R$ 0,00"
             />
             {validationErrors.cargoValue && (

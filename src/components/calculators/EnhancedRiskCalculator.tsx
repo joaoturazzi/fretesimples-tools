@@ -5,7 +5,6 @@ import { useEnhancedRiskCalculator } from './risk/useEnhancedRiskCalculator';
 import EnhancedRiskForm from './risk/EnhancedRiskForm';
 import IntelligentRiskResults from './risk/IntelligentRiskResults';
 import RiskActionButtons from './risk/RiskActionButtons';
-import { generateWhatsAppMessage, openWhatsAppContact } from './risk/WhatsAppContact';
 
 interface EnhancedRiskCalculatorProps {
   isActive: boolean;
@@ -41,39 +40,6 @@ const EnhancedRiskCalculator = ({ isActive }: EnhancedRiskCalculatorProps) => {
     handleCalculateRisk,
     handleReset
   } = useEnhancedRiskCalculator();
-
-  const handleExportReport = () => {
-    if (!result) return;
-    
-    const factors = {
-      origin,
-      destination,
-      cargoType,
-      cargoValue: parseFloat(cargoValue) / 100,
-      contractType,
-      travelTime,
-      securityTools,
-      routeDistance
-    };
-    
-    console.log('Exporting report with factors:', factors);
-  };
-
-  const handleContactSpecialist = () => {
-    const factors = {
-      origin,
-      destination,
-      cargoType,
-      cargoValue: parseFloat(cargoValue) / 100,
-      contractType,
-      travelTime,
-      securityTools,
-      routeDistance
-    };
-    
-    const message = generateWhatsAppMessage(factors, result);
-    openWhatsAppContact(message);
-  };
 
   const factors = {
     origin,
@@ -127,8 +93,13 @@ const EnhancedRiskCalculator = ({ isActive }: EnhancedRiskCalculatorProps) => {
         {result && (
           <IntelligentRiskResults
             result={result}
-            onExportReport={handleExportReport}
-            onContactSpecialist={handleContactSpecialist}
+            onExportReport={() => {
+              if (!result) return;
+              console.log('Exporting report with factors:', factors);
+            }}
+            onContactSpecialist={() => {
+              // This will be handled by RiskActionButtons component
+            }}
           />
         )}
       </div>

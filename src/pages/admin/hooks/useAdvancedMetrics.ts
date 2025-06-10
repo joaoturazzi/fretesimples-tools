@@ -86,12 +86,12 @@ export const useAdvancedMetrics = (dateRange: { start: Date; end: Date }) => {
       const diagnostics = diagnosticsData.data || [];
       const toolUsage = toolUsageData.data || [];
 
-      // Calcular distribuição de risco
-      const riskCounts = diagnostics.reduce((acc, d) => {
+      // Calcular distribuição de risco - fix the type issue
+      const riskCounts: Record<string, number> = diagnostics.reduce((acc, d) => {
         const level = d.risk_level?.toLowerCase() || 'low';
         acc[level] = (acc[level] || 0) + 1;
         return acc;
-      }, {});
+      }, {} as Record<string, number>);
 
       // Calcular leads deste mês e do mês passado
       const now = new Date();
@@ -108,10 +108,10 @@ export const useAdvancedMetrics = (dateRange: { start: Date; end: Date }) => {
       }).length;
 
       // Calcular ferramenta mais usada
-      const toolCounts = toolUsage.reduce((acc, t) => {
+      const toolCounts: Record<string, number> = toolUsage.reduce((acc, t) => {
         acc[t.tool_type] = (acc[t.tool_type] || 0) + 1;
         return acc;
-      }, {});
+      }, {} as Record<string, number>);
 
       const topPerformingTool = Object.entries(toolCounts)
         .sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'N/A';
@@ -122,10 +122,10 @@ export const useAdvancedMetrics = (dateRange: { start: Date; end: Date }) => {
         avgSessionDuration: 8.5, // Estimativa
         topPerformingTool,
         riskDistribution: {
-          low: riskCounts.baixo || 0,
-          medium: riskCounts.médio || 0,
-          high: riskCounts.alto || 0,
-          critical: riskCounts.crítico || 0
+          low: riskCounts['baixo'] || riskCounts['low'] || 0,
+          medium: riskCounts['médio'] || riskCounts['medium'] || 0,
+          high: riskCounts['alto'] || riskCounts['high'] || 0,
+          critical: riskCounts['crítico'] || riskCounts['critical'] || 0
         },
         leadsThisMonth,
         leadsLastMonth,

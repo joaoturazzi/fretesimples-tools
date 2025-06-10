@@ -28,8 +28,20 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      setNotifications(data || []);
-      setUnreadCount((data || []).filter(n => !n.read).length);
+      // Type the data properly to match our Notification interface
+      const typedNotifications: Notification[] = (data || []).map(item => ({
+        id: item.id,
+        type: item.type as 'new_lead' | 'high_risk' | 'follow_up' | 'system',
+        title: item.title,
+        message: item.message,
+        data: item.data,
+        read: item.read,
+        created_at: item.created_at,
+        expires_at: item.expires_at
+      }));
+
+      setNotifications(typedNotifications);
+      setUnreadCount(typedNotifications.filter(n => !n.read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -85,7 +97,17 @@ export const useNotifications = () => {
           table: 'notifications'
         },
         (payload) => {
-          setNotifications(prev => [payload.new as Notification, ...prev]);
+          const newNotification: Notification = {
+            id: payload.new.id,
+            type: payload.new.type as 'new_lead' | 'high_risk' | 'follow_up' | 'system',
+            title: payload.new.title,
+            message: payload.new.message,
+            data: payload.new.data,
+            read: payload.new.read,
+            created_at: payload.new.created_at,
+            expires_at: payload.new.expires_at
+          };
+          setNotifications(prev => [newNotification, ...prev]);
           setUnreadCount(prev => prev + 1);
         }
       )

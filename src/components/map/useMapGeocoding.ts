@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LoadingState } from '@/components/ui/loading';
 import { mapService } from '@/services/map/UnifiedMapService';
 import { useErrorHandler } from '@/hooks/useErrorHandler';

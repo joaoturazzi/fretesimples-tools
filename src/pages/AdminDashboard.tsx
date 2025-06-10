@@ -25,7 +25,8 @@ interface Diagnostic {
   risk_level: string;
   viability: string;
   created_at: string;
-  profiles: Profile;
+  user_id: string;
+  profile: Profile | null;
 }
 
 const AdminDashboard = () => {
@@ -52,22 +53,31 @@ const AdminDashboard = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      // Buscar diagnósticos com perfis
+      // Buscar diagnósticos
       const { data: diagnosticsData } = await supabase
         .from('diagnostics')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            email,
-            company
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
 
+      // Buscar perfis dos diagnósticos separadamente
+      const diagnosticsWithProfiles = await Promise.all(
+        (diagnosticsData || []).map(async (diagnostic) => {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', diagnostic.user_id)
+            .single();
+
+          return {
+            ...diagnostic,
+            profile: profileData || null
+          };
+        })
+      );
+
       setProfiles(profilesData || []);
-      setDiagnostics(diagnosticsData || []);
+      setDiagnostics(diagnosticsWithProfiles);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -213,8 +223,8 @@ const AdminDashboard = () => {
                 {diagnostics.map((diagnostic) => (
                   <div key={diagnostic.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
-                      <h3 className="font-semibold">{diagnostic.profiles?.full_name}</h3>
-                      <p className="text-sm text-gray-600">{diagnostic.profiles?.email}</p>
+                      <h3 className="font-semibold">{diagnostic.profile?.full_name || 'Usuário Desconhecido'}</h3>
+                      <p className="text-sm text-gray-600">{diagnostic.profile?.email || 'Email não disponível'}</p>
                       <p className="text-sm text-gray-500">
                         Ferramenta: {diagnostic.tool_type}
                       </p>

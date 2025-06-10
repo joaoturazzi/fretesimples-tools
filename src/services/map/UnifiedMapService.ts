@@ -8,14 +8,31 @@ export class UnifiedMapService extends BaseMapService {
   private routingService = new UnifiedRoutingService();
 
   async geocodeAddress(address: string): Promise<GeocodeResponse | null> {
-    return this.geocodingService.geocodeAddress(address);
+    console.log('UnifiedMapService: Iniciando geocodificação para:', address);
+    try {
+      const result = await this.geocodingService.geocodeAddress(address);
+      console.log('UnifiedMapService: Resultado da geocodificação:', result);
+      return result;
+    } catch (error) {
+      console.error('UnifiedMapService: Erro na geocodificação:', error);
+      throw error;
+    }
   }
 
   async calculateRoute(origin: string, destination: string): Promise<RouteResponse | null> {
-    return this.routingService.calculateRoute(origin, destination);
+    console.log('UnifiedMapService: Iniciando cálculo de rota:', { origin, destination });
+    try {
+      const result = await this.routingService.calculateRoute(origin, destination);
+      console.log('UnifiedMapService: Resultado do cálculo de rota:', result);
+      return result;
+    } catch (error) {
+      console.error('UnifiedMapService: Erro no cálculo de rota:', error);
+      throw error;
+    }
   }
 
   clearCache(): void {
+    console.log('UnifiedMapService: Limpando cache');
     super.clearCache();
     this.geocodingService.clearCache();
     this.routingService.clearCache();
@@ -26,12 +43,15 @@ export class UnifiedMapService extends BaseMapService {
     const geocodingStats = this.geocodingService.getCacheStats();
     const routingStats = this.routingService.getCacheStats();
     
-    return {
+    const stats = {
       ...baseStats,
       geocoding: geocodingStats,
       routing: routingStats,
       totalCacheSize: baseStats.cacheSize + geocodingStats.cacheSize + routingStats.cacheSize
     };
+    
+    console.log('UnifiedMapService: Estatísticas do cache:', stats);
+    return stats;
   }
 }
 

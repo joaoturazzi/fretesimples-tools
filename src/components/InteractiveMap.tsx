@@ -1,6 +1,8 @@
+
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { LatLngExpression } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { LoadingState } from '@/components/ui/loading';
 import MapInitializer from './map/MapInitializer';
 import MapMarkers from './map/MapMarkers';
@@ -38,7 +40,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const mapCenter: LatLngExpression = [-14.235, -51.9253]; // Centro do Brasil
 
   useEffect(() => {
-    console.log('InteractiveMap state:', { 
+    console.log('InteractiveMap: Estado atual do mapa:', { 
       origin, 
       destination, 
       routeCoordinatesLength: routeCoordinates?.length,
@@ -62,6 +64,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
   }
 
   if (error) {
+    console.error('InteractiveMap: Erro no mapa:', error);
     return (
       <div className={`flex items-center justify-center h-full bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
         <div className="text-center">
@@ -82,12 +85,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
   }
 
   try {
-    console.log('InteractiveMap: Rendering MapContainer with:', {
-      center: mapCenter,
-      originCoords,
-      destCoords,
-      routeCoordinatesLength: routeCoordinates?.length
-    });
+    console.log('InteractiveMap: Renderizando MapContainer com sucesso');
 
     return (
       <div className={`relative rounded-lg overflow-hidden border border-gray-200 ${className}`} style={{ height }}>
@@ -120,13 +118,13 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
       </div>
     );
   } catch (error) {
-    console.error('InteractiveMap: Error rendering map:', error);
+    console.error('InteractiveMap: Erro ao renderizar mapa:', error);
     return (
       <div className={`flex items-center justify-center h-full bg-gray-50 text-gray-600 rounded-lg border ${className}`} style={{ height }}>
         <div className="text-center">
           <p className="mb-2">⚠️ Erro ao renderizar mapa</p>
           <p className="text-sm">Tente recarregar a página</p>
-          <p className="text-xs text-gray-500 mt-2">Detalhes do erro: {error instanceof Error ? error.message : 'Erro desconhecido'}</p>
+          <p className="text-xs text-gray-500 mt-2">Detalhes: {error instanceof Error ? error.message : 'Erro desconhecido'}</p>
         </div>
       </div>
     );

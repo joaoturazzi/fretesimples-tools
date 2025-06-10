@@ -1,5 +1,6 @@
+
 import { useCallback, useEffect, useRef } from 'react';
-import { mapService } from '@/services/unifiedMapService';
+import { mapService } from '@/services/map/UnifiedMapService';
 import { useNotify } from '@/components/ui/notification';
 
 export const useFreightRouteCalculation = (

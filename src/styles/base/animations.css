@@ -41,35 +41,35 @@
 }
 
 @layer utilities {
-  .animate-fade-in {
+  .anim-fade-in {
     animation: fadeIn 0.5s ease-out forwards;
   }
   
-  .animate-slide-in-left {
+  .anim-slide-in-left {
     animation: slideInLeft 0.5s ease-out forwards;
   }
   
-  .animate-slide-in-right {
+  .anim-slide-in-right {
     animation: slideInRight 0.5s ease-out forwards;
   }
   
-  .animate-slide-in-up {
+  .anim-slide-in-up {
     animation: slideInUp 0.5s ease-out forwards;
   }
   
-  .animate-slide-in-down {
+  .anim-slide-in-down {
     animation: slideInDown 0.5s ease-out forwards;
   }
   
-  .animate-bounce-in {
+  .anim-bounce-in {
     animation: bounceIn 0.6s ease-out forwards;
   }
   
-  .animate-pulse-soft {
+  .anim-pulse-soft {
     animation: pulse 2s infinite ease-in-out;
   }
   
-  .animate-shimmer {
+  .anim-shimmer {
     background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.5), rgba(255,255,255,0));
     background-size: 200% 100%;
     animation: shimmer 2s infinite linear;

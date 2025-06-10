@@ -3,9 +3,8 @@ import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { User, LogOut, Settings, Home } from 'lucide-react';
+import { User, LogOut, Settings } from 'lucide-react';
 import CciLogo from '@/components/ui/CciLogo';
-import { cn } from '@/lib/utils';
 
 const UnifiedHeader: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -29,18 +28,8 @@ const UnifiedHeader: React.FC = () => {
           <CciLogo size="md" />
         </div>
 
-        {/* Navegação Central */}
+        {/* Navegação Central - Removido o botão Ferramentas */}
         <nav className="hidden md:flex items-center gap-6">
-          <Button
-            variant={location.pathname === '/' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2"
-          >
-            <Home className="h-4 w-4" />
-            Ferramentas
-          </Button>
-          
           {user?.email?.includes('@cci.com.br') && (
             <Button
               variant={isAdmin ? 'default' : 'ghost'}
@@ -88,29 +77,19 @@ const UnifiedHeader: React.FC = () => {
         </div>
       </div>
 
-      {/* Navegação Mobile */}
-      {user && (
+      {/* Navegação Mobile - Simplificada */}
+      {user?.email?.includes('@cci.com.br') && (
         <div className="md:hidden border-t border-orange-100 bg-white px-4 py-2">
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center">
             <Button
-              variant={location.pathname === '/' ? 'default' : 'ghost'}
+              variant={isAdmin ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => navigate('/')}
-              className="flex-1 max-w-32"
+              onClick={() => navigate('/admin')}
+              className="flex items-center gap-2"
             >
-              Ferramentas
+              <Settings className="h-4 w-4" />
+              Admin
             </Button>
-            
-            {user.email?.includes('@cci.com.br') && (
-              <Button
-                variant={isAdmin ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => navigate('/admin')}
-                className="flex-1 max-w-32"
-              >
-                Admin
-              </Button>
-            )}
           </div>
         </div>
       )}

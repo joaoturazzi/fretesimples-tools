@@ -75,7 +75,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
   
   return (
     <>
-      {/* Mobile Toggle Button */}
+      {/* Mobile Toggle Button - Posicionamento otimizado */}
       {isMobile && (
         <Button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -86,18 +86,19 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
         </Button>
       )}
     
-      {/* Sidebar */}
+      {/* Sidebar - Ajustes de responsividade */}
       <div 
         className={cn(
-          "fixed left-0 bg-white/95 backdrop-blur-md border-r border-orange-100 shadow-lg transition-all duration-300 ease-in-out z-40 overflow-y-auto w-72",
+          "fixed left-0 bg-white/95 backdrop-blur-md border-r border-orange-100 shadow-lg transition-all duration-300 ease-in-out z-40 overflow-y-auto",
           "top-16", // Ajustado para header unificado
+          isMobile ? "w-80" : "w-72", // Largura otimizada para mobile
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
           !isMobile && "md:translate-x-0",
           isMobile ? "bottom-0" : "bottom-0"
         )}
       >
-        <div className="p-6">
-          {/* Informações da Ferramenta */}
+        <div className="p-4 sm:p-6">
+          {/* Informações da Ferramenta - Texto otimizado */}
           <div className="mb-6 pb-4 border-b border-orange-100">
             <p className="text-xs text-gray-500 mb-3">
               Ferramentas gratuitas para transportadores
@@ -112,11 +113,11 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
             </div>
           </div>
 
-          {/* Navegação */}
-          <nav className="space-y-6">
+          {/* Navegação - Espaçamento otimizado para mobile */}
+          <nav className="space-y-4 sm:space-y-6">
             {Object.entries(groupedItems).map(([category, items]) => (
               <div key={category}>
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 sm:mb-3 px-2 sm:px-3">
                   {categoryLabels[category as keyof typeof categoryLabels]}
                 </h3>
                 <div className="space-y-1">
@@ -125,7 +126,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
                       key={item.id}
                       onClick={() => handleSectionClick(item.id)}
                       className={cn(
-                        "w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 text-sm group relative",
+                        "w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-all duration-200 flex items-center gap-3 text-sm group relative",
                         activeSection === item.id 
                           ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-md" 
                           : "text-gray-600 hover:bg-orange-50 hover:text-orange-700"
@@ -137,7 +138,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
                       )}>
                         {item.icon}
                       </span>
-                      <span className="font-medium leading-tight">{item.label}</span>
+                      <span className="font-medium leading-tight text-xs sm:text-sm">{item.label}</span>
                       {activeSection === item.id && (
                         <div className="ml-auto flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-white/80 animate-pulse"></div>
@@ -150,8 +151,8 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
             ))}
           </nav>
 
-          {/* CTA de Consultoria */}
-          <div className="mt-8 p-4 bg-gradient-to-br from-orange-50 to-blue-50 rounded-xl border border-orange-100">
+          {/* CTA de Consultoria - Ajustado para mobile */}
+          <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-gradient-to-br from-orange-50 to-blue-50 rounded-xl border border-orange-100">
             <div className="text-center">
               <h4 className="text-sm font-semibold text-gray-900 mb-2">
                 Precisa de mais?
@@ -171,12 +172,12 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay - Ajuste de z-index */}
       {isMobile && isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
           onClick={() => setIsSidebarOpen(false)}
-          style={{ top: '64px' }} // Ajustado para header
+          style={{ top: '64px' }}
         />
       )}
     </>

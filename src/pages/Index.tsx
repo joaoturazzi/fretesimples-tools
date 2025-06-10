@@ -66,14 +66,15 @@ const Index = () => {
       />
       
       <main 
-        className={`pt-20 pb-16 transition-all duration-300 ${
-          isMobile ? 'ml-0' : 'ml-72'
-        }`}
+        className={cn(
+          "pt-20 pb-16 transition-all duration-300",
+          isMobile ? "ml-0" : "ml-72"
+        )}
       >
-        <div className="content-container px-4 sm:px-6">
+        <div className="content-container px-3 sm:px-4 lg:px-6">
           {/* Testing Utils (Development Only) */}
           {showTestingUtils && (
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <TestingUtils />
             </div>
           )}
@@ -94,18 +95,18 @@ const Index = () => {
           
           {activeSection === 'sobre' && <AboutSection />}
           
-          <footer id="footer" className="text-center text-gray-500 text-sm py-8 border-t border-gray-100 mt-12">
+          <footer id="footer" className="text-center text-gray-500 text-sm py-6 sm:py-8 border-t border-gray-100 mt-8 sm:mt-12">
             <div className="flex justify-center items-center mb-4">
               <div className="bg-white p-2 rounded-full mr-3 shadow-sm">
                 <CciLogo size="sm" showText={false} />
               </div>
               <div className="text-left">
-                <span className="font-semibold text-gray-700 block">FreteDigital BY CCI</span>
+                <span className="font-semibold text-gray-700 block text-sm sm:text-base">FreteDigital BY CCI</span>
                 <span className="text-xs text-gray-500">Soluções em Logística</span>
               </div>
             </div>
-            <p>© {new Date().getFullYear()} - Todas as ferramentas gratuitas para sempre.</p>
-            <p className="mt-1">
+            <p className="text-xs sm:text-sm">© {new Date().getFullYear()} - Todas as ferramentas gratuitas para sempre.</p>
+            <p className="mt-1 text-xs sm:text-sm">
               Desenvolvido para auxiliar transportadores e profissionais de logística.
             </p>
           </footer>

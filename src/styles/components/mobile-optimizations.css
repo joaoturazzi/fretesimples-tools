@@ -1,0 +1,163 @@
+
+@layer components {
+  /* Mobile-first optimizations */
+  @media (max-width: 768px) {
+    /* Header optimizations */
+    .unified-header {
+      @apply px-3 h-14;
+    }
+    
+    .unified-header .logo-container {
+      @apply scale-90;
+    }
+    
+    /* Sidebar mobile optimizations */
+    .sidebar-mobile {
+      @apply w-80 max-w-[85vw];
+    }
+    
+    .sidebar-content {
+      @apply p-3 space-y-4;
+    }
+    
+    .sidebar-nav-item {
+      @apply px-3 py-2 text-sm;
+    }
+    
+    /* Content area mobile */
+    .content-mobile {
+      @apply px-2 pt-16;
+    }
+    
+    /* Calculator cards mobile */
+    .calculator-card-mobile {
+      @apply p-3 space-y-3;
+    }
+    
+    .calculator-title-mobile {
+      @apply text-lg;
+    }
+    
+    .calculator-input-mobile {
+      @apply text-base px-3 py-2;
+    }
+    
+    .calculator-button-mobile {
+      @apply px-4 py-2 text-sm;
+    }
+    
+    /* Form sections mobile */
+    .form-section-mobile {
+      @apply p-3 space-y-3;
+    }
+    
+    .form-grid-mobile {
+      @apply grid-cols-1 gap-3;
+    }
+    
+    /* Results mobile */
+    .result-card-mobile {
+      @apply p-3;
+    }
+    
+    .result-value-mobile {
+      @apply text-lg;
+    }
+    
+    /* Footer mobile */
+    .footer-mobile {
+      @apply px-3 py-4 text-xs;
+    }
+    
+    /* Testing utils mobile */
+    .testing-utils-mobile {
+      @apply max-w-full mx-2;
+    }
+  }
+  
+  /* Tablet optimizations */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .sidebar-tablet {
+      @apply w-64;
+    }
+    
+    .content-tablet {
+      @apply ml-64 px-4;
+    }
+    
+    .calculator-grid-tablet {
+      @apply grid-cols-2 gap-4;
+    }
+  }
+  
+  /* Desktop optimizations */
+  @media (min-width: 1024px) {
+    .sidebar-desktop {
+      @apply w-72;
+    }
+    
+    .content-desktop {
+      @apply ml-72 px-6;
+    }
+    
+    .calculator-grid-desktop {
+      @apply grid-cols-3 gap-6;
+    }
+  }
+  
+  /* Touch-friendly improvements */
+  .touch-friendly {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .touch-button {
+    @apply touch-friendly px-4 py-3;
+  }
+  
+  /* Performance optimizations */
+  .will-change-transform {
+    will-change: transform;
+  }
+  
+  .gpu-accelerated {
+    transform: translateZ(0);
+  }
+  
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    .reduce-motion * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  
+  /* High contrast support */
+  @media (prefers-contrast: high) {
+    .high-contrast {
+      @apply border-2 border-gray-900;
+    }
+    
+    .high-contrast-text {
+      @apply text-gray-900;
+    }
+    
+    .high-contrast-bg {
+      @apply bg-white;
+    }
+  }
+  
+  /* Focus improvements */
+  .focus-ring {
+    @apply focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none;
+  }
+  
+  /* Loading states */
+  .loading-skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+  
+  .loading-spinner {
+    @apply animate-spin rounded-full border-2 border-orange-500 border-t-transparent;
+  }
+}

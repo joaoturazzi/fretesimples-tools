@@ -1,24 +1,101 @@
 
-/* Main CSS entry point that imports all other style modules */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("./base/tailwind.css");
+@import url("./base/variables.css");
+@import url("./base/typography.css");
+@import url("./base/animations.css");
+@import url("./base/utilities.css");
 
-@import './base/tailwind.css';
-@import './base/variables.css';
-@import './base/typography.css';
-@import './base/animations.css';
-@import './base/utilities.css';
-@import './components/layout.css';
-@import './components/cards.css';
-@import './components/inputs.css';
-@import './components/buttons.css';
-@import './components/sidebar.css';
-@import './components/tooltips.css';
-@import './components/calculator-base.css';
-@import './components/calculator-inputs.css';
-@import './components/calculator-buttons.css';
-@import './components/calculator-results.css';
-@import './components/calculator-animations.css';
-@import './components/calculator-status.css';
-@import './components/calculator-responsive.css';
-@import './components/chat.css';
-@import './components/print.css';
+@import url("./components/buttons.css");
+@import url("./components/cards.css");
+@import url("./components/inputs.css");
+@import url("./components/layout.css");
+@import url("./components/responsive.css");
+@import url("./components/mobile-optimizations.css");
+@import url("./components/sidebar.css");
+@import url("./components/tooltips.css");
+@import url("./components/print.css");
+@import url("./components/chat.css");
+
+@import url("./components/calculator-base.css");
+@import url("./components/calculator-inputs.css");
+@import url("./components/calculator-buttons.css");
+@import url("./components/calculator-results.css");
+@import url("./components/calculator-status.css");
+@import url("./components/calculator-animations.css");
+@import url("./components/calculator-responsive.css");
+
+/* Global mobile optimizations */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
+  body {
+    line-height: 1.5;
+  }
+  
+  /* Improve tap targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
+/* Performance improvements */
+* {
+  box-sizing: border-box;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Critical CSS for above-the-fold content */
+.header, .sidebar, .main-content {
+  contain: layout;
+}
+
+/* Optimize images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Improve button accessibility */
+button:focus,
+a:focus,
+[tabindex]:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Error states */
+.error {
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Success states */
+.success {
+  color: #16a34a;
+  border-color: #16a34a;
+}

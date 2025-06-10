@@ -89,6 +89,12 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
       />
         
       <FreightForm
+        origin={origin}
+        setOrigin={setOrigin}
+        destination={destination}
+        setDestination={setDestination}
+        distance={distance}
+        setDistance={setDistance}
         weight={weight}
         setWeight={setWeight}
         costPerKm={costPerKm}
@@ -101,7 +107,10 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
         setConsumption={setConsumption}
         tollsCost={tollsCost}
         setTollsCost={setTollsCost}
+        isCalculatingRoute={isCalculatingRoute}
         getDefaultCostPerKm={getDefaultCostPerKm}
+        hasError={hasError}
+        errorMessage={errorMessage}
       />
 
       <CostSimulation
@@ -134,7 +143,15 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
       />
       
       {result && (
-        <FreightResults result={result} />
+        <FreightResults 
+          result={result}
+          origin={origin}
+          destination={destination}
+          distance={typeof distance === 'number' ? distance : 0}
+          weight={typeof weight === 'number' ? weight : 0}
+          vehicleType={vehicleType}
+          routeDuration={routeDuration}
+        />
       )}
     </CalculatorSection>
   );

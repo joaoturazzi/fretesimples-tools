@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Calculator from '@/components/Calculator';
 import RiskForm from './risk/RiskForm';
@@ -6,7 +5,7 @@ import RiskMap from './risk/RiskMap';
 import RiskResults from './risk/RiskResults';
 import RiskExport from './risk/RiskExport';
 import { RefreshCw } from 'lucide-react';
-import { mapService } from '@/services/unifiedMapService';
+import { mapService } from '@/services/map/UnifiedMapService';
 import { calculateRisk } from './risk/riskCalculations';
 
 interface RiskCalculatorProps {

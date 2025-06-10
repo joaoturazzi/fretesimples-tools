@@ -1,3 +1,4 @@
+
 // Environment configuration
 const env = {
   // HERE Maps API configuration - Nova API key
@@ -21,9 +22,3 @@ const env = {
 } as const;
 
 export default env;
-
-declare global {
-  interface ImportMeta {
-    env: Record<string, string>;
-  }
-}

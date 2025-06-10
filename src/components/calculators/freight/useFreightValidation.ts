@@ -15,7 +15,7 @@ export const useFreightValidation = () => {
     setErrorMessage('');
 
     // Validate distance
-    if (!distance || distance === '') {
+    if (distance === '' || distance === null || distance === undefined) {
       const message = 'Por favor, informe a distância da viagem.';
       setErrorMessage(message);
       setHasError(true);
@@ -41,7 +41,7 @@ export const useFreightValidation = () => {
     }
 
     // Validate weight
-    if (!weight || weight === '') {
+    if (weight === '' || weight === null || weight === undefined) {
       const message = 'Por favor, informe o peso da carga.';
       setErrorMessage(message);
       setHasError(true);

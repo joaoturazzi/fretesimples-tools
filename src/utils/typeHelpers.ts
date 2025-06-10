@@ -1,65 +1,55 @@
 
 /**
- * Utility functions for type conversion and validation
+ * Utility functions for type conversions and validations
  */
 
 /**
- * Safely converts a value that can be number or empty string to number
- * @param value - The value to convert
- * @param defaultValue - Default value if conversion fails
- * @returns A valid number
+ * Safely convert a value to number, returning 0 for empty strings or invalid values
  */
-export const toNumber = (value: number | string | '', defaultValue: number = 0): number => {
-  if (typeof value === 'number') {
-    return isNaN(value) ? defaultValue : value;
-  }
-  
-  if (typeof value === 'string') {
-    if (value === '' || value.trim() === '') {
-      return defaultValue;
-    }
-    
-    const parsed = parseFloat(value);
-    return isNaN(parsed) ? defaultValue : parsed;
-  }
-  
-  return defaultValue;
+export const toNumber = (value: number | string | ''): number => {
+  if (typeof value === 'number') return value;
+  if (value === '' || value === null || value === undefined) return 0;
+  const parsed = parseFloat(value.toString());
+  return isNaN(parsed) ? 0 : parsed;
 };
 
 /**
- * Validates if a value is a valid number (not empty string or NaN)
- * @param value - The value to validate
- * @returns True if the value is a valid number
+ * Safely convert a value to string
  */
-export const isValidNumber = (value: number | string | ''): boolean => {
-  if (typeof value === 'number') {
-    return !isNaN(value) && isFinite(value);
-  }
-  
-  if (typeof value === 'string' && value.trim() !== '') {
-    const parsed = parseFloat(value);
-    return !isNaN(parsed) && isFinite(parsed);
-  }
-  
-  return false;
+export const toString = (value: any): string => {
+  if (value === null || value === undefined) return '';
+  return value.toString();
 };
 
 /**
- * Formats a number for display, handling edge cases
- * @param value - The value to format
- * @param decimals - Number of decimal places
- * @returns Formatted string
+ * Check if value is a valid positive number
  */
-export const formatNumber = (value: number | string | '', decimals: number = 2): string => {
+export const isValidPositiveNumber = (value: number | string | ''): boolean => {
+  const num = toNumber(value);
+  return num > 0;
+};
+
+/**
+ * Format number with specified decimal places
+ */
+export const formatNumber = (value: number | string | '', decimals = 2): string => {
   const num = toNumber(value);
   return num.toFixed(decimals);
 };
 
 /**
- * Type guard to check if a value is a number (not empty string)
- * @param value - The value to check
- * @returns True if value is a number
+ * Convert input value to number or empty string for form fields
  */
-export const isNumber = (value: number | string | ''): value is number => {
-  return typeof value === 'number';
+export const convertInputValue = (value: string | number): number | '' => {
+  if (typeof value === 'number') return value;
+  if (value === '' || value === null || value === undefined) return '';
+  const parsed = parseFloat(value);
+  return isNaN(parsed) ? '' : parsed;
+};
+
+/**
+ * Validate if a string represents a valid number
+ */
+export const isNumericString = (value: string): boolean => {
+  return !isNaN(parseFloat(value)) && isFinite(parseFloat(value));
 };

@@ -1,3 +1,4 @@
+
 import env from '@/config/env';
 import { CacheService } from '../cacheService';
 import { HttpClient } from './HttpClient';
@@ -48,7 +49,7 @@ export class GeocodingService {
           throw error instanceof ApiError ? error : new ApiError('Falha ao geocodificar endereço');
         }
       },
-      30 * 60 * 1000 // Cache por 30 minutos
+      { ttl: 30 * 60 * 1000 } // Cache por 30 minutos
     );
   }
 

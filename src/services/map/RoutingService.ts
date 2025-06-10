@@ -79,7 +79,7 @@ export class RoutingService {
           throw error instanceof ApiError ? error : new ApiError('Failed to calculate route');
         }
       },
-      15 * 60 * 1000 // Cache routes for 15 minutes
+      { ttl: 15 * 60 * 1000 } // Cache routes for 15 minutes
     );
   }
 

@@ -186,8 +186,10 @@ const EnhancedRiskCalculator = ({ isActive }: EnhancedRiskCalculatorProps) => {
             disabled={!isFormValid || isCalculating}
             className={cn(
               "btn btn-primary",
-              (!isFormValid || isCalculating) && "opacity-50 cursor-not-allowed",
-              isCalculating && "btn-loading"
+              {
+                "opacity-50 cursor-not-allowed": !isFormValid || isCalculating,
+                "btn-loading": isCalculating
+              }
             )}
           >
             {!isCalculating && <CalculatorIcon size={18} />}

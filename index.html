@@ -33,14 +33,13 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./src/main.tsx"></script>
     
     <!-- Service Worker Registration -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          const swPath = import.meta.env.MODE === 'production' ? '/fretesimples-tools/sw.js' : '/sw.js';
-          navigator.serviceWorker.register(swPath)
+          navigator.serviceWorker.register('./sw.js')
             .then((registration) => {
               console.log('SW registered: ', registration);
             })

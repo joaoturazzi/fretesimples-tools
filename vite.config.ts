@@ -10,7 +10,7 @@ export default defineConfig(({ command, mode }) => ({
     react(),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
-  base: command === 'serve' ? '/' : '/fretesimples-tools/',
+  base: './',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

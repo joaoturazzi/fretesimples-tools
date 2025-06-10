@@ -88,30 +88,102 @@ const FreightCalculator = ({ isActive }: { isActive: boolean }) => {
         onCalculateDistance={calculateDistanceFromRoute}
       />
         
-      <FreightForm
-        origin={origin}
-        setOrigin={setOrigin}
-        destination={destination}
-        setDestination={setDestination}
-        distance={distance}
-        setDistance={setDistance}
-        weight={weight}
-        setWeight={setWeight}
-        costPerKm={costPerKm}
-        setCostPerKm={setCostPerKm}
-        vehicleType={vehicleType}
-        setVehicleType={setVehicleType}
-        fuelPrice={fuelPrice}
-        setFuelPrice={setFuelPrice}
-        consumption={consumption}
-        setConsumption={setConsumption}
-        tollsCost={tollsCost}
-        setTollsCost={setTollsCost}
-        isCalculatingRoute={isCalculatingRoute}
-        getDefaultCostPerKm={getDefaultCostPerKm}
-        hasError={hasError}
-        errorMessage={errorMessage}
-      />
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Peso da Carga (kg)
+            </label>
+            <input
+              type="number"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="input"
+              placeholder="Ex: 1000"
+              min="0"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tipo de Veículo
+            </label>
+            <select
+              value={vehicleType}
+              onChange={(e) => setVehicleType(e.target.value)}
+              className="input"
+            >
+              <option value="truck">Caminhão</option>
+              <option value="van">Van</option>
+              <option value="motorcycle">Moto</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Custo por Km (R$)
+            </label>
+            <input
+              type="number"
+              value={costPerKm}
+              onChange={(e) => setCostPerKm(e.target.value)}
+              className="input"
+              placeholder={`Padrão: R$ ${getDefaultCostPerKm()}`}
+              step="0.1"
+              min="0"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Preço do Combustível (R$/L)
+            </label>
+            <input
+              type="number"
+              value={fuelPrice}
+              onChange={(e) => setFuelPrice(e.target.value)}
+              className="input"
+              placeholder="Ex: 5.50"
+              step="0.01"
+              min="0"
+            />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Consumo (km/L)
+            </label>
+            <input
+              type="number"
+              value={consumption}
+              onChange={(e) => setConsumption(e.target.value)}
+              className="input"
+              placeholder="Ex: 8.5"
+              step="0.1"
+              min="0"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Pedagios (R$)
+            </label>
+            <input
+              type="number"
+              value={tollsCost}
+              onChange={(e) => setTollsCost(e.target.value)}
+              className="input"
+              placeholder="Ex: 25.00"
+              step="0.01"
+              min="0"
+            />
+          </div>
+        </div>
+      </div>
 
       <CostSimulation
         showCostSimulation={showCostSimulation}

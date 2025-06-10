@@ -3,13 +3,13 @@
   "name": "Frete Simples - Ferramentas Logísticas",
   "short_name": "Frete Simples",
   "description": "Plataforma completa com ferramentas gratuitas para transportadores",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "theme_color": "#f97316",
   "background_color": "#ffffff",
   "icons": [
     {
-      "src": "/favicon.ico",
+      "src": "./favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     }

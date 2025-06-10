@@ -35,8 +35,8 @@ const Index = () => {
       />
       
       <main 
-        className={`pt-20 pb-16 transition-all duration-300 ${
-          isMobile ? 'ml-0' : 'ml-64'
+        className={`pt-4 pb-16 transition-all duration-300 ${
+          isMobile ? 'ml-0' : 'ml-72'
         }`}
       >
         <div className="content-container px-4 sm:px-6">
@@ -58,10 +58,17 @@ const Index = () => {
           
           <footer id="footer" className="text-center text-gray-500 text-sm py-8 border-t border-gray-100 mt-12">
             <div className="flex justify-center items-center mb-4">
-              <div className="bg-white p-2 rounded-full mr-2">
-                <img src="https://www.ccigris.com.br/site/assets/img/logo-cci.png" alt="CCI Logo" className="h-8" />
+              <div className="bg-white p-2 rounded-full mr-3 shadow-sm">
+                <img 
+                  src="https://i.postimg.cc/C5bzFpj8/Logo-CCI.png" 
+                  alt="CCI Logo" 
+                  className="h-8 w-auto object-contain" 
+                />
               </div>
-              <span className="font-semibold text-gray-700">Frete Simples BY CCI</span>
+              <div className="text-left">
+                <span className="font-semibold text-gray-700 block">FreteDigital BY CCI</span>
+                <span className="text-xs text-gray-500">Soluções em Logística</span>
+              </div>
             </div>
             <p>© {new Date().getFullYear()} - Todas as ferramentas gratuitas para sempre.</p>
             <p className="mt-1">

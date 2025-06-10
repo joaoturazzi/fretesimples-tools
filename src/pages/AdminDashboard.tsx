@@ -22,14 +22,37 @@ const AdminDashboard = () => {
   }, [user, navigate]);
 
   if (loading) {
-    return <div className="p-8">Carregando...</div>;
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <img 
+            src="https://i.postimg.cc/C5bzFpj8/Logo-CCI.png" 
+            alt="CCI Logo" 
+            className="h-12 w-auto object-contain mx-auto mb-4"
+          />
+          <p className="text-gray-600">Carregando dados...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Painel Administrativo CCI</h1>
-        <Button onClick={() => navigate('/')}>Voltar ao Site</Button>
+        <div className="flex items-center gap-4">
+          <img 
+            src="https://i.postimg.cc/C5bzFpj8/Logo-CCI.png" 
+            alt="CCI Logo" 
+            className="h-10 w-auto object-contain"
+          />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Painel Administrativo</h1>
+            <p className="text-gray-600">FreteDigital BY CCI</p>
+          </div>
+        </div>
+        <Button onClick={() => navigate('/')} variant="outline">
+          Voltar ao Site
+        </Button>
       </div>
 
       <StatsCards stats={stats} />

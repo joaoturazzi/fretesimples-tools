@@ -110,10 +110,20 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
         )}
       >
         <div className="p-6">
-          <div className="mb-6">
-            <h2 className="text-sm font-bold text-orange-600 uppercase tracking-wider mb-2">
-              Frete.Digital BY CCI
-            </h2>
+          <div className="mb-6 pb-4 border-b border-orange-100">
+            <div className="flex items-center gap-3 mb-3">
+              <img 
+                src="https://i.postimg.cc/C5bzFpj8/Logo-CCI.png" 
+                alt="CCI Logo" 
+                className="h-8 w-auto object-contain"
+              />
+              <div>
+                <h2 className="text-sm font-bold text-orange-600 uppercase tracking-wider">
+                  FreteDigital
+                </h2>
+                <p className="text-xs text-gray-500">BY CCI</p>
+              </div>
+            </div>
             <p className="text-xs text-gray-500">
               Ferramentas gratuitas para transportadores
             </p>
@@ -147,7 +157,6 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
                       {activeSection === item.id && (
                         <div className="ml-auto flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-white/80 animate-pulse"></div>
-                          <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-0 h-0 border-l-4 border-l-orange-500 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
                         </div>
                       )}
                     </button>

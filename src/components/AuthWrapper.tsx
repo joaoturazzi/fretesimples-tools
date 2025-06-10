@@ -27,9 +27,16 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({
       
       <Card className="bg-gradient-to-r from-orange-50 to-blue-50 border-orange-200">
         <CardHeader>
-          <CardTitle className="text-lg text-center text-gray-800">
-            💡 Quer salvar seus cálculos?
-          </CardTitle>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <img 
+              src="https://i.postimg.cc/C5bzFpj8/Logo-CCI.png" 
+              alt="CCI Logo" 
+              className="h-8 w-auto object-contain"
+            />
+            <CardTitle className="text-lg text-center text-gray-800">
+              💡 Quer salvar seus cálculos?
+            </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="text-center space-y-4">
           <p className="text-gray-600">{message}</p>
@@ -40,7 +47,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({
                 Entrar
               </Link>
             </Button>
-            <Button asChild>
+            <Button asChild className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">
               <Link to="/auth">
                 <UserPlus size={16} className="mr-2" />
                 Cadastrar

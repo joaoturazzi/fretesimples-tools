@@ -11,6 +11,8 @@ interface CalculatorProps {
 }
 
 const Calculator = ({ id, title, description, isActive, children }: CalculatorProps) => {
+  console.log(`Calculator ${id} - isActive:`, isActive);
+  
   return (
     <section 
       id={id}

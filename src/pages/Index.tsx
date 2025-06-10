@@ -22,6 +22,8 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState('calculadora-frete');
   const isMobile = useIsMobile();
   
+  console.log('Index - activeSection:', activeSection);
+  
   return (
     <div className="bg-gray-50 min-h-screen">
       <Header />

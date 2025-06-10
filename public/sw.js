@@ -1,8 +1,8 @@
 
 const CACHE_NAME = 'frete-simples-v1';
 const urlsToCache = [
-  './',
-  './manifest.json'
+  '/',
+  '/manifest.json'
 ];
 
 // Install event

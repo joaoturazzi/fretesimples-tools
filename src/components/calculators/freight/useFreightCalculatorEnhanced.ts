@@ -5,6 +5,7 @@ import { useNotify } from '@/components/ui/notification';
 import { useCalculatorValidation } from '@/hooks/useCalculatorValidation';
 import { useCalculationHistory } from '@/hooks/useCalculationHistory';
 import { calculateFreight, calculateCostSimulation, getDefaultCostPerKm, FreightCalculationResult, CostSimulationResult } from './freightCalculations';
+import { toNumber } from '@/utils/typeHelpers';
 
 export const useFreightCalculatorEnhanced = () => {
   const notify = useNotify();
@@ -39,7 +40,7 @@ export const useFreightCalculatorEnhanced = () => {
   const convertValue = (value: string | number): number | '' => {
     if (typeof value === 'number') return value;
     if (value === '' || value === null || value === undefined) return '';
-    const parsed = parseFloat(value);
+    const parsed = parseFloat(value.toString());
     return isNaN(parsed) ? '' : parsed;
   };
 
@@ -83,17 +84,17 @@ export const useFreightCalculatorEnhanced = () => {
   }, [origin, destination, notify]);
 
   const performCalculation = () => {
-    // Validate input data
+    // Convert all values to numbers for validation
     const inputData = {
       origin,
       destination,
-      distance: typeof distance === 'number' ? distance : 0,
-      weight: typeof weight === 'number' ? weight : 0,
+      distance: toNumber(distance),
+      weight: toNumber(weight),
       vehicleType,
-      costPerKm: typeof costPerKm === 'number' ? costPerKm : getDefaultCostPerKm(vehicleType),
-      fuelPrice: typeof fuelPrice === 'number' ? fuelPrice : 0,
-      consumption: typeof consumption === 'number' ? consumption : 0,
-      tollsCost: typeof tollsCost === 'number' ? tollsCost : 0,
+      costPerKm: toNumber(costPerKm) || getDefaultCostPerKm(vehicleType),
+      fuelPrice: toNumber(fuelPrice),
+      consumption: toNumber(consumption),
+      tollsCost: toNumber(tollsCost),
     };
 
     const validatedData = validateFreightData(inputData);
@@ -118,14 +119,10 @@ export const useFreightCalculatorEnhanced = () => {
 
         // Calculate cost simulation if fields are filled
         if (showCostSimulation) {
-          const monthlyMaintenanceValue = typeof monthlyMaintenance === 'number' ? monthlyMaintenance : 0;
-          const driverSalaryValue = typeof driverSalary === 'number' ? driverSalary : 0;
-          const monthlyDistanceValue = typeof monthlyDistance === 'number' ? monthlyDistance : 0;
-          
           const costSim = calculateCostSimulation(
-            monthlyMaintenanceValue,
-            driverSalaryValue,
-            monthlyDistanceValue,
+            toNumber(monthlyMaintenance),
+            toNumber(driverSalary),
+            toNumber(monthlyDistance),
             validatedData.fuelPrice || 0,
             validatedData.consumption || 0,
             validatedData.tollsCost || 0,

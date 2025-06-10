@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -26,7 +27,7 @@ export default defineConfig(({ command }) => ({
     chunkSizeWarningLimit: 1000,
   },
   server: {
-    port: 3000,
+    port: 8080,
     open: true,
   },
 }));

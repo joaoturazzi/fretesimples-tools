@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import ResponsiveSidebar from '@/components/ResponsiveSidebar';
 import { 
@@ -56,6 +57,22 @@ const Index = () => {
     const showTests = localStorage.getItem('show-testing-utils') === 'true' ||
                      window.location.search.includes('debug=true');
     setShowTestingUtils(showTests);
+  }, []);
+
+  // Listen for custom events to change section (for the "Simular Lucro" button)
+  useEffect(() => {
+    const handleChangeSection = (event: CustomEvent) => {
+      const newSection = event.detail;
+      if (newSection) {
+        handleSectionChange(newSection);
+      }
+    };
+
+    window.addEventListener('changeActiveSection', handleChangeSection as EventListener);
+    
+    return () => {
+      window.removeEventListener('changeActiveSection', handleChangeSection as EventListener);
+    };
   }, []);
   
   return (

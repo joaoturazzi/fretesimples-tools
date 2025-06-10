@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { LatLngExpression } from 'leaflet';
 import { LoadingState } from '@/components/ui/loading';
@@ -38,13 +37,18 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
 
   const mapCenter: LatLngExpression = [-14.235, -51.9253]; // Centro do Brasil
 
-  console.log('InteractiveMap render:', { 
-    origin, 
-    destination, 
-    routeCoordinatesLength: routeCoordinates?.length,
-    mapReady,
-    isLoading 
-  });
+  useEffect(() => {
+    console.log('InteractiveMap state:', { 
+      origin, 
+      destination, 
+      routeCoordinatesLength: routeCoordinates?.length,
+      mapReady,
+      isLoading,
+      error,
+      originCoords,
+      destCoords
+    });
+  }, [origin, destination, routeCoordinates, mapReady, isLoading, error, originCoords, destCoords]);
 
   if (!origin || !destination) {
     return (
@@ -63,6 +67,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
         <div className="text-center">
           <p className="mb-2">⚠️ Erro ao carregar mapa</p>
           <p className="text-sm">{error}</p>
+          <p className="text-xs text-gray-500 mt-2">Verifique se os endereços estão corretos e tente novamente</p>
         </div>
       </div>
     );
@@ -77,7 +82,13 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
   }
 
   try {
-    console.log('InteractiveMap: Rendering MapContainer');
+    console.log('InteractiveMap: Rendering MapContainer with:', {
+      center: mapCenter,
+      originCoords,
+      destCoords,
+      routeCoordinatesLength: routeCoordinates?.length
+    });
+
     return (
       <div className={`relative rounded-lg overflow-hidden border border-gray-200 ${className}`} style={{ height }}>
         <MapContainer
@@ -115,6 +126,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
         <div className="text-center">
           <p className="mb-2">⚠️ Erro ao renderizar mapa</p>
           <p className="text-sm">Tente recarregar a página</p>
+          <p className="text-xs text-gray-500 mt-2">Detalhes do erro: {error instanceof Error ? error.message : 'Erro desconhecido'}</p>
         </div>
       </div>
     );

@@ -1,69 +1,84 @@
-# Welcome to your Lovable project
+# Frete Simples Tools
 
-## Project info
+Ferramentas gratuitas para transportadores: calculadora de frete, simulador de lucro, análise de risco e muito mais.
 
-**URL**: https://lovable.dev/projects/fc3aa13c-8384-4f60-90e0-14dbcc631139
+## 🚀 Funcionalidades
 
-## How can I edit this code?
+- 📊 Calculadora de Frete
+- 💰 Simulador de Lucro
+- 🎯 Análise de Risco
+- 🗺️ Visualização de Rotas
+- 📱 Interface Responsiva
+- 🔒 Segurança e Privacidade
 
-There are several ways of editing your application.
+## 🛠️ Tecnologias
 
-**Use Lovable**
+- React
+- TypeScript
+- Tailwind CSS
+- HERE Maps API
+- OpenStreetMap
+- Vite
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/fc3aa13c-8384-4f60-90e0-14dbcc631139) and start prompting.
+## 📋 Pré-requisitos
 
-Changes made via Lovable will be committed automatically to this repo.
+- Node.js 16+
+- npm ou yarn
+- Chave de API do HERE Maps
 
-**Use your preferred IDE**
+## 🔧 Instalação
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/frete-simples-tools.git
+cd frete-simples-tools
 ```
 
-**Edit a file directly in GitHub**
+2. Instale as dependências:
+```bash
+npm install
+# ou
+yarn install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Configure as variáveis de ambiente:
+```bash
+cp .env.example .env
+```
+Edite o arquivo `.env` e adicione sua chave de API do HERE Maps.
 
-**Use GitHub Codespaces**
+4. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+# ou
+yarn dev
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🌐 Deploy
 
-## What technologies are used for this project?
+O projeto está configurado para deploy automático no GitHub Pages. Para fazer o deploy:
 
-This project is built with .
+1. Faça push das alterações para a branch `main`:
+```bash
+git add .
+git commit -m "feat: nova funcionalidade"
+git push origin main
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+2. O GitHub Actions irá automaticamente fazer o build e deploy do projeto.
 
-## How can I deploy this project?
+## 📝 Licença
 
-Simply open [Lovable](https://lovable.dev/projects/fc3aa13c-8384-4f60-90e0-14dbcc631139) and click on Share -> Publish.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## I want to use a custom domain - is that possible?
+## 🤝 Contribuindo
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📧 Contato
+
+Para suporte ou dúvidas, entre em contato através do email: suporte@fretesimples.com.br

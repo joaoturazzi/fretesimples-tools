@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef } from 'react';
 import { mapService } from '@/services/unifiedMapService';
 import { useNotify } from '@/components/ui/notification';
@@ -155,7 +154,7 @@ export const useFreightRouteCalculation = (
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [origin, destination, performRouteCalculation]);
+  }, [origin, destination]);
 
   // Manual calculation function
   const calculateDistanceFromRoute = useCallback(async () => {

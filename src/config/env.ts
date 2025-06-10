@@ -1,8 +1,7 @@
-
 // Environment configuration
 const env = {
   // HERE Maps API configuration - Nova API key
-  HERE_API_KEY: 'xAWs93J1XD4ye3qV62X-_qMQ_Ei268DJU4MLQOSLHoA',
+  HERE_API_KEY: import.meta.env.VITE_HERE_API_KEY || '',
   
   // API endpoints
   HERE_ROUTER_API: 'https://router.hereapi.com/v8',
@@ -22,3 +21,9 @@ const env = {
 } as const;
 
 export default env;
+
+declare global {
+  interface ImportMeta {
+    env: Record<string, string>;
+  }
+}

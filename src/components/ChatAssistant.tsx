@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, X, ChevronUp, ChevronDown, Loader2 } from 'lucide-react';
 
@@ -52,10 +51,10 @@ const ChatAssistant = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY || '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'}`
+          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY || ''}`
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: 'gpt-4',
           messages: [
             {
               role: 'system',

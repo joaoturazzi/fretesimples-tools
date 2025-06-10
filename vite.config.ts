@@ -1,48 +1,32 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+export default defineConfig(({ command }) => ({
+  plugins: [react()],
+  base: '/fretesimples-tools/', // Nome do repositório
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
-  define: {
-    // Expose env variables to the client
-    __DEV__: mode === 'development',
-  },
-  optimizeDeps: {
-    include: ['leaflet', 'react-leaflet'],
-  },
   build: {
-    sourcemap: mode === 'development',
+    outDir: 'dist',
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': ['react', 'react-dom', 'react-router-dom'],
-          'maps': ['leaflet', 'react-leaflet'],
-          'ui': ['lucide-react', '@radix-ui/react-toast'],
-          'analytics': ['react-helmet-async'],
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          leaflet: ['leaflet', 'react-leaflet'],
         },
       },
     },
-    // Use esbuild for minification in all cases to avoid terser dependency
-    minify: 'esbuild',
-    // Enable gzip compression
-    reportCompressedSize: false,
     chunkSizeWarningLimit: 1000,
+  },
+  server: {
+    port: 3000,
+    open: true,
   },
 }));

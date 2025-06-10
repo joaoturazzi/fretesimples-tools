@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      alert_settings: {
+        Row: {
+          admin_email: string
+          created_at: string
+          email_frequency: string | null
+          follow_up_enabled: boolean | null
+          high_risk_enabled: boolean | null
+          id: string
+          new_leads_enabled: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          admin_email: string
+          created_at?: string
+          email_frequency?: string | null
+          follow_up_enabled?: boolean | null
+          high_risk_enabled?: boolean | null
+          id?: string
+          new_leads_enabled?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          admin_email?: string
+          created_at?: string
+          email_frequency?: string | null
+          follow_up_enabled?: boolean | null
+          high_risk_enabled?: boolean | null
+          id?: string
+          new_leads_enabled?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       diagnostics: {
         Row: {
           created_at: string
@@ -81,6 +114,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          expires_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          expires_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          expires_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company: string | null
@@ -143,10 +212,37 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      detailed_metrics: {
+        Row: {
+          completion_rate: number | null
+          date: string | null
+          tool_type: string | null
+          unique_users: number | null
+          usage_count: number | null
+        }
+        Relationships: []
+      }
+      usage_trends: {
+        Row: {
+          daily_usage: number | null
+          daily_users: number | null
+          date: string | null
+          usage_growth_percent: number | null
+          users_growth_percent: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      create_notification: {
+        Args: {
+          p_type: string
+          p_title: string
+          p_message: string
+          p_data?: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

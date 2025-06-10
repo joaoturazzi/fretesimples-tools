@@ -98,7 +98,7 @@ const EnhancedRiskCalculator = ({ isActive }: EnhancedRiskCalculatorProps) => {
               console.log('Exporting report with factors:', factors);
             }}
             onContactSpecialist={() => {
-              // This will be handled by RiskActionButtons component
+              console.log('Contact specialist clicked');
             }}
           />
         )}

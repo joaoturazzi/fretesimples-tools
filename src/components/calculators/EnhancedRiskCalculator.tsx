@@ -222,7 +222,7 @@ const EnhancedRiskCalculator = ({ isActive }: EnhancedRiskCalculatorProps) => {
           {result && (result.riskLevel === 'Alto' || result.riskLevel === 'Crítico') && (
             <button 
               onClick={handleContactSpecialist}
-              className="btn-warning bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 hover:from-orange-600 hover:to-red-600"
+              className="btn btn-warning bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 hover:from-orange-600 hover:to-red-600"
             >
               <Phone size={18} />
               Falar com Especialista

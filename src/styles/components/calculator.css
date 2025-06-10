@@ -255,4 +255,49 @@
   .enhanced-card-subtitle {
     @apply text-sm text-gray-600;
   }
+
+  /* CCI Brand Colors and Consistency */
+  .cci-primary {
+    @apply bg-orange-500 text-white;
+  }
+  
+  .cci-primary-hover {
+    @apply hover:bg-orange-600;
+  }
+  
+  .cci-secondary {
+    @apply bg-blue-600 text-white;
+  }
+  
+  .cci-accent {
+    @apply text-orange-500;
+  }
+
+  /* Mobile-first responsive improvements */
+  @media (max-width: 768px) {
+    .calculator-card {
+      @apply p-4;
+    }
+    
+    .btn {
+      @apply px-4 py-2 text-xs;
+    }
+    
+    .calculator-title {
+      @apply text-lg;
+    }
+    
+    .result-card-value {
+      @apply text-xl;
+    }
+  }
+
+  /* Performance optimizations */
+  .lazy-loading {
+    @apply opacity-0 transition-opacity duration-300;
+  }
+  
+  .lazy-loaded {
+    @apply opacity-100;
+  }
 }

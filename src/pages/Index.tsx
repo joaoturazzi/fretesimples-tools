@@ -6,6 +6,7 @@ import {
   FreightCalculator,
   ProfitSimulator,
   RiskCalculator,
+  EnhancedRiskCalculator,
   FuelCalculator,
   TripChecklist,
   VehicleSizingTool,
@@ -43,6 +44,7 @@ const Index = () => {
             <FreightCalculator isActive={activeSection === 'calculadora-frete'} />
             <ProfitSimulator isActive={activeSection === 'simulador-lucro'} />
             <RiskCalculator isActive={activeSection === 'calculadora-risco'} />
+            <EnhancedRiskCalculator isActive={activeSection === 'calculadora-risco-inteligente'} />
             <FuelCalculator isActive={activeSection === 'calculadora-combustivel'} />
             <TripChecklist isActive={activeSection === 'checklist-viagem'} />
             <VehicleSizingTool isActive={activeSection === 'dimensionamento-veiculo'} />

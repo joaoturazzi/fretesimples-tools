@@ -19,12 +19,12 @@ const DistanceInput: React.FC<DistanceInputProps> = ({
 }) => {
   return (
     <div className="calculator-input-group">
-      <label htmlFor="distance" className="calculator-label flex items-center gap-1.5">
-        <Navigation size={16} className="text-frete-500" />
+      <label htmlFor="distance" className="calculator-label">
+        <Navigation size={16} className="calculator-label-icon" />
         Distância (km)
         {isCalculatingRoute && (
-          <span className="text-sm text-blue-600 ml-2 flex items-center gap-1">
-            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+          <span className="text-sm text-orange-600 ml-2 flex items-center gap-1">
+            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-orange-600"></div>
             Calculando...
           </span>
         )}
@@ -32,14 +32,20 @@ const DistanceInput: React.FC<DistanceInputProps> = ({
       <input
         id="distance"
         type="number"
-        className={`input-field ${hasError ? 'border-red-500' : ''}`}
+        className={`input-field ${hasError ? 'error' : ''}`}
         value={distance}
         min={0}
+        step={0.1}
         onChange={(e) => setDistance(e.target.value ? parseFloat(e.target.value) : '')}
         placeholder="Ex: 450"
       />
       {hasError && errorMessage && (
-        <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
+        <p className="form-error">{errorMessage}</p>
+      )}
+      {!hasError && (
+        <p className="form-helper">
+          Distância em quilômetros entre origem e destino
+        </p>
       )}
     </div>
   );

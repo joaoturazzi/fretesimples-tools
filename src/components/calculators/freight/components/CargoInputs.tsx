@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BarChart3, Truck } from 'lucide-react';
+import { Package, Truck } from 'lucide-react';
 
 interface CargoInputsProps {
   weight: number | '';
@@ -18,8 +18,8 @@ const CargoInputs: React.FC<CargoInputsProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="calculator-input-group">
-        <label htmlFor="weight" className="calculator-label flex items-center gap-1.5">
-          <BarChart3 size={16} className="text-frete-500" />
+        <label htmlFor="weight" className="calculator-label">
+          <Package size={16} className="calculator-label-icon" />
           Peso da carga (kg)
         </label>
         <input
@@ -29,13 +29,16 @@ const CargoInputs: React.FC<CargoInputsProps> = ({
           value={weight}
           min={0}
           onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : '')}
-          placeholder="Ex: 500"
+          placeholder="Ex: 1000"
         />
+        <p className="form-helper">
+          Informe o peso total da carga em quilogramas
+        </p>
       </div>
 
       <div className="calculator-input-group">
-        <label htmlFor="vehicleType" className="calculator-label flex items-center gap-1.5">
-          <Truck size={16} className="text-frete-500" />
+        <label htmlFor="vehicleType" className="calculator-label">
+          <Truck size={16} className="calculator-label-icon" />
           Tipo de veículo
         </label>
         <select
@@ -44,10 +47,13 @@ const CargoInputs: React.FC<CargoInputsProps> = ({
           value={vehicleType}
           onChange={(e) => setVehicleType(e.target.value)}
         >
-          <option value="truck">Caminhão</option>
-          <option value="van">Van</option>
-          <option value="motorcycle">Motocicleta</option>
+          <option value="truck">Caminhão (até 23t)</option>
+          <option value="van">Van (até 3.5t)</option>
+          <option value="motorcycle">Moto (até 200kg)</option>
         </select>
+        <p className="form-helper">
+          Selecione o tipo de veículo mais adequado para a carga
+        </p>
       </div>
     </div>
   );

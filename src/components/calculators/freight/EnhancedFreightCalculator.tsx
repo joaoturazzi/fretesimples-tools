@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useNotify } from '@/components/ui/notification';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { toNumber } from '@/utils/typeHelpers';
 
 const EnhancedFreightCalculator = () => {
   const notify = useNotify();
@@ -22,11 +23,6 @@ const EnhancedFreightCalculator = () => {
         'O resultado foi salvo no histórico de cálculos'
       );
     }
-  };
-
-  // Helper function to safely convert values to numbers
-  const toNumber = (value: number | ''): number => {
-    return typeof value === 'number' ? value : 0;
   };
 
   return (

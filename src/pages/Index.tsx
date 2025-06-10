@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import ResponsiveSidebar from '@/components/ResponsiveSidebar';
 import { 
@@ -21,6 +20,7 @@ import { useSEO } from '@/hooks/useSEO';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import AboutSection from '@/components/AboutSection';
 import CciLogo from '@/components/ui/CciLogo';
+import { cn } from '@/lib/utils';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('calculadora-frete');

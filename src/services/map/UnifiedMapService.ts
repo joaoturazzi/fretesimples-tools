@@ -2,6 +2,7 @@
 import { UnifiedGeocodingService, GeocodeResponse } from './UnifiedGeocodingService';
 import { UnifiedRoutingService, RouteResponse } from './UnifiedRoutingService';
 import { BaseMapService } from './BaseMapService';
+import env from '@/config/env';
 
 export class UnifiedMapService extends BaseMapService {
   private geocodingService = new UnifiedGeocodingService();
@@ -9,6 +10,8 @@ export class UnifiedMapService extends BaseMapService {
 
   async geocodeAddress(address: string): Promise<GeocodeResponse | null> {
     console.log('UnifiedMapService: Iniciando geocodificação para:', address);
+    console.log('UnifiedMapService: Usando API key:', env.HERE_API_KEY ? 'API key configurada' : 'API key não configurada');
+    
     try {
       const result = await this.geocodingService.geocodeAddress(address);
       console.log('UnifiedMapService: Resultado da geocodificação:', result);
@@ -21,6 +24,8 @@ export class UnifiedMapService extends BaseMapService {
 
   async calculateRoute(origin: string, destination: string): Promise<RouteResponse | null> {
     console.log('UnifiedMapService: Iniciando cálculo de rota:', { origin, destination });
+    console.log('UnifiedMapService: Usando API key:', env.HERE_API_KEY ? 'API key configurada' : 'API key não configurada');
+    
     try {
       const result = await this.routingService.calculateRoute(origin, destination);
       console.log('UnifiedMapService: Resultado do cálculo de rota:', result);

@@ -1,4 +1,5 @@
 
+import env from '@/config/env';
 import { BaseMapService } from './BaseMapService';
 import { UnifiedGeocodingService, GeocodeResponse } from './UnifiedGeocodingService';
 
@@ -24,9 +25,15 @@ export class UnifiedRoutingService extends BaseMapService {
 
     const cacheKey = this.generateCacheKey('route', { origin: origin.toLowerCase(), destination: destination.toLowerCase() });
     const cached = this.getCachedData<RouteResponse>(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+      console.log('UnifiedRoutingService: Usando dados em cache para rota:', { origin, destination });
+      return cached;
+    }
 
     try {
+      console.log('UnifiedRoutingService: Calculando rota de', origin, 'para', destination);
+      console.log('UnifiedRoutingService: Status da API key:', env.HERE_API_KEY ? 'Presente' : 'Ausente');
+      
       // Geocode both addresses
       const [originCoords, destCoords] = await Promise.all([
         this.geocodingService.geocodeAddress(origin),
@@ -40,6 +47,8 @@ export class UnifiedRoutingService extends BaseMapService {
       if (!destCoords) {
         throw new Error(`Could not find location for: ${destination}`);
       }
+
+      console.log('UnifiedRoutingService: Coordenadas obtidas:', { originCoords, destCoords });
 
       // Calculate direct distance using Haversine formula
       const distance = this.calculateHaversineDistance(
@@ -59,9 +68,11 @@ export class UnifiedRoutingService extends BaseMapService {
         route: { geometry }
       };
 
+      console.log('UnifiedRoutingService: Rota calculada com sucesso:', result);
       this.setCachedData(cacheKey, result);
       return result;
     } catch (error) {
+      console.error('UnifiedRoutingService: Erro ao calcular rota:', error);
       throw error instanceof Error ? error : new Error('Failed to calculate route');
     }
   }

@@ -1,8 +1,8 @@
 
 // Environment configuration
 const env = {
-  // HERE Maps API configuration - Nova API key
-  HERE_API_KEY: import.meta.env.VITE_HERE_API_KEY || '',
+  // HERE Maps API configuration - API key fornecida pelo usuário
+  HERE_API_KEY: 'K7MXfdjJY8KO06EJgp52akxWMWhSzVypUKZ84hUpAYY',
   
   // API endpoints
   HERE_ROUTER_API: 'https://router.hereapi.com/v8',

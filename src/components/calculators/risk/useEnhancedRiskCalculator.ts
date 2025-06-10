@@ -100,7 +100,13 @@ export const useEnhancedRiskCalculator = () => {
     setRouteDistance(null);
   };
 
-  const isFormValid = Object.keys(validationErrors).length === 0 && origin && destination && cargoValue;
+  // Fix: Ensure isFormValid returns a proper boolean
+  const isFormValid = Boolean(
+    Object.keys(validationErrors).length === 0 && 
+    origin.trim() && 
+    destination.trim() && 
+    cargoValue.trim()
+  );
 
   return {
     // Form states

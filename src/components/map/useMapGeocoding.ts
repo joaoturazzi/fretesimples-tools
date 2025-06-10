@@ -16,17 +16,31 @@ export const useMapGeocoding = (origin: string, destination: string) => {
   const [mapReady, setMapReady] = useState(false);
   const { handleError } = useErrorHandler();
   const geocodingInProgress = useRef(false);
+  const lastProcessedAddresses = useRef<string>('');
 
   useEffect(() => {
     const geocode = async () => {
+      // Create unique key for current addresses
+      const addressKey = `${origin}|${destination}`;
+      
+      // Skip if addresses are empty
       if (!origin || !destination) {
         console.log('useMapGeocoding: Origem ou destino em branco');
         setOriginCoords(null);
         setDestCoords(null);
         setMapReady(false);
+        setError(null);
+        lastProcessedAddresses.current = '';
         return;
       }
       
+      // Skip if already processed these exact addresses
+      if (lastProcessedAddresses.current === addressKey) {
+        console.log('useMapGeocoding: Endereços já processados, pulando');
+        return;
+      }
+      
+      // Skip if geocoding is already in progress
       if (geocodingInProgress.current) {
         console.log('useMapGeocoding: Geocodificação já em andamento');
         return;
@@ -34,6 +48,7 @@ export const useMapGeocoding = (origin: string, destination: string) => {
       
       console.log('useMapGeocoding: Iniciando geocodificação para:', { origin, destination });
       geocodingInProgress.current = true;
+      lastProcessedAddresses.current = addressKey;
       setIsLoading(true);
       setError(null);
       setMapReady(false);
@@ -73,6 +88,7 @@ export const useMapGeocoding = (origin: string, destination: string) => {
         const message = err instanceof Error ? err.message : 'Erro ao geolocalizar endereços';
         console.error('useMapGeocoding: Erro na geocodificação:', err);
         setError(message);
+        // Call handleError but don't make it a dependency to avoid loops
         handleError(err, 'Geocoding');
       } finally {
         setIsLoading(false);
@@ -81,7 +97,7 @@ export const useMapGeocoding = (origin: string, destination: string) => {
     };
 
     geocode();
-  }, [origin, destination, handleError]);
+  }, [origin, destination]); // Removed handleError from dependencies to prevent infinite loops
 
   return {
     originCoords,

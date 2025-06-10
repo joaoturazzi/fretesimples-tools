@@ -61,25 +61,41 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
   };
   
   const sidebarItems = [
-    { id: 'calculadora-frete', label: 'Calculadora de Frete', icon: <Calculator size={18} /> },
-    { id: 'simulador-lucro', label: 'Simulador de Lucro', icon: <TrendingUp size={18} /> },
-    { id: 'calculadora-risco', label: 'Calculadora de Risco', icon: <AlertTriangle size={18} /> },
-    { id: 'calculadora-combustivel', label: 'Calculadora de Combustível', icon: <Fuel size={18} /> },
-    { id: 'checklist-viagem', label: 'Checklist de Viagem', icon: <ClipboardCheck size={18} /> },
-    { id: 'dimensionamento-veiculo', label: 'Dimensionamento de Veículo', icon: <Package size={18} /> },
-    { id: 'diagnostico-logistica', label: 'Diagnóstico Logístico', icon: <BarChart size={18} /> },
-    { id: 'diagnostico-risco', label: 'Diagnóstico de Risco', icon: <Shield size={18} /> },
-    { id: 'gerador-posts', label: 'Gerador de Posts', icon: <Linkedin size={18} /> },
-    { id: 'gerador-contratos', label: 'Gerador de Contratos', icon: <FileText size={18} /> },
-    { id: 'sobre', label: 'Sobre', icon: <Info size={18} /> },
+    { id: 'calculadora-frete', label: 'Calculadora de Frete', icon: <Calculator size={20} />, category: 'calculadoras' },
+    { id: 'simulador-lucro', label: 'Simulador de Lucro', icon: <TrendingUp size={20} />, category: 'calculadoras' },
+    { id: 'calculadora-risco', label: 'Análise de Risco', icon: <AlertTriangle size={20} />, category: 'calculadoras' },
+    { id: 'calculadora-combustivel', label: 'Calculadora de Combustível', icon: <Fuel size={20} />, category: 'calculadoras' },
+    { id: 'checklist-viagem', label: 'Checklist de Viagem', icon: <ClipboardCheck size={20} />, category: 'ferramentas' },
+    { id: 'dimensionamento-veiculo', label: 'Dimensionamento de Veículo', icon: <Package size={20} />, category: 'ferramentas' },
+    { id: 'diagnostico-logistica', label: 'Diagnóstico Logístico', icon: <BarChart size={20} />, category: 'diagnosticos' },
+    { id: 'diagnostico-risco', label: 'Diagnóstico de Risco', icon: <Shield size={20} />, category: 'diagnosticos' },
+    { id: 'gerador-posts', label: 'Gerador de Posts', icon: <Linkedin size={20} />, category: 'geradores' },
+    { id: 'gerador-contratos', label: 'Gerador de Contratos', icon: <FileText size={20} />, category: 'geradores' },
+    { id: 'sobre', label: 'Sobre', icon: <Info size={20} />, category: 'info' },
   ];
+
+  const groupedItems = sidebarItems.reduce((acc, item) => {
+    if (!acc[item.category]) {
+      acc[item.category] = [];
+    }
+    acc[item.category].push(item);
+    return acc;
+  }, {} as Record<string, typeof sidebarItems>);
+
+  const categoryLabels = {
+    calculadoras: 'Calculadoras',
+    ferramentas: 'Ferramentas',
+    diagnosticos: 'Diagnósticos',
+    geradores: 'Geradores',
+    info: 'Informações'
+  };
   
   return (
     <>
       {isMobile && (
         <button 
           onClick={toggleSidebar}
-          className="fixed bottom-6 right-6 z-50 bg-gradient-to-br from-orange-500 to-orange-600 text-white p-3 rounded-full shadow-lg transition-transform duration-300 transform hover:scale-105 active:scale-95"
+          className="fixed bottom-6 right-6 z-50 bg-gradient-to-br from-orange-500 to-orange-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-xl"
           aria-label={isSidebarOpen ? "Fechar menu" : "Abrir menu"}
         >
           {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
@@ -88,40 +104,76 @@ const Sidebar = ({ activeSection, setActiveSection }: SidebarProps) => {
     
       <div 
         className={cn(
-          "fixed left-0 top-16 bottom-0 bg-white border-r border-orange-100 shadow-sm transition-all duration-300 ease-in-out z-40 overflow-y-auto w-64",
+          "fixed left-0 top-16 bottom-0 bg-white/95 backdrop-blur-md border-r border-orange-100 shadow-lg transition-all duration-300 ease-in-out z-40 overflow-y-auto w-72",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
           !isMobile && "md:translate-x-0"
         )}
       >
-        <div className="p-4">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">
-            Ferramentas
-          </h2>
-          <nav className="space-y-1.5">
-            {sidebarItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleSectionClick(item.id)}
-                className={cn(
-                  "w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-3 text-sm",
-                  activeSection === item.id 
-                    ? "bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 font-medium" 
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-700"
-                )}
-              >
-                <span className={cn(
-                  "transition-colors",
-                  activeSection === item.id ? "text-orange-500" : "text-gray-500"
-                )}>
-                  {item.icon}
-                </span>
-                {item.label}
-                {activeSection === item.id && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-500"></div>
-                )}
-              </button>
+        <div className="p-6">
+          <div className="mb-6">
+            <h2 className="text-sm font-bold text-orange-600 uppercase tracking-wider mb-2">
+              Frete.Digital BY CCI
+            </h2>
+            <p className="text-xs text-gray-500">
+              Ferramentas gratuitas para transportadores
+            </p>
+          </div>
+
+          <nav className="space-y-6">
+            {Object.entries(groupedItems).map(([category, items]) => (
+              <div key={category}>
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">
+                  {categoryLabels[category as keyof typeof categoryLabels]}
+                </h3>
+                <div className="space-y-1">
+                  {items.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSectionClick(item.id)}
+                      className={cn(
+                        "w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 text-sm group relative",
+                        activeSection === item.id 
+                          ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-md" 
+                          : "text-gray-600 hover:bg-orange-50 hover:text-orange-700"
+                      )}
+                    >
+                      <span className={cn(
+                        "transition-all duration-200 flex-shrink-0",
+                        activeSection === item.id ? "text-white" : "text-gray-500 group-hover:text-orange-500"
+                      )}>
+                        {item.icon}
+                      </span>
+                      <span className="font-medium leading-tight">{item.label}</span>
+                      {activeSection === item.id && (
+                        <div className="ml-auto flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-white/80 animate-pulse"></div>
+                          <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-0 h-0 border-l-4 border-l-orange-500 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </nav>
+
+          <div className="mt-8 p-4 bg-gradient-to-br from-orange-50 to-blue-50 rounded-xl border border-orange-100">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                <Truck size={16} className="text-white" />
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">CCI Gestão</h4>
+                <p className="text-xs text-gray-600">Soluções completas</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-600 mb-3">
+              Precisa de consultoria em logística ou gestão de risco?
+            </p>
+            <button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-medium py-2 px-3 rounded-lg hover:shadow-md transition-all duration-200">
+              Falar com Especialista
+            </button>
+          </div>
         </div>
       </div>
 

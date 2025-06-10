@@ -1,455 +1,453 @@
 
 import React, { useState, useEffect } from 'react';
 import Calculator from '@/components/Calculator';
-import ResultBox from './ResultBox';
-import { RefreshCw, CheckCircle, XCircle, Download, AlertTriangle, TrendingUp, Info } from 'lucide-react';
+import { TrendingUp, DollarSign, Target, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 import useSharedData from '@/hooks/useSharedData';
-import { formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 interface ProfitSimulatorProps {
   isActive: boolean;
 }
 
-interface ViabilityResult {
-  isViable: boolean;
-  profit: string;
-  marginPercent: string;
-  suggestedPrice: string;
-  targetMargin: number;
-  minimumMargin: number;
-  recommendation: {
-    type: 'danger' | 'warning' | 'success';
-    title: string;
-    message: string;
-  };
-  breakEvenPoint: string;
-  profitabilityIndex: number;
-}
-
 const ProfitSimulator = ({ isActive }: ProfitSimulatorProps) => {
-  const [totalCost, setTotalCost] = useState('');
-  const [price, setPrice] = useState('');
-  const [suggestedMargin, setSuggestedMargin] = useState(15);
-  const [customMargin, setCustomMargin] = useState('');
-  const [result, setResult] = useState<ViabilityResult | null>(null);
-  const [canImportFreight, setCanImportFreight] = useState(false);
+  const { data } = useSharedData();
   
-  const { data, saveRiskData } = useSharedData();
+  // Estados do formulário
+  const [freightCost, setFreightCost] = useState('');
+  const [proposedPrice, setProposedPrice] = useState('');
+  const [suggestedMargin, setSuggestedMargin] = useState('15');
+  const [additionalCosts, setAdditionalCosts] = useState('');
+  const [origin, setOrigin] = useState('');
+  const [destination, setDestination] = useState('');
+  const [distance, setDistance] = useState('');
+  
+  // Estados de resultado
+  const [result, setResult] = useState<any>(null);
+  const [scenarios, setScenarios] = useState<any[]>([]);
 
-  useEffect(() => {
-    setCanImportFreight(!!data.freightData);
-  }, [data.freightData]);
-
-  const importFreightData = () => {
-    if (data.freightData) {
-      setTotalCost(data.freightData.totalCost.toString());
-      // Sugerir preço com margem padrão
-      const suggestedPrice = data.freightData.totalCost * (1 + suggestedMargin / 100);
-      setPrice(suggestedPrice.toFixed(2));
-    }
-  };
-
-  const getMarketSuggestedMargin = (vehicleType: string, distance: number) => {
-    // Margem sugerida baseada no tipo de veículo e distância
-    const baseMargins = {
-      'van': 18,
-      'toco': 15,
-      'truck': 12,
-      'carreta': 10,
-      'bitrem': 8
-    };
-    
-    let margin = baseMargins[vehicleType as keyof typeof baseMargins] || 15;
-    
-    // Ajuste por distância (viagens longas têm margem menor)
-    if (distance > 1000) margin -= 2;
-    else if (distance > 500) margin -= 1;
-    else if (distance < 100) margin += 3;
-    
-    return Math.max(5, Math.min(25, margin));
-  };
-
+  // Importar dados da Calculadora de Frete automaticamente
   useEffect(() => {
     if (data.freightData) {
-      const suggestedMarginValue = getMarketSuggestedMargin(
-        data.freightData.vehicleType, 
-        data.freightData.distance
-      );
-      setSuggestedMargin(suggestedMarginValue);
+      setFreightCost(data.freightData.totalCost.toString());
+      setOrigin(data.freightData.origin);
+      setDestination(data.freightData.destination);
+      setDistance(data.freightData.distance.toString());
+      
+      // Calcular preço sugerido baseado na margem padrão
+      const suggestedPrice = data.freightData.totalCost * (1 + parseFloat(suggestedMargin) / 100);
+      setProposedPrice(suggestedPrice.toFixed(2));
     }
-  }, [data.freightData]);
-  
+  }, [data.freightData, suggestedMargin]);
+
+  // Cálculo em tempo real
+  useEffect(() => {
+    if (freightCost && proposedPrice) {
+      calculateProfit();
+    }
+  }, [freightCost, proposedPrice, additionalCosts, suggestedMargin]);
+
   const calculateProfit = () => {
-    if (!totalCost || !price) return;
+    const cost = parseFloat(freightCost) || 0;
+    const price = parseFloat(proposedPrice) || 0;
+    const additional = parseFloat(additionalCosts) || 0;
+    const totalCost = cost + additional;
     
-    const costValue = parseFloat(totalCost);
-    const priceValue = parseFloat(price);
+    const netProfit = price - totalCost;
+    const profitPercentage = totalCost > 0 ? (netProfit / totalCost) * 100 : 0;
+    const margin = price > 0 ? (netProfit / price) * 100 : 0;
     
-    const profit = priceValue - costValue;
-    const marginPercent = (profit / priceValue) * 100;
-    const isProfit = profit > 0;
+    // Análise de viabilidade
+    let viability = 'Inviável';
+    let viabilityColor = 'red';
+    let recommendation = '';
     
-    // Calcular preço sugerido com margem customizada ou padrão
-    const targetMargin = customMargin ? parseFloat(customMargin) : suggestedMargin;
-    const suggestedPrice = costValue / (1 - targetMargin / 100);
-    
-    // Determinar viabilidade baseada na margem mínima
-    const minimumMargin = 8; // Margem mínima para viabilidade
-    const isViable = marginPercent >= minimumMargin;
-    
-    // Ponto de equilíbrio (custo total = preço mínimo)
-    const breakEvenPoint = costValue.toFixed(2);
-    
-    // Índice de rentabilidade (preço / custo)
-    const profitabilityIndex = priceValue / costValue;
-    
-    const analysisResult: ViabilityResult = {
-      profit: profit.toFixed(2),
-      marginPercent: marginPercent.toFixed(2),
-      isViable,
-      suggestedPrice: suggestedPrice.toFixed(2),
-      targetMargin,
-      minimumMargin,
-      recommendation: getRecommendation(marginPercent, minimumMargin, profitabilityIndex),
-      breakEvenPoint,
-      profitabilityIndex: parseFloat(profitabilityIndex.toFixed(3))
+    if (profitPercentage >= 25) {
+      viability = 'Excelente';
+      viabilityColor = 'green';
+      recommendation = 'Operação muito lucrativa. Margem excelente para o setor.';
+    } else if (profitPercentage >= 15) {
+      viability = 'Viável';
+      viabilityColor = 'green';
+      recommendation = 'Boa margem de lucro. Operação recomendada.';
+    } else if (profitPercentage >= 8) {
+      viability = 'Atenção';
+      viabilityColor = 'yellow';
+      recommendation = 'Margem baixa. Monitore custos e considere renegociar.';
+    } else if (profitPercentage >= 0) {
+      viability = 'Crítico';
+      viabilityColor = 'orange';
+      recommendation = 'Margem muito baixa. Risco alto de prejuízo.';
+    } else {
+      viability = 'Inviável';
+      viabilityColor = 'red';
+      recommendation = 'Operação com prejuízo. Reavalie custos e preços.';
+    }
+
+    const calculatedResult = {
+      totalCost,
+      proposedPrice: price,
+      netProfit,
+      profitPercentage,
+      margin,
+      viability,
+      viabilityColor,
+      recommendation,
+      costPerKm: distance ? totalCost / parseFloat(distance) : 0,
+      pricePerKm: distance ? price / parseFloat(distance) : 0
     };
-    
-    setResult(analysisResult);
-    
-    // Salvar dados para outros componentes
-    saveRiskData({
-      totalCost: costValue,
-      price: priceValue,
-      viabilityAnalysis: analysisResult,
-      timestamp: Date.now()
-    });
+
+    setResult(calculatedResult);
+    generateScenarios(calculatedResult);
   };
 
-  const getRecommendation = (margin: number, minimum: number, profitIndex: number) => {
-    if (margin < 0) {
+  const generateScenarios = (baseResult: any) => {
+    const margins = [10, 15, 20, 25, 30];
+    const newScenarios = margins.map(margin => {
+      const price = baseResult.totalCost * (1 + margin / 100);
+      const profit = price - baseResult.totalCost;
+      const profitPercentage = (profit / baseResult.totalCost) * 100;
+      
       return {
-        type: 'danger' as const,
-        title: 'Operação com prejuízo',
-        message: 'Esta operação gerará prejuízo. Renegocie o preço ou reduza custos urgentemente.'
+        margin,
+        price,
+        profit,
+        profitPercentage,
+        viable: profitPercentage >= 10
       };
-    } else if (margin < minimum) {
-      return {
-        type: 'warning' as const,
-        title: 'Margem insuficiente',
-        message: `Margem abaixo do mínimo recomendado (${minimum}%). Alto risco operacional.`
-      };
-    } else if (margin < 15) {
-      return {
-        type: 'success' as const,
-        title: 'Operação viável',
-        message: 'Margem aceitável, mas há espaço para melhorar a rentabilidade.'
-      };
-    } else if (margin < 25) {
-      return {
-        type: 'success' as const,
-        title: 'Boa rentabilidade',
-        message: 'Margem saudável! Operação altamente recomendada.'
-      };
-    } else {
-      return {
-        type: 'success' as const,
-        title: 'Excelente rentabilidade',
-        message: 'Margem excepcional! Operação muito lucrativa.'
-      };
+    });
+    
+    setScenarios(newScenarios);
+  };
+
+  const handleReset = () => {
+    setFreightCost('');
+    setProposedPrice('');
+    setSuggestedMargin('15');
+    setAdditionalCosts('');
+    setOrigin('');
+    setDestination('');
+    setDistance('');
+    setResult(null);
+    setScenarios([]);
+  };
+
+  const applyScenario = (scenario: any) => {
+    setProposedPrice(scenario.price.toFixed(2));
+    setSuggestedMargin(scenario.margin.toString());
+  };
+
+  const getViabilityIcon = (viability: string) => {
+    switch (viability) {
+      case 'Excelente':
+      case 'Viável':
+        return <CheckCircle size={20} className="text-green-500" />;
+      case 'Atenção':
+        return <AlertTriangle size={20} className="text-yellow-500" />;
+      case 'Crítico':
+        return <AlertTriangle size={20} className="text-orange-500" />;
+      default:
+        return <AlertTriangle size={20} className="text-red-500" />;
     }
   };
 
-  const exportResults = () => {
-    if (!result) return;
-
-    const exportData = {
-      calculation: {
-        totalCost: parseFloat(totalCost),
-        price: parseFloat(price),
-        profit: parseFloat(result.profit),
-        marginPercent: parseFloat(result.marginPercent),
-        isViable: result.isViable,
-        targetMargin: result.targetMargin,
-        profitabilityIndex: result.profitabilityIndex
-      },
-      freightData: data.freightData,
-      timestamp: new Date().toISOString(),
-      recommendation: result.recommendation,
-      analysis: {
-        breakEvenPoint: result.breakEvenPoint,
-        suggestedPrice: result.suggestedPrice,
-        viabilityStatus: result.isViable ? 'VIÁVEL' : 'INVIÁVEL'
-      }
-    };
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: 'application/json'
-    });
-    
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `analise-lucro-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-  
   return (
     <Calculator
       id="simulador-lucro"
-      title="Simulador de Lucro por Frete"
-      description="Calcule o lucro líquido, margem percentual e viabilidade completa da operação."
+      title="Simulador de Lucro"
+      description="Simule diferentes cenários de margem e analise a viabilidade da operação."
       isActive={isActive}
     >
-      {canImportFreight && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-blue-800">Dados de frete disponíveis</p>
-              <p className="text-sm text-blue-600 mt-1">
-                Importar dados da última calculadora de frete: {formatCurrency(data.freightData?.totalCost || 0)}
-                {data.freightData && (
-                  <span className="ml-2 text-xs">
-                    (Margem sugerida: {getMarketSuggestedMargin(data.freightData.vehicleType, data.freightData.distance)}%)
-                  </span>
-                )}
-              </p>
+      <div className="space-y-6">
+        {/* Importação Automática */}
+        {data.freightData && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <CheckCircle size={20} className="text-blue-500" />
+              <span className="font-medium text-blue-700">Dados importados da Calculadora de Frete</span>
             </div>
-            <button
-              onClick={importFreightData}
-              className="btn btn-primary btn-sm"
-            >
-              <Download size={16} className="mr-1" />
-              Importar
-            </button>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-blue-600">
+              <span><strong>Rota:</strong> {data.freightData.origin} → {data.freightData.destination}</span>
+              <span><strong>Distância:</strong> {data.freightData.distance} km</span>
+              <span><strong>Custo:</strong> R$ {data.freightData.totalCost.toFixed(2)}</span>
+            </div>
           </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <div className="mb-4">
-            <label htmlFor="totalCost" className="block text-sm font-medium text-gray-700 mb-1">
-              Custo total do frete (R$) *
-            </label>
-            <input
-              type="number"
-              id="totalCost"
-              className="input-field"
-              value={totalCost}
-              onChange={(e) => setTotalCost(e.target.value)}
-              placeholder="Ex: 1200"
-              step="0.01"
-            />
-            {result && (
-              <p className="text-xs text-gray-500 mt-1">
-                Ponto de equilíbrio: R$ {result.breakEvenPoint}
-              </p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="suggestedMargin" className="block text-sm font-medium text-gray-700 mb-1">
-              Margem sugerida do mercado (%)
-            </label>
-            <input
-              type="number"
-              id="suggestedMargin"
-              className="input-field"
-              value={suggestedMargin}
-              onChange={(e) => setSuggestedMargin(parseFloat(e.target.value) || 15)}
-              placeholder="15"
-              min="0"
-              max="100"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Baseada no tipo de veículo e distância da rota
-            </p>
-          </div>
-        </div>
-        
-        <div>
-          <div className="mb-4">
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              Valor cobrado do cliente (R$) *
-            </label>
-            <input
-              type="number"
-              id="price"
-              className="input-field"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="Ex: 1500"
-              step="0.01"
-            />
-            {result && (
-              <p className="text-xs text-gray-500 mt-1">
-                Índice de rentabilidade: {result.profitabilityIndex}x
-              </p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="customMargin" className="block text-sm font-medium text-gray-700 mb-1">
-              Margem personalizada (%) - opcional
-            </label>
-            <input
-              type="number"
-              id="customMargin"
-              className="input-field"
-              value={customMargin}
-              onChange={(e) => setCustomMargin(e.target.value)}
-              placeholder="Ex: 20"
-              min="0"
-              max="100"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Deixe vazio para usar a margem sugerida do mercado
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      <div className="flex flex-wrap gap-3 mt-6">
-        <button 
-          className="btn btn-primary"
-          onClick={calculateProfit}
-          disabled={!totalCost || !price}
-        >
-          <TrendingUp size={18} className="mr-2" />
-          Analisar Viabilidade
-        </button>
-        
-        {result && (
-          <button 
-            className="btn btn-secondary"
-            onClick={exportResults}
-          >
-            <Download size={18} className="mr-2" />
-            Exportar Análise
-          </button>
         )}
-        
-        <button 
-          className="btn btn-secondary"
-          onClick={() => {
-            setTotalCost('');
-            setPrice('');
-            setCustomMargin('');
-            setResult(null);
-          }}
-        >
-          <RefreshCw size={18} className="mr-2" />
-          Limpar
-        </button>
-      </div>
-      
-      {result && (
-        <div className="mt-8 animate-fade-in">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Análise Completa de Viabilidade</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <ResultBox 
-              label="Lucro Líquido" 
-              value={`R$ ${result.profit}`}
-              className={parseFloat(result.profit) >= 0 ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}
-            />
-            <ResultBox 
-              label="Margem de Lucro" 
-              value={result.marginPercent}
-              unit="%"
-              className={result.isViable ? "bg-green-50 border-green-200" : "bg-yellow-50 border-yellow-200"}
-            />
-            <ResultBox 
-              label="Preço Sugerido" 
-              value={`R$ ${result.suggestedPrice}`}
-              tooltip={`Para margem de ${result.targetMargin}%`}
-              className="bg-blue-50 border-blue-200"
-            />
-            <ResultBox 
-              label="Status" 
-              value={result.isViable ? "VIÁVEL" : "INVIÁVEL"}
-              className={result.isViable ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}
-            />
-          </div>
 
-          <div className={`p-4 rounded-lg flex items-start gap-3 animate-fade-in mb-4 ${
-            result.recommendation.type === 'danger' 
-              ? "bg-red-50 border border-red-200 text-red-800" 
-              : result.recommendation.type === 'warning'
-                ? "bg-yellow-50 border border-yellow-200 text-yellow-800"
-                : "bg-green-50 border border-green-200 text-green-800"
-          }`}>
-            {result.recommendation.type === 'danger' ? (
-              <XCircle className="text-red-500 mt-0.5 shrink-0" size={20} />
-            ) : result.recommendation.type === 'warning' ? (
-              <AlertTriangle className="text-yellow-500 mt-0.5 shrink-0" size={20} />
-            ) : (
-              <CheckCircle className="text-green-500 mt-0.5 shrink-0" size={20} />
-            )}
-            <div className="flex-1">
-              <p className="font-medium">{result.recommendation.title}</p>
-              <p className="text-sm mt-1">{result.recommendation.message}</p>
-              
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="bg-white/50 p-2 rounded border border-current/20">
-                  <p className="font-medium">Ponto de Equilíbrio:</p>
-                  <p>R$ {result.breakEvenPoint}</p>
-                </div>
-                <div className="bg-white/50 p-2 rounded border border-current/20">
-                  <p className="font-medium">Rentabilidade:</p>
-                  <p>{result.profitabilityIndex}x do investimento</p>
-                </div>
-                <div className="bg-white/50 p-2 rounded border border-current/20">
-                  <p className="font-medium">Margem Mínima:</p>
-                  <p>{result.minimumMargin}% para viabilidade</p>
-                </div>
-              </div>
-              
-              {!result.isViable && (
-                <div className="mt-3 p-3 bg-white/50 rounded border border-current/20">
-                  <p className="font-medium text-sm">💡 Ações Recomendadas:</p>
-                  <ul className="text-sm mt-1 space-y-1">
-                    <li>• Negociar preço mínimo de <strong>R$ {result.suggestedPrice}</strong></li>
-                    <li>• Ou reduzir custos em <strong>R$ {(parseFloat(totalCost) - (parseFloat(price) * (1 - result.minimumMargin / 100))).toFixed(2)}</strong></li>
-                    <li>• Avaliar alternativas de rota ou combustível</li>
-                  </ul>
-                </div>
-              )}
+        {/* Dados Básicos */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+              <DollarSign size={20} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Dados da Operação</h3>
+              <p className="text-sm text-gray-600">Custos e preços para análise</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg text-blue-800 text-sm">
-              <p className="font-medium flex items-center">
-                <Info size={16} className="mr-2" />
-                Indicadores de Performance
-              </p>
-              <ul className="mt-2 space-y-1">
-                <li>• Margem atual: {result.marginPercent}%</li>
-                <li>• Margem ideal: {result.targetMargin}%</li>
-                <li>• ROI: {((result.profitabilityIndex - 1) * 100).toFixed(1)}%</li>
-                <li>• Gap para meta: {(result.targetMargin - parseFloat(result.marginPercent)).toFixed(1)} pontos</li>
-              </ul>
+            <div>
+              <label className="calculator-label">
+                <DollarSign size={16} className="calculator-label-icon" />
+                Custo Total do Frete (R$)
+              </label>
+              <input
+                type="number"
+                value={freightCost}
+                onChange={(e) => setFreightCost(e.target.value)}
+                className="input-field"
+                placeholder="Ex: 1500.00"
+                step="0.01"
+                min="0"
+              />
             </div>
-            
-            <div className="p-4 bg-gray-50 border border-gray-100 rounded-lg text-gray-800 text-sm">
-              <p className="font-medium">📊 Resumo Executivo:</p>
-              <p className="mt-1">
-                <strong>{result.isViable ? "✅ OPERAÇÃO APROVADA" : "❌ OPERAÇÃO REJEITADA"}</strong>
+
+            <div>
+              <label className="calculator-label">
+                <Target size={16} className="calculator-label-icon" />
+                Preço Proposto (R$)
+              </label>
+              <input
+                type="number"
+                value={proposedPrice}
+                onChange={(e) => setProposedPrice(e.target.value)}
+                className="input-field"
+                placeholder="Ex: 1800.00"
+                step="0.01"
+                min="0"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label className="calculator-label">
+                <TrendingUp size={16} className="calculator-label-icon" />
+                Margem Sugerida pelo Mercado (%)
+              </label>
+              <input
+                type="number"
+                value={suggestedMargin}
+                onChange={(e) => setSuggestedMargin(e.target.value)}
+                className="input-field"
+                placeholder="15"
+                step="1"
+                min="0"
+                max="100"
+              />
+              <p className="form-helper">
+                Sugestão: 15% a 25% para operações seguras
               </p>
-              <p className="mt-1">
-                {result.isViable 
-                  ? `Lucro de R$ ${result.profit} com margem de ${result.marginPercent}% confirma viabilidade da operação.` 
-                  : `Déficit de R$ ${Math.abs(parseFloat(result.profit)).toFixed(2)} torna a operação inviável no cenário atual.`}
+            </div>
+
+            <div>
+              <label className="calculator-label">
+                Custos Adicionais (R$)
+              </label>
+              <input
+                type="number"
+                value={additionalCosts}
+                onChange={(e) => setAdditionalCosts(e.target.value)}
+                className="input-field"
+                placeholder="Ex: 50.00"
+                step="0.01"
+                min="0"
+              />
+              <p className="form-helper">
+                Opcional: taxas, seguros extras, etc.
               </p>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Resultado Principal */}
+        {result && (
+          <div className="space-y-6">
+            <div className={cn(
+              "rounded-xl p-6 border-2",
+              result.viabilityColor === 'green' && "bg-green-50 border-green-200",
+              result.viabilityColor === 'yellow' && "bg-yellow-50 border-yellow-200",
+              result.viabilityColor === 'orange' && "bg-orange-50 border-orange-200",
+              result.viabilityColor === 'red' && "bg-red-50 border-red-200"
+            )}>
+              <div className="flex items-center gap-4 mb-4">
+                <div className={cn(
+                  "w-16 h-16 rounded-xl flex items-center justify-center",
+                  result.viabilityColor === 'green' && "bg-green-500",
+                  result.viabilityColor === 'yellow' && "bg-yellow-500",
+                  result.viabilityColor === 'orange' && "bg-orange-500",
+                  result.viabilityColor === 'red' && "bg-red-500"
+                )}>
+                  {getViabilityIcon(result.viability)}
+                </div>
+                <div>
+                  <h3 className={cn(
+                    "text-2xl font-bold",
+                    result.viabilityColor === 'green' && "text-green-700",
+                    result.viabilityColor === 'yellow' && "text-yellow-700",
+                    result.viabilityColor === 'orange' && "text-orange-700",
+                    result.viabilityColor === 'red' && "text-red-700"
+                  )}>
+                    {result.viability}
+                  </h3>
+                  <p className={cn(
+                    "text-sm",
+                    result.viabilityColor === 'green' && "text-green-600",
+                    result.viabilityColor === 'yellow' && "text-yellow-600",
+                    result.viabilityColor === 'orange' && "text-orange-600",
+                    result.viabilityColor === 'red' && "text-red-600"
+                  )}>
+                    {result.recommendation}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="text-sm font-medium text-gray-600 mb-1">Lucro Líquido</div>
+                  <div className={cn(
+                    "text-2xl font-bold",
+                    result.netProfit >= 0 ? "text-green-600" : "text-red-600"
+                  )}>
+                    R$ {result.netProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm font-medium text-gray-600 mb-1">Lucro Percentual</div>
+                  <div className={cn(
+                    "text-2xl font-bold",
+                    result.profitPercentage >= 15 ? "text-green-600" : 
+                    result.profitPercentage >= 8 ? "text-yellow-600" : "text-red-600"
+                  )}>
+                    {result.profitPercentage.toFixed(1)}%
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm font-medium text-gray-600 mb-1">Margem sobre Venda</div>
+                  <div className={cn(
+                    "text-2xl font-bold",
+                    result.margin >= 15 ? "text-green-600" : 
+                    result.margin >= 8 ? "text-yellow-600" : "text-red-600"
+                  )}>
+                    {result.margin.toFixed(1)}%
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Cenários de Margem */}
+            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <TrendingUp size={20} className="text-purple-500" />
+                Cenários de Margem
+              </h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                {scenarios.map((scenario, index) => (
+                  <div 
+                    key={index}
+                    className={cn(
+                      "p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md",
+                      scenario.viable 
+                        ? "border-green-200 bg-green-50 hover:border-green-300" 
+                        : "border-gray-200 bg-gray-50 hover:border-gray-300"
+                    )}
+                    onClick={() => applyScenario(scenario)}
+                  >
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-gray-900">{scenario.margin}%</div>
+                      <div className="text-sm text-gray-600 mb-2">Margem</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        R$ {scenario.price.toFixed(2)}
+                      </div>
+                      <div className={cn(
+                        "text-xs mt-1",
+                        scenario.viable ? "text-green-600" : "text-gray-500"
+                      )}>
+                        Lucro: {scenario.profitPercentage.toFixed(1)}%
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <p className="text-sm text-gray-500 mt-3">
+                Clique em um cenário para aplicar automaticamente
+              </p>
+            </div>
+
+            {/* Detalhamento */}
+            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">Detalhamento da Operação</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-sm font-medium text-gray-600 mb-1">Custo Total</div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    R$ {result.totalCost.toFixed(2)}
+                  </div>
+                  {distance && (
+                    <div className="text-xs text-gray-500">
+                      R$ {result.costPerKm.toFixed(2)}/km
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-sm font-medium text-gray-600 mb-1">Preço Cobrado</div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    R$ {result.proposedPrice.toFixed(2)}
+                  </div>
+                  {distance && (
+                    <div className="text-xs text-gray-500">
+                      R$ {result.pricePerKm.toFixed(2)}/km
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="text-sm font-medium text-blue-600 mb-1">Margem sobre Custo</div>
+                  <div className="text-lg font-semibold text-blue-700">
+                    {result.profitPercentage.toFixed(1)}%
+                  </div>
+                  <div className="text-xs text-blue-600">
+                    Lucro/Custo
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 rounded-lg p-4">
+                  <div className="text-sm font-medium text-purple-600 mb-1">Margem sobre Venda</div>
+                  <div className="text-lg font-semibold text-purple-700">
+                    {result.margin.toFixed(1)}%
+                  </div>
+                  <div className="text-xs text-purple-600">
+                    Lucro/Preço
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Botões de Ação */}
+        <div className="flex flex-wrap gap-3">
+          <button 
+            onClick={calculateProfit}
+            className="btn btn-primary"
+          >
+            <TrendingUp size={18} />
+            Simular Lucro
+          </button>
+
+          <button 
+            onClick={handleReset}
+            className="btn btn-secondary"
+          >
+            <RefreshCw size={18} />
+            Limpar
+          </button>
+        </div>
+      </div>
     </Calculator>
   );
 };

@@ -66,7 +66,7 @@
   
   /* Enhance headings */
   .section-heading {
-    @apply mb-5;
+    @apply mb-6;
   }
   
   /* Tools container - contains all calculator tools */
@@ -79,30 +79,105 @@
     @apply h-1 w-24 bg-gradient-to-r from-orange-500 to-blue-500 rounded-full my-6 mx-auto;
   }
   
-  /* Card styles */
+  /* Enhanced Card styles */
   .feature-card {
-    @apply bg-white rounded-xl p-5 border border-gray-100 shadow-sm 
+    @apply bg-white rounded-xl p-6 border border-gray-100 shadow-sm 
     hover:shadow-md transition-all duration-300 flex flex-col h-full;
   }
   
   .feature-card-icon {
     @apply w-12 h-12 rounded-lg bg-orange-100 text-orange-600 flex items-center 
-    justify-center mb-4;
+    justify-center mb-4 transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white;
   }
   
-  /* Button styles with new colors */
+  /* Enhanced Button styles */
   .btn-orange {
     @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg 
-    shadow-sm hover:shadow-md transition-all duration-300 px-4 py-2 font-medium;
+    shadow-sm hover:shadow-md transition-all duration-300 px-6 py-3 font-medium 
+    hover:from-orange-600 hover:to-orange-700;
   }
   
   .btn-blue {
-    @apply bg-gradient-to-r from-cci-500 to-cci-600 text-white rounded-lg 
-    shadow-sm hover:shadow-md transition-all duration-300 px-4 py-2 font-medium;
+    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg 
+    shadow-sm hover:shadow-md transition-all duration-300 px-6 py-3 font-medium 
+    hover:from-blue-600 hover:to-blue-700;
   }
   
   .btn-ghost {
     @apply bg-white text-gray-700 border border-gray-200 rounded-lg shadow-sm 
-    hover:bg-gray-50 transition-all duration-300 px-4 py-2 font-medium;
+    hover:bg-gray-50 transition-all duration-300 px-6 py-3 font-medium hover:shadow-md;
+  }
+
+  /* Mobile-first responsive grid */
+  .responsive-grid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4;
+  }
+
+  /* Enhanced form sections */
+  .form-section {
+    @apply bg-white rounded-xl p-6 border border-gray-100 shadow-sm space-y-4;
+  }
+  
+  .form-section-header {
+    @apply flex items-center gap-3 mb-4 pb-3 border-b border-gray-100;
+  }
+  
+  .form-section-icon {
+    @apply w-10 h-10 rounded-lg flex items-center justify-center text-white;
+  }
+  
+  .form-section-title {
+    @apply text-lg font-semibold text-gray-900;
+  }
+  
+  .form-section-subtitle {
+    @apply text-sm text-gray-600;
+  }
+
+  /* Status cards */
+  .status-card {
+    @apply rounded-xl p-4 border-2 transition-all duration-200;
+  }
+  
+  .status-card-success {
+    @apply bg-green-50 border-green-200 text-green-700;
+  }
+  
+  .status-card-warning {
+    @apply bg-yellow-50 border-yellow-200 text-yellow-700;
+  }
+  
+  .status-card-error {
+    @apply bg-red-50 border-red-200 text-red-700;
+  }
+  
+  .status-card-info {
+    @apply bg-blue-50 border-blue-200 text-blue-700;
+  }
+
+  /* Enhanced animations */
+  .slide-up {
+    @apply transition-all duration-300 transform hover:-translate-y-1;
+  }
+  
+  .fade-in {
+    @apply animate-fade-in;
+  }
+  
+  .scale-in {
+    @apply animate-scale-in;
+  }
+
+  /* Improved spacing system */
+  .section-gap {
+    @apply space-y-8 md:space-y-12;
+  }
+  
+  .element-gap {
+    @apply space-y-4 md:space-y-6;
+  }
+  
+  .tight-gap {
+    @apply space-y-2 md:space-y-3;
   }
 }

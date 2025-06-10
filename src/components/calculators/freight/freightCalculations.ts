@@ -5,6 +5,7 @@ export interface FreightCalculationResult {
   fuelCost: number;
   tollsCost: number;
   totalFreight: number;
+  suggestedPrice: number;
   costPerKm: number;
   deliveryTime: string;
   breakdown: {
@@ -83,12 +84,16 @@ export const calculateFreight = (
   const totalFreight = distanceCost + weightCost + fuelCost + tollsCost;
   const finalCostPerKm = totalFreight / distance;
   
+  // Calculate suggested price with margin (20% markup)
+  const suggestedPrice = totalFreight * 1.2;
+  
   return {
     distanceCost,
     weightCost,
     fuelCost,
     tollsCost,
     totalFreight,
+    suggestedPrice,
     costPerKm: finalCostPerKm,
     deliveryTime: calculateEstimatedTime(distance, vehicleType),
     breakdown: {

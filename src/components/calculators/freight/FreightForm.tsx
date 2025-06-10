@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Truck, Fuel, DollarSign, Route, AlertCircle } from 'lucide-react';
+import { MapPin, Truck, Fuel, DollarSign, Route, AlertCircle, Package, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface FreightFormProps {

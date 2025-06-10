@@ -1,0 +1,21 @@
+
+@layer components {
+  /* Mobile-first responsive improvements */
+  @media (max-width: 768px) {
+    .calculator-card {
+      @apply p-4;
+    }
+    
+    .btn {
+      @apply px-4 py-2 text-xs;
+    }
+    
+    .calculator-title {
+      @apply text-lg;
+    }
+    
+    .result-card-value {
+      @apply text-xl;
+    }
+  }
+}

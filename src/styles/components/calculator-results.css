@@ -1,0 +1,59 @@
+
+@layer components {
+  .result-box {
+    @apply bg-white rounded-xl p-6 border border-gray-100 shadow-sm;
+  }
+  
+  .result-box-title {
+    @apply text-sm font-medium text-gray-600 mb-2 flex items-center gap-2;
+  }
+  
+  .result-box-value {
+    @apply text-2xl font-bold text-gray-900;
+  }
+  
+  .result-box-unit {
+    @apply text-gray-500 text-sm font-normal ml-1;
+  }
+  
+  .result-card {
+    @apply bg-white rounded-xl p-6 border-2 border-gray-100 shadow-sm transition-all duration-200 hover:shadow-md;
+  }
+  
+  .result-card-header {
+    @apply text-sm font-medium text-gray-600 mb-2 flex items-center gap-2;
+  }
+  
+  .result-card-value {
+    @apply text-2xl font-bold text-gray-900;
+  }
+  
+  .progress-bar {
+    @apply w-full h-3 bg-gray-200 rounded-full overflow-hidden;
+  }
+  
+  .progress-bar-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
+
+  /* Enhanced card styles */
+  .enhanced-card {
+    @apply bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300;
+  }
+  
+  .enhanced-card-header {
+    @apply flex items-center gap-3 mb-4;
+  }
+  
+  .enhanced-card-icon {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center text-white;
+  }
+  
+  .enhanced-card-title {
+    @apply text-lg font-semibold text-gray-900;
+  }
+  
+  .enhanced-card-subtitle {
+    @apply text-sm text-gray-600;
+  }
+}

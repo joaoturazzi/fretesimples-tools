@@ -1,0 +1,30 @@
+
+@layer components {
+  /* Enhanced animations - using direct CSS instead of @apply to avoid circular dependency */
+  .anim-fade-in {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .anim-slide-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideInUp 0.3s ease-out forwards;
+  }
+  
+  .anim-bounce-in {
+    opacity: 0;
+    transform: scale(0.8);
+    animation: bounceIn 0.3s ease-out forwards;
+  }
+
+  /* Performance optimizations */
+  .lazy-loading {
+    @apply opacity-0 transition-opacity duration-300;
+  }
+  
+  .lazy-loaded {
+    @apply opacity-100;
+  }
+}

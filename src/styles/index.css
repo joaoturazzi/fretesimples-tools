@@ -13,6 +13,12 @@
 @import './components/buttons.css';
 @import './components/sidebar.css';
 @import './components/tooltips.css';
-@import './components/calculator.css';
+@import './components/calculator-base.css';
+@import './components/calculator-inputs.css';
+@import './components/calculator-buttons.css';
+@import './components/calculator-results.css';
+@import './components/calculator-animations.css';
+@import './components/calculator-status.css';
+@import './components/calculator-responsive.css';
 @import './components/chat.css';
 @import './components/print.css';

@@ -1,0 +1,63 @@
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-medium rounded-lg px-6 py-3 
+    transition-all duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 
+    disabled:opacity-60 disabled:cursor-not-allowed shadow-sm hover:shadow-md;
+  }
+  
+  .btn-sm {
+    @apply px-4 py-2 text-xs rounded-md;
+  }
+  
+  .btn-lg {
+    @apply px-8 py-4 text-base rounded-xl;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white 
+    hover:from-orange-600 hover:to-orange-700 focus:ring-orange-300;
+  }
+  
+  .btn-secondary {
+    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white 
+    hover:from-blue-600 hover:to-blue-700 focus:ring-blue-300;
+  }
+  
+  .btn-success {
+    @apply bg-gradient-to-r from-green-500 to-green-600 text-white 
+    hover:from-green-600 hover:to-green-700 focus:ring-green-300;
+  }
+  
+  .btn-warning {
+    @apply bg-gradient-to-r from-yellow-500 to-orange-500 text-white 
+    hover:from-yellow-600 hover:to-orange-600 focus:ring-yellow-300;
+  }
+  
+  .btn-danger {
+    @apply bg-gradient-to-r from-red-500 to-red-600 text-white 
+    hover:from-red-600 hover:to-red-700 focus:ring-red-300;
+  }
+  
+  .btn-ghost {
+    @apply bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 
+    focus:ring-gray-200;
+  }
+  
+  .btn-outline {
+    @apply bg-transparent border border-orange-500 text-orange-600 hover:bg-orange-50 
+    focus:ring-orange-300;
+  }
+  
+  .btn-loading {
+    @apply relative text-transparent transition-none hover:text-transparent;
+  }
+  
+  .btn-loading::after {
+    @apply absolute h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin;
+    content: '';
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}

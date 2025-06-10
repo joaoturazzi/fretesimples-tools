@@ -1,20 +1,50 @@
 
 import React from 'react';
-import { Truck } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { LogOut, User, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
+  const { user, signOut } = useAuth();
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-b border-orange-100 shadow-sm">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-2.5 rounded-lg shadow-md animate-fade-in flex items-center justify-center transition-transform hover:scale-105">
-            <Truck size={22} strokeWidth={2.5} />
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center">
+            <Link to="/" className="text-xl font-bold text-gray-900">
+              FreteDigital
+            </Link>
           </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center">
-              Frete Simples 
-              <span className="ml-2 text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white px-2 py-0.5 rounded-md font-medium shadow-sm">BY CCI</span>
-            </h1>
+
+          <div className="flex items-center gap-4">
+            {user ? (
+              <>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <User size={16} />
+                  {user.email}
+                </div>
+                
+                {user.email?.includes('@cci.com.br') && (
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/admin">
+                      <Settings size={16} className="mr-2" />
+                      Admin
+                    </Link>
+                  </Button>
+                )}
+                
+                <Button onClick={signOut} variant="ghost" size="sm">
+                  <LogOut size={16} className="mr-2" />
+                  Sair
+                </Button>
+              </>
+            ) : (
+              <Button asChild>
+                <Link to="/auth">Entrar</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>

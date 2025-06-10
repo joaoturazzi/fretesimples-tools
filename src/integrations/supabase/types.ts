@@ -9,7 +9,138 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      diagnostics: {
+        Row: {
+          created_at: string
+          id: string
+          input_data: Json
+          results: Json
+          risk_level: string | null
+          session_id: string | null
+          tool_type: string
+          user_id: string
+          viability: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_data: Json
+          results: Json
+          risk_level?: string | null
+          session_id?: string | null
+          tool_type: string
+          user_id: string
+          viability?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_data?: Json
+          results?: Json
+          risk_level?: string | null
+          session_id?: string | null
+          tool_type?: string
+          user_id?: string
+          viability?: string | null
+        }
+        Relationships: []
+      }
+      lead_qualification: {
+        Row: {
+          assigned_to: string | null
+          id: string
+          notes: string | null
+          priority: number | null
+          status: string | null
+          tags: string[] | null
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          id?: string
+          notes?: string | null
+          priority?: number | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          id?: string
+          notes?: string | null
+          priority?: number | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          last_activity: string | null
+          lead_status: string | null
+          phone: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id: string
+          last_activity?: string | null
+          lead_status?: string | null
+          phone?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          last_activity?: string | null
+          lead_status?: string | null
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      tool_usage: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          id: string
+          session_id: string | null
+          tool_type: string
+          user_id: string | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          session_id?: string | null
+          tool_type: string
+          user_id?: string | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          session_id?: string | null
+          tool_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

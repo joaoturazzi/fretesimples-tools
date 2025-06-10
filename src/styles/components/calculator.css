@@ -60,6 +60,10 @@
     bg-no-repeat bg-[position:right_1rem_center] bg-[size:16px] shadow-sm
     focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200 transition-all duration-200;
   }
+
+  .checkbox-field {
+    @apply rounded border-gray-300 text-orange-500 focus:ring-orange-500 focus:ring-2;
+  }
   
   .btn {
     @apply inline-flex items-center justify-center gap-2 font-medium rounded-lg px-6 py-3 
@@ -158,6 +162,15 @@
     @apply h-full rounded-full transition-all duration-500 ease-out;
   }
 
+  /* Form validation helpers */
+  .form-error {
+    @apply text-red-600 text-xs mt-1 font-medium;
+  }
+  
+  .form-helper {
+    @apply text-gray-500 text-xs mt-1;
+  }
+
   /* Status indicators */
   .status-indicator {
     @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium;
@@ -190,5 +203,56 @@
   
   .validation-warning {
     @apply border-yellow-300 bg-yellow-50 focus:border-yellow-500 focus:ring-yellow-200;
+  }
+
+  /* Enhanced animations */
+  .animate-fade-in {
+    @apply animate-in fade-in duration-500;
+  }
+  
+  .animate-slide-up {
+    @apply animate-in slide-in-from-bottom-4 duration-300;
+  }
+  
+  .animate-bounce-in {
+    @apply animate-in zoom-in-50 duration-300;
+  }
+
+  /* Risk level specific styles */
+  .risk-critical {
+    @apply bg-gradient-to-br from-red-600 to-red-700 text-white;
+  }
+  
+  .risk-high {
+    @apply bg-gradient-to-br from-red-500 to-orange-600 text-white;
+  }
+  
+  .risk-medium {
+    @apply bg-gradient-to-br from-yellow-500 to-orange-500 text-white;
+  }
+  
+  .risk-low {
+    @apply bg-gradient-to-br from-green-500 to-emerald-600 text-white;
+  }
+
+  /* Enhanced card styles */
+  .enhanced-card {
+    @apply bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300;
+  }
+  
+  .enhanced-card-header {
+    @apply flex items-center gap-3 mb-4;
+  }
+  
+  .enhanced-card-icon {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center text-white;
+  }
+  
+  .enhanced-card-title {
+    @apply text-lg font-semibold text-gray-900;
+  }
+  
+  .enhanced-card-subtitle {
+    @apply text-sm text-gray-600;
   }
 }

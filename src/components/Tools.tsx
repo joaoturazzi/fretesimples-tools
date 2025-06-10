@@ -3,6 +3,7 @@ import React from 'react';
 import FreightCalculator from '@/components/calculators/FreightCalculator';
 import ProfitSimulator from '@/components/calculators/ProfitSimulator';
 import RiskCalculator from '@/components/calculators/RiskCalculator';
+import EnhancedRiskCalculator from '@/components/calculators/EnhancedRiskCalculator';
 import FuelCalculator from '@/components/calculators/FuelCalculator';
 import TripChecklist from '@/components/calculators/TripChecklist';
 import VehicleSizingTool from '@/components/calculators/VehicleSizingTool';
@@ -15,6 +16,7 @@ export {
   FreightCalculator,
   ProfitSimulator,
   RiskCalculator,
+  EnhancedRiskCalculator,
   FuelCalculator,
   TripChecklist,
   VehicleSizingTool,

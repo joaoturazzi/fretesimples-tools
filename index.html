@@ -27,9 +27,37 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://router.hereapi.com" />
     <link rel="preconnect" href="https://geocode.search.hereapi.com" />
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
     
     <!-- Performance hints -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//www.google-analytics.com" />
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // Configure with environment variable or default
+      const GA_ID = import.meta?.env?.VITE_GA_MEASUREMENT_ID || 'GA_MEASUREMENT_ID';
+      gtag('config', GA_ID, {
+        page_title: 'Frete Simples - Home',
+        page_location: window.location.href,
+        custom_map: {
+          'custom_parameter_1': 'calculator_type',
+          'custom_parameter_2': 'user_type'
+        }
+      });
+
+      // Enhanced ecommerce and custom events
+      gtag('config', GA_ID, {
+        send_page_view: true,
+        allow_google_signals: true,
+        allow_ad_personalization_signals: true
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
@@ -42,9 +70,25 @@
           navigator.serviceWorker.register('/sw.js')
             .then((registration) => {
               console.log('SW registered: ', registration);
+              
+              // Track successful service worker registration
+              if (typeof gtag !== 'undefined') {
+                gtag('event', 'service_worker_registered', {
+                  event_category: 'performance',
+                  event_label: 'success'
+                });
+              }
             })
             .catch((registrationError) => {
               console.log('SW registration failed: ', registrationError);
+              
+              // Track service worker registration failure
+              if (typeof gtag !== 'undefined') {
+                gtag('event', 'service_worker_error', {
+                  event_category: 'error',
+                  event_label: registrationError.message
+                });
+              }
             });
         });
       }

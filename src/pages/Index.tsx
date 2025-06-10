@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import { 
@@ -17,13 +17,38 @@ import {
 } from '@/components/Tools';
 import ChatAssistant from '@/components/ChatAssistant';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useSEO } from '@/hooks/useSEO';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import AboutSection from '@/components/AboutSection';
+import LazyImage from '@/components/ui/LazyImage';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('calculadora-frete');
   const isMobile = useIsMobile();
+  const { trackPageView, trackCalculatorStart, trackUserInteraction } = useAnalytics();
+  
+  // Update SEO based on active section
+  useSEO(activeSection);
   
   console.log('Index - activeSection:', activeSection);
+  
+  // Track page view and section changes
+  useEffect(() => {
+    trackPageView(`/${activeSection}`, `Frete Simples - ${activeSection}`);
+  }, [activeSection, trackPageView]);
+
+  // Track when user starts using a calculator
+  useEffect(() => {
+    if (activeSection !== 'sobre') {
+      trackCalculatorStart(activeSection);
+    }
+  }, [activeSection, trackCalculatorStart]);
+
+  // Handle section change with analytics
+  const handleSectionChange = (section: string) => {
+    trackUserInteraction('section_change', 'sidebar_menu', section);
+    setActiveSection(section);
+  };
   
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -31,7 +56,7 @@ const Index = () => {
       
       <Sidebar 
         activeSection={activeSection} 
-        setActiveSection={setActiveSection} 
+        setActiveSection={handleSectionChange} 
       />
       
       <main 
@@ -59,10 +84,11 @@ const Index = () => {
           <footer id="footer" className="text-center text-gray-500 text-sm py-8 border-t border-gray-100 mt-12">
             <div className="flex justify-center items-center mb-4">
               <div className="bg-white p-2 rounded-full mr-3 shadow-sm">
-                <img 
+                <LazyImage 
                   src="https://i.postimg.cc/C5bzFpj8/Logo-CCI.png" 
                   alt="CCI Logo" 
                   className="h-8 w-auto object-contain" 
+                  skeleton={true}
                 />
               </div>
               <div className="text-left">

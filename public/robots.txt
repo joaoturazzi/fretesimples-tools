@@ -1,0 +1,25 @@
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://frete-simples.com/sitemap.xml
+
+# SEO optimization
+Crawl-delay: 1
+
+# Allow all calculators and tools
+Allow: /calculadora-frete
+Allow: /simulador-lucro
+Allow: /calculadora-risco
+Allow: /calculadora-combustivel
+Allow: /dimensionamento-veiculo
+Allow: /diagnostico-logistica
+
+# Block sensitive areas (if any)
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_*
+
+# Cache directives for better crawling
+Cache-Control: max-age=86400

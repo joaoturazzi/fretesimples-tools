@@ -1,120 +1,51 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Calculator from '@/components/Calculator';
-import { RefreshCw, Shield, Phone, CalculatorIcon } from 'lucide-react';
-import { mapService } from '@/services/map/UnifiedMapService';
-import { calculateIntelligentRisk, RiskFactors } from './risk/intelligentRiskCalculations';
+import { useEnhancedRiskCalculator } from './risk/useEnhancedRiskCalculator';
 import EnhancedRiskForm from './risk/EnhancedRiskForm';
 import IntelligentRiskResults from './risk/IntelligentRiskResults';
-import RiskReportExporter from './risk/RiskReportExporter';
-import { cn } from '@/lib/utils';
+import RiskActionButtons from './risk/RiskActionButtons';
+import { generateWhatsAppMessage, openWhatsAppContact } from './risk/WhatsAppContact';
 
 interface EnhancedRiskCalculatorProps {
   isActive: boolean;
 }
 
 const EnhancedRiskCalculator = ({ isActive }: EnhancedRiskCalculatorProps) => {
-  // Form states
-  const [origin, setOrigin] = useState('');
-  const [destination, setDestination] = useState('');
-  const [cargoType, setCargoType] = useState('alimentos');
-  const [cargoValue, setCargoValue] = useState('');
-  const [contractType, setContractType] = useState('frota_propria');
-  const [travelTime, setTravelTime] = useState('manha');
-  const [securityTools, setSecurityTools] = useState<string[]>([]);
-  
-  // Calculation states
-  const [result, setResult] = useState<any>(null);
-  const [routeDistance, setRouteDistance] = useState<number | null>(null);
-  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-
-  // Auto-calculate route distance
-  useEffect(() => {
-    const autoCalculateRoute = async () => {
-      if (origin.trim() && destination.trim() && origin !== destination) {
-        setIsCalculatingRoute(true);
-        
-        try {
-          const route = await mapService.calculateRoute(origin, destination);
-          if (route) {
-            setRouteDistance(route.distance);
-            console.log('Enhanced Risk - Auto-calculated distance:', route.distance, 'km');
-          }
-        } catch (error) {
-          console.error('Enhanced Risk - Error auto-calculating distance:', error);
-        } finally {
-          setIsCalculatingRoute(false);
-        }
-      }
-    };
-
-    const timeoutId = setTimeout(autoCalculateRoute, 1000);
-    return () => clearTimeout(timeoutId);
-  }, [origin, destination]);
-
-  // Real-time validation
-  useEffect(() => {
-    const errors: Record<string, string> = {};
+  const {
+    // Form states
+    origin,
+    setOrigin,
+    destination,
+    setDestination,
+    cargoType,
+    setCargoType,
+    cargoValue,
+    setCargoValue,
+    contractType,
+    setContractType,
+    travelTime,
+    setTravelTime,
+    securityTools,
+    setSecurityTools,
     
-    if (!origin.trim()) errors.origin = 'Origem é obrigatória';
-    if (!destination.trim()) errors.destination = 'Destino é obrigatório';
-    if (!cargoValue || parseFloat(cargoValue) <= 0) {
-      errors.cargoValue = 'Valor da carga deve ser maior que 0';
-    }
+    // Calculation states
+    result,
+    routeDistance,
+    isCalculatingRoute,
+    isCalculating,
+    validationErrors,
+    isFormValid,
     
-    setValidationErrors(errors);
-  }, [origin, destination, cargoValue]);
-
-  const handleCalculateRisk = async () => {
-    if (Object.keys(validationErrors).length > 0) return;
-    
-    setIsCalculating(true);
-    
-    try {
-      // Convert cargoValue from cents to reais
-      const cargoValueInReais = parseFloat(cargoValue) / 100;
-      
-      const factors: RiskFactors = {
-        origin,
-        destination,
-        cargoType,
-        cargoValue: cargoValueInReais,
-        contractType,
-        travelTime,
-        securityTools,
-        routeDistance
-      };
-      
-      const riskResult = calculateIntelligentRisk(factors);
-      setResult(riskResult);
-      
-      console.log('Risk calculation completed:', riskResult);
-    } catch (error) {
-      console.error('Error calculating risk:', error);
-    } finally {
-      setIsCalculating(false);
-    }
-  };
-
-  const handleReset = () => {
-    setOrigin('');
-    setDestination('');
-    setCargoType('alimentos');
-    setCargoValue('');
-    setContractType('frota_propria');
-    setTravelTime('manha');
-    setSecurityTools([]);
-    setResult(null);
-    setRouteDistance(null);
-  };
+    // Actions
+    handleCalculateRisk,
+    handleReset
+  } = useEnhancedRiskCalculator();
 
   const handleExportReport = () => {
     if (!result) return;
     
-    // The RiskReportExporter component will handle the export
-    const factors: RiskFactors = {
+    const factors = {
       origin,
       destination,
       cargoType,
@@ -125,30 +56,35 @@ const EnhancedRiskCalculator = ({ isActive }: EnhancedRiskCalculatorProps) => {
       routeDistance
     };
     
-    // This would be handled by the RiskReportExporter component
     console.log('Exporting report with factors:', factors);
   };
 
   const handleContactSpecialist = () => {
-    const message = `Olá! Preciso de uma análise completa de risco para transporte.%0A%0A` +
-      `📍 *Dados da Operação:*%0A` +
-      `• Origem: ${origin}%0A` +
-      `• Destino: ${destination}%0A` +
-      `• Distância: ${routeDistance ? routeDistance + ' km' : 'Não calculada'}%0A` +
-      `• Tipo de carga: ${cargoType}%0A` +
-      `• Valor da carga: R$ ${cargoValue ? (parseFloat(cargoValue) / 100).toLocaleString('pt-BR') : '0'}%0A` +
-      `• Contratação: ${contractType}%0A` +
-      `• Horário: ${travelTime}%0A%0A` +
-      `⚠️ *Resultado da Análise:*%0A` +
-      `• Nível de risco: ${result?.riskLevel || 'Não calculado'}%0A` +
-      `• Pontuação: ${result?.totalScore || 0} pontos%0A` +
-      `• Índice de segurança: ${result?.safetyScore || 0}%%0A%0A` +
-      `Gostaria de uma consulta especializada para otimizar a segurança desta operação.`;
+    const factors = {
+      origin,
+      destination,
+      cargoType,
+      cargoValue: parseFloat(cargoValue) / 100,
+      contractType,
+      travelTime,
+      securityTools,
+      routeDistance
+    };
     
-    window.open(`https://wa.me/5511999999999?text=${message}`, '_blank');
+    const message = generateWhatsAppMessage(factors, result);
+    openWhatsAppContact(message);
   };
 
-  const isFormValid = Object.keys(validationErrors).length === 0 && origin && destination && cargoValue;
+  const factors = {
+    origin,
+    destination,
+    cargoType,
+    cargoValue: parseFloat(cargoValue) / 100,
+    contractType,
+    travelTime,
+    securityTools,
+    routeDistance
+  };
   
   return (
     <Calculator
@@ -179,60 +115,15 @@ const EnhancedRiskCalculator = ({ isActive }: EnhancedRiskCalculatorProps) => {
           validationErrors={validationErrors}
         />
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-3">
-          <button 
-            onClick={handleCalculateRisk}
-            disabled={!isFormValid || isCalculating}
-            className={cn(
-              "btn btn-primary",
-              {
-                "opacity-50 cursor-not-allowed": !isFormValid || isCalculating,
-                "btn-loading": isCalculating
-              }
-            )}
-          >
-            {!isCalculating && <CalculatorIcon size={18} />}
-            {isCalculating ? 'Analisando Risco...' : 'Analisar Risco'}
-          </button>
+        <RiskActionButtons
+          isFormValid={isFormValid}
+          isCalculating={isCalculating}
+          onCalculateRisk={handleCalculateRisk}
+          onReset={handleReset}
+          result={result}
+          factors={factors}
+        />
 
-          <button 
-            onClick={handleReset}
-            className="btn btn-secondary"
-            disabled={isCalculating}
-          >
-            <RefreshCw size={18} />
-            Nova Análise
-          </button>
-
-          {result && (
-            <RiskReportExporter 
-              result={result} 
-              factors={{
-                origin,
-                destination,
-                cargoType,
-                cargoValue: parseFloat(cargoValue) / 100,
-                contractType,
-                travelTime,
-                securityTools,
-                routeDistance
-              }}
-            />
-          )}
-
-          {result && (result.riskLevel === 'Alto' || result.riskLevel === 'Crítico') && (
-            <button 
-              onClick={handleContactSpecialist}
-              className="btn btn-warning bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 hover:from-orange-600 hover:to-red-600"
-            >
-              <Phone size={18} />
-              Falar com Especialista
-            </button>
-          )}
-        </div>
-
-        {/* Results */}
         {result && (
           <IntelligentRiskResults
             result={result}

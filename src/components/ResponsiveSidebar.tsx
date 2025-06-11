@@ -86,17 +86,17 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
           "bottom-0"
         )}
       >
-        {/* Header do Sidebar Mobile */}
+        {/* Header do Sidebar Mobile - Melhor contraste */}
         {isMobile && (
-          <div className="flex items-center justify-between p-4 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-blue-50">
-            <h2 className="text-lg font-bold text-gray-900">Ferramentas</h2>
+          <div className="flex items-center justify-between p-4 border-b border-orange-200 bg-gradient-to-r from-gray-900 to-gray-800">
+            <h2 className="text-lg font-bold text-white">Ferramentas</h2>
             <Button
               variant="ghost"
               size="icon"
               onClick={onToggle}
-              className="h-8 w-8 touch-friendly hover:bg-orange-100"
+              className="h-8 w-8 touch-friendly hover:bg-white/20 text-white"
             >
-              <X size={18} className="text-gray-600" />
+              <X size={18} />
             </Button>
           </div>
         )}
@@ -109,7 +109,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={() => handleSectionClick('home')}
-                className="w-full flex items-center gap-2 text-orange-600 border-orange-200 hover:bg-orange-50"
+                className="w-full flex items-center gap-2 text-orange-600 border-orange-200 hover:bg-orange-50 font-medium"
               >
                 <ArrowLeft size={16} />
                 Voltar ao Início
@@ -132,7 +132,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
             </div>
           </div>
 
-          {/* Navegação - Touch-friendly para mobile */}
+          {/* Navegação - Melhor contraste para mobile */}
           <nav className="space-y-4 sm:space-y-6">
             {Object.entries(groupedItems).map(([category, items]) => (
               <div key={category}>
@@ -148,13 +148,13 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
                         "w-full text-left px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl transition-all duration-200 flex items-center gap-3 text-sm group relative touch-friendly",
                         "min-h-[48px]", // Touch target mínimo
                         activeSection === item.id 
-                          ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-lg scale-[1.02]" 
-                          : "text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:scale-[1.01]"
+                          ? "bg-gradient-to-r from-gray-900 to-gray-800 text-white font-medium shadow-lg scale-[1.02] border border-gray-700" 
+                          : "text-gray-700 hover:bg-orange-50 hover:text-orange-700 hover:scale-[1.01] border border-transparent hover:border-orange-200"
                       )}
                     >
                       <span className={cn(
                         "transition-all duration-200 flex-shrink-0",
-                        activeSection === item.id ? "text-white" : "text-gray-500 group-hover:text-orange-500"
+                        activeSection === item.id ? "text-white" : "text-gray-600 group-hover:text-orange-600"
                       )}>
                         {item.icon}
                       </span>
@@ -182,7 +182,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
               </p>
               <Button 
                 size="sm" 
-                className="w-full text-xs touch-friendly min-h-[44px]"
+                className="w-full text-xs touch-friendly min-h-[44px] bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
                 onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
               >
                 Falar com Especialista
@@ -192,10 +192,10 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Overlay - Melhorado */}
+      {/* Mobile Overlay - Melhorado com melhor contraste */}
       {isMobile && isOpen && (
         <div 
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30 transition-all duration-300"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 transition-all duration-300"
           onClick={onToggle}
           style={{ top: '64px' }}
         />

@@ -26,7 +26,7 @@ import CciLogo from '@/components/ui/CciLogo';
 import { cn } from '@/lib/utils';
 
 const Index = () => {
-  const [activeSection, setActiveSection] = useState('home'); // Changed default to 'home'
+  const [activeSection, setActiveSection] = useState('home');
   const [showTestingUtils, setShowTestingUtils] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -66,6 +66,12 @@ const Index = () => {
     setActiveSection(toolId);
   };
 
+  // Handle back to home
+  const handleBackToHome = () => {
+    trackUserInteraction('back_to_home', 'tool_header', activeSection);
+    setActiveSection('home');
+  };
+
   // Handle sidebar toggle
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -79,7 +85,7 @@ const Index = () => {
     setShowTestingUtils(showTests);
   }, []);
 
-  // Listen for custom events to change section (for the "Simular Lucro" button)
+  // Listen for custom events to change section
   useEffect(() => {
     const handleChangeSection = (event: CustomEvent) => {
       const newSection = event.detail;
@@ -131,17 +137,50 @@ const Index = () => {
 
           {/* Individual Tools */}
           <div className="tools-container">
-            <FreightCalculator isActive={activeSection === 'calculadora-frete'} />
-            <ProfitSimulator isActive={activeSection === 'simulador-lucro'} />
-            <RiskCalculator isActive={activeSection === 'calculadora-risco'} />
-            <EnhancedRiskCalculator isActive={activeSection === 'calculadora-risco-inteligente'} />
-            <FuelCalculator isActive={activeSection === 'calculadora-combustivel'} />
-            <TripChecklist isActive={activeSection === 'checklist-viagem'} />
-            <VehicleSizingTool isActive={activeSection === 'dimensionamento-veiculo'} />
-            <LogisticsManagementDiagnostic isActive={activeSection === 'diagnostico-logistica'} />
-            <RiskManagementDiagnostic isActive={activeSection === 'diagnostico-risco'} />
-            <LogisticsPostGenerator isActive={activeSection === 'gerador-posts'} />
-            <ContractGenerator isActive={activeSection === 'gerador-contratos'} />
+            <FreightCalculator 
+              isActive={activeSection === 'calculadora-frete'} 
+              onBackToHome={handleBackToHome}
+            />
+            <ProfitSimulator 
+              isActive={activeSection === 'simulador-lucro'} 
+              onBackToHome={handleBackToHome}
+            />
+            <RiskCalculator 
+              isActive={activeSection === 'calculadora-risco'} 
+              onBackToHome={handleBackToHome}
+            />
+            <EnhancedRiskCalculator 
+              isActive={activeSection === 'calculadora-risco-inteligente'} 
+              onBackToHome={handleBackToHome}
+            />
+            <FuelCalculator 
+              isActive={activeSection === 'calculadora-combustivel'} 
+              onBackToHome={handleBackToHome}
+            />
+            <TripChecklist 
+              isActive={activeSection === 'checklist-viagem'} 
+              onBackToHome={handleBackToHome}
+            />
+            <VehicleSizingTool 
+              isActive={activeSection === 'dimensionamento-veiculo'} 
+              onBackToHome={handleBackToHome}
+            />
+            <LogisticsManagementDiagnostic 
+              isActive={activeSection === 'diagnostico-logistica'} 
+              onBackToHome={handleBackToHome}
+            />
+            <RiskManagementDiagnostic 
+              isActive={activeSection === 'diagnostico-risco'} 
+              onBackToHome={handleBackToHome}
+            />
+            <LogisticsPostGenerator 
+              isActive={activeSection === 'gerador-posts'} 
+              onBackToHome={handleBackToHome}
+            />
+            <ContractGenerator 
+              isActive={activeSection === 'gerador-contratos'} 
+              onBackToHome={handleBackToHome}
+            />
           </div>
           
           {activeSection === 'sobre' && <AboutSection />}

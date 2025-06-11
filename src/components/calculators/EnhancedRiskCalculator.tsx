@@ -8,10 +8,9 @@ import RiskActionButtons from './risk/RiskActionButtons';
 
 interface EnhancedRiskCalculatorProps {
   isActive: boolean;
-  onBackToHome?: () => void;
 }
 
-const EnhancedRiskCalculator = ({ isActive, onBackToHome }: EnhancedRiskCalculatorProps) => {
+const EnhancedRiskCalculator = ({ isActive }: EnhancedRiskCalculatorProps) => {
   const {
     // Form states
     origin,
@@ -59,7 +58,6 @@ const EnhancedRiskCalculator = ({ isActive, onBackToHome }: EnhancedRiskCalculat
       title="Análise Inteligente de Risco de Transporte"
       description="Sistema avançado de avaliação de risco com análise regional, de rota e recomendações personalizadas baseadas em dados reais."
       isActive={isActive}
-      onBackToHome={onBackToHome}
     >
       <div className="space-y-6">
         <EnhancedRiskForm

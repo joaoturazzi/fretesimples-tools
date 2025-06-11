@@ -26,7 +26,7 @@ import CciLogo from '@/components/ui/CciLogo';
 import { cn } from '@/lib/utils';
 
 const Index = () => {
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState('home'); // Changed default to 'home'
   const [showTestingUtils, setShowTestingUtils] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -56,23 +56,14 @@ const Index = () => {
 
   // Handle section change with analytics
   const handleSectionChange = (section: string) => {
-    console.log('Index.tsx - HandleSectionChange called with:', section);
     trackUserInteraction('section_change', 'sidebar_menu', section);
     setActiveSection(section);
   };
 
   // Handle tool selection from overview
   const handleToolSelect = (toolId: string) => {
-    console.log('Index.tsx - HandleToolSelect called with:', toolId);
     trackUserInteraction('tool_select', 'overview_card', toolId);
     setActiveSection(toolId);
-  };
-
-  // Handle back to home
-  const handleBackToHome = () => {
-    console.log('Index.tsx - HandleBackToHome called');
-    trackUserInteraction('back_to_home', 'tool_header', activeSection);
-    setActiveSection('home');
   };
 
   // Handle sidebar toggle
@@ -88,11 +79,10 @@ const Index = () => {
     setShowTestingUtils(showTests);
   }, []);
 
-  // Listen for custom events to change section
+  // Listen for custom events to change section (for the "Simular Lucro" button)
   useEffect(() => {
     const handleChangeSection = (event: CustomEvent) => {
       const newSection = event.detail;
-      console.log('Index.tsx - Custom event received:', newSection);
       if (newSection) {
         handleSectionChange(newSection);
       }
@@ -104,9 +94,6 @@ const Index = () => {
       window.removeEventListener('changeActiveSection', handleChangeSection as EventListener);
     };
   }, []);
-
-  // Debug: Log which tool should be active
-  console.log('Index.tsx - Rendering tools, activeSection:', activeSection);
   
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -124,6 +111,8 @@ const Index = () => {
       <main 
         className={cn(
           "pt-20 pb-16 transition-all duration-300",
+          // Desktop: sempre com margem para sidebar
+          // Mobile: sem margem, overlay do sidebar
           isMobile ? "ml-0" : (isSidebarOpen ? "ml-72" : "ml-0")
         )}
       >
@@ -140,84 +129,19 @@ const Index = () => {
             <ToolsOverview onToolSelect={handleToolSelect} />
           )}
 
-          {/* Individual Tools - Verifying all IDs match */}
+          {/* Individual Tools */}
           <div className="tools-container">
-            {activeSection === 'calculadora-frete' && (
-              <FreightCalculator 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
-            
-            {activeSection === 'simulador-lucro' && (
-              <ProfitSimulator 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
-            
-            {activeSection === 'calculadora-risco' && (
-              <RiskCalculator 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
-            
-            {activeSection === 'calculadora-risco-inteligente' && (
-              <EnhancedRiskCalculator 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
-            
-            {activeSection === 'calculadora-combustivel' && (
-              <FuelCalculator 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
-            
-            {activeSection === 'checklist-viagem' && (
-              <TripChecklist 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
-            
-            {activeSection === 'dimensionamento-veiculo' && (
-              <VehicleSizingTool 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
-            
-            {activeSection === 'diagnostico-logistica' && (
-              <LogisticsManagementDiagnostic 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
-            
-            {activeSection === 'diagnostico-risco' && (
-              <RiskManagementDiagnostic 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
-            
-            {activeSection === 'gerador-posts' && (
-              <LogisticsPostGenerator 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
-            
-            {activeSection === 'gerador-contratos' && (
-              <ContractGenerator 
-                isActive={true} 
-                onBackToHome={handleBackToHome}
-              />
-            )}
+            <FreightCalculator isActive={activeSection === 'calculadora-frete'} />
+            <ProfitSimulator isActive={activeSection === 'simulador-lucro'} />
+            <RiskCalculator isActive={activeSection === 'calculadora-risco'} />
+            <EnhancedRiskCalculator isActive={activeSection === 'calculadora-risco-inteligente'} />
+            <FuelCalculator isActive={activeSection === 'calculadora-combustivel'} />
+            <TripChecklist isActive={activeSection === 'checklist-viagem'} />
+            <VehicleSizingTool isActive={activeSection === 'dimensionamento-veiculo'} />
+            <LogisticsManagementDiagnostic isActive={activeSection === 'diagnostico-logistica'} />
+            <RiskManagementDiagnostic isActive={activeSection === 'diagnostico-risco'} />
+            <LogisticsPostGenerator isActive={activeSection === 'gerador-posts'} />
+            <ContractGenerator isActive={activeSection === 'gerador-contratos'} />
           </div>
           
           {activeSection === 'sobre' && <AboutSection />}

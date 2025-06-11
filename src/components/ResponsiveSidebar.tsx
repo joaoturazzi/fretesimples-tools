@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Calculator, 
@@ -37,9 +36,15 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
   const isMobile = useIsMobile();
   
   const handleSectionClick = (section: string) => {
-    console.log('ResponsiveSidebar - handleSectionClick called with:', section);
-    console.log('ResponsiveSidebar - setActiveSection function:', typeof setActiveSection);
+    console.log('ResponsiveSidebar - Button clicked for section:', section);
+    console.log('ResponsiveSidebar - Current activeSection:', activeSection);
+    console.log('ResponsiveSidebar - setActiveSection function type:', typeof setActiveSection);
+    
+    // Call the function directly
     setActiveSection(section);
+    
+    console.log('ResponsiveSidebar - After setActiveSection call');
+    
     // Em mobile, não fechamos automaticamente - usuário decide quando fechar
   };
   
@@ -111,7 +116,10 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleSectionClick('home')}
+                onClick={() => {
+                  console.log('Back to home button clicked');
+                  handleSectionClick('home');
+                }}
                 className="w-full flex items-center gap-2 text-orange-600 border-orange-200 hover:bg-orange-50 font-medium"
               >
                 <ArrowLeft size={16} />
@@ -147,7 +155,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
                     <button
                       key={item.id}
                       onClick={() => {
-                        console.log('Sidebar button clicked for:', item.id, item.label);
+                        console.log('Sidebar menu item clicked:', item.id, item.label);
                         handleSectionClick(item.id);
                       }}
                       className={cn(

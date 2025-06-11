@@ -49,6 +49,13 @@ const ToolsOverview: React.FC<ToolsOverviewProps> = ({ onToolSelect }) => {
           gradient: 'bg-gradient-to-br from-yellow-500 to-yellow-600'
         },
         {
+          id: 'calculadora-risco-inteligente',
+          title: 'Análise Inteligente de Risco',
+          description: 'Sistema avançado de avaliação de risco com análise regional e recomendações personalizadas',
+          icon: <Shield size={32} />,
+          gradient: 'bg-gradient-to-br from-purple-500 to-purple-600'
+        },
+        {
           id: 'calculadora-combustivel',
           title: 'Calculadora de Combustível',
           description: 'Calcule o consumo de combustível e custos por quilômetro rodado',
@@ -66,14 +73,14 @@ const ToolsOverview: React.FC<ToolsOverviewProps> = ({ onToolSelect }) => {
           title: 'Checklist de Viagem',
           description: 'Lista completa de verificações antes, durante e após a viagem',
           icon: <ClipboardCheck size={32} />,
-          gradient: 'bg-gradient-to-br from-purple-500 to-purple-600'
+          gradient: 'bg-gradient-to-br from-indigo-500 to-indigo-600'
         },
         {
           id: 'dimensionamento-veiculo',
           title: 'Dimensionamento de Veículo',
           description: 'Escolha o veículo ideal baseado no tipo e volume da carga',
           icon: <Package size={32} />,
-          gradient: 'bg-gradient-to-br from-indigo-500 to-indigo-600'
+          gradient: 'bg-gradient-to-br from-pink-500 to-pink-600'
         }
       ]
     },
@@ -117,6 +124,11 @@ const ToolsOverview: React.FC<ToolsOverviewProps> = ({ onToolSelect }) => {
         }
       ]
     }
+  };
+
+  const handleToolSelect = (toolId: string) => {
+    console.log('ToolsOverview - Tool selected:', toolId);
+    onToolSelect(toolId);
   };
 
   return (
@@ -174,7 +186,7 @@ const ToolsOverview: React.FC<ToolsOverviewProps> = ({ onToolSelect }) => {
                   icon={tool.icon}
                   category={category.title}
                   gradient={tool.gradient}
-                  onSelect={onToolSelect}
+                  onSelect={handleToolSelect}
                 />
               ))}
             </div>

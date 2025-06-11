@@ -56,21 +56,21 @@ const Index = () => {
 
   // Handle section change with analytics
   const handleSectionChange = (section: string) => {
-    console.log('HandleSectionChange called with:', section);
+    console.log('Index.tsx - HandleSectionChange called with:', section);
     trackUserInteraction('section_change', 'sidebar_menu', section);
     setActiveSection(section);
   };
 
   // Handle tool selection from overview
   const handleToolSelect = (toolId: string) => {
-    console.log('HandleToolSelect called with:', toolId);
+    console.log('Index.tsx - HandleToolSelect called with:', toolId);
     trackUserInteraction('tool_select', 'overview_card', toolId);
     setActiveSection(toolId);
   };
 
   // Handle back to home
   const handleBackToHome = () => {
-    console.log('HandleBackToHome called');
+    console.log('Index.tsx - HandleBackToHome called');
     trackUserInteraction('back_to_home', 'tool_header', activeSection);
     setActiveSection('home');
   };
@@ -92,6 +92,7 @@ const Index = () => {
   useEffect(() => {
     const handleChangeSection = (event: CustomEvent) => {
       const newSection = event.detail;
+      console.log('Index.tsx - Custom event received:', newSection);
       if (newSection) {
         handleSectionChange(newSection);
       }
@@ -103,6 +104,9 @@ const Index = () => {
       window.removeEventListener('changeActiveSection', handleChangeSection as EventListener);
     };
   }, []);
+
+  // Debug: Log which tool should be active
+  console.log('Index.tsx - Rendering tools, activeSection:', activeSection);
   
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -136,52 +140,84 @@ const Index = () => {
             <ToolsOverview onToolSelect={handleToolSelect} />
           )}
 
-          {/* Individual Tools */}
+          {/* Individual Tools - Verifying all IDs match */}
           <div className="tools-container">
-            <FreightCalculator 
-              isActive={activeSection === 'calculadora-frete'} 
-              onBackToHome={handleBackToHome}
-            />
-            <ProfitSimulator 
-              isActive={activeSection === 'simulador-lucro'} 
-              onBackToHome={handleBackToHome}
-            />
-            <RiskCalculator 
-              isActive={activeSection === 'calculadora-risco'} 
-              onBackToHome={handleBackToHome}
-            />
-            <EnhancedRiskCalculator 
-              isActive={activeSection === 'calculadora-risco-inteligente'} 
-              onBackToHome={handleBackToHome}
-            />
-            <FuelCalculator 
-              isActive={activeSection === 'calculadora-combustivel'} 
-              onBackToHome={handleBackToHome}
-            />
-            <TripChecklist 
-              isActive={activeSection === 'checklist-viagem'} 
-              onBackToHome={handleBackToHome}
-            />
-            <VehicleSizingTool 
-              isActive={activeSection === 'dimensionamento-veiculo'} 
-              onBackToHome={handleBackToHome}
-            />
-            <LogisticsManagementDiagnostic 
-              isActive={activeSection === 'diagnostico-logistica'} 
-              onBackToHome={handleBackToHome}
-            />
-            <RiskManagementDiagnostic 
-              isActive={activeSection === 'diagnostico-risco'} 
-              onBackToHome={handleBackToHome}
-            />
-            <LogisticsPostGenerator 
-              isActive={activeSection === 'gerador-posts'} 
-              onBackToHome={handleBackToHome}
-            />
-            <ContractGenerator 
-              isActive={activeSection === 'gerador-contratos'} 
-              onBackToHome={handleBackToHome}
-            />
+            {activeSection === 'calculadora-frete' && (
+              <FreightCalculator 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
+            
+            {activeSection === 'simulador-lucro' && (
+              <ProfitSimulator 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
+            
+            {activeSection === 'calculadora-risco' && (
+              <RiskCalculator 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
+            
+            {activeSection === 'calculadora-risco-inteligente' && (
+              <EnhancedRiskCalculator 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
+            
+            {activeSection === 'calculadora-combustivel' && (
+              <FuelCalculator 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
+            
+            {activeSection === 'checklist-viagem' && (
+              <TripChecklist 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
+            
+            {activeSection === 'dimensionamento-veiculo' && (
+              <VehicleSizingTool 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
+            
+            {activeSection === 'diagnostico-logistica' && (
+              <LogisticsManagementDiagnostic 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
+            
+            {activeSection === 'diagnostico-risco' && (
+              <RiskManagementDiagnostic 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
+            
+            {activeSection === 'gerador-posts' && (
+              <LogisticsPostGenerator 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
+            
+            {activeSection === 'gerador-contratos' && (
+              <ContractGenerator 
+                isActive={true} 
+                onBackToHome={handleBackToHome}
+              />
+            )}
           </div>
           
           {activeSection === 'sobre' && <AboutSection />}

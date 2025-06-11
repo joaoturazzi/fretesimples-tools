@@ -11,7 +11,6 @@ import {
   BarChart,
   Shield,
   Info,
-  Menu,
   X,
   Linkedin,
   FileText
@@ -23,24 +22,21 @@ import { Button } from '@/components/ui/button';
 interface ResponsiveSidebarProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
 const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({ 
   activeSection, 
-  setActiveSection 
+  setActiveSection,
+  isOpen,
+  onToggle
 }) => {
   const isMobile = useIsMobile();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
-  
-  useEffect(() => {
-    setIsSidebarOpen(!isMobile);
-  }, [isMobile]);
   
   const handleSectionClick = (section: string) => {
     setActiveSection(section);
-    if (isMobile) {
-      setIsSidebarOpen(false);
-    }
+    // Em mobile, não fechamos automaticamente - usuário decide quando fechar
   };
   
   const sidebarItems = [
@@ -75,30 +71,34 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
   
   return (
     <>
-      {/* Mobile Toggle Button - Posicionamento otimizado */}
-      {isMobile && (
-        <Button
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg"
-          size="icon"
-        >
-          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-        </Button>
-      )}
-    
-      {/* Sidebar - Ajustes de responsividade */}
+      {/* Sidebar - Comportamento otimizado para mobile */}
       <div 
         className={cn(
-          "fixed left-0 bg-white/95 backdrop-blur-md border-r border-orange-100 shadow-lg transition-all duration-300 ease-in-out z-40 overflow-y-auto",
+          "fixed left-0 bg-white/98 backdrop-blur-md border-r border-orange-100 shadow-xl transition-all duration-300 ease-in-out z-40 overflow-y-auto",
           "top-16", // Ajustado para header unificado
-          isMobile ? "w-80" : "w-72", // Largura otimizada para mobile
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full",
-          !isMobile && "md:translate-x-0",
-          isMobile ? "bottom-0" : "bottom-0"
+          isMobile ? "w-80 max-w-[85vw]" : "w-72", // Largura responsiva
+          isOpen ? "translate-x-0" : "-translate-x-full",
+          !isMobile && "md:translate-x-0", // Desktop sempre visível
+          "bottom-0"
         )}
       >
+        {/* Header do Sidebar Mobile */}
+        {isMobile && (
+          <div className="flex items-center justify-between p-4 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-blue-50">
+            <h2 className="text-lg font-bold text-gray-900">Ferramentas</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggle}
+              className="h-8 w-8 touch-friendly hover:bg-orange-100"
+            >
+              <X size={18} className="text-gray-600" />
+            </Button>
+          </div>
+        )}
+
         <div className="p-4 sm:p-6">
-          {/* Informações da Ferramenta - Texto otimizado */}
+          {/* Informações da Ferramenta - Mobile otimizado */}
           <div className="mb-6 pb-4 border-b border-orange-100">
             <p className="text-xs text-gray-500 mb-3">
               Ferramentas gratuitas para transportadores
@@ -113,7 +113,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
             </div>
           </div>
 
-          {/* Navegação - Espaçamento otimizado para mobile */}
+          {/* Navegação - Touch-friendly para mobile */}
           <nav className="space-y-4 sm:space-y-6">
             {Object.entries(groupedItems).map(([category, items]) => (
               <div key={category}>
@@ -126,10 +126,11 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
                       key={item.id}
                       onClick={() => handleSectionClick(item.id)}
                       className={cn(
-                        "w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-all duration-200 flex items-center gap-3 text-sm group relative",
+                        "w-full text-left px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl transition-all duration-200 flex items-center gap-3 text-sm group relative touch-friendly",
+                        "min-h-[48px]", // Touch target mínimo
                         activeSection === item.id 
-                          ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-md" 
-                          : "text-gray-600 hover:bg-orange-50 hover:text-orange-700"
+                          ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium shadow-lg scale-[1.02]" 
+                          : "text-gray-600 hover:bg-orange-50 hover:text-orange-700 hover:scale-[1.01]"
                       )}
                     >
                       <span className={cn(
@@ -141,7 +142,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
                       <span className="font-medium leading-tight text-xs sm:text-sm">{item.label}</span>
                       {activeSection === item.id && (
                         <div className="ml-auto flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-white/80 animate-pulse"></div>
+                          <div className="w-2 h-2 rounded-full bg-white/90 animate-pulse"></div>
                         </div>
                       )}
                     </button>
@@ -151,8 +152,8 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
             ))}
           </nav>
 
-          {/* CTA de Consultoria - Ajustado para mobile */}
-          <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-gradient-to-br from-orange-50 to-blue-50 rounded-xl border border-orange-100">
+          {/* CTA de Consultoria - Mobile otimizado */}
+          <div className="mt-6 sm:mt-8 p-4 bg-gradient-to-br from-orange-50 to-blue-50 rounded-xl border border-orange-100">
             <div className="text-center">
               <h4 className="text-sm font-semibold text-gray-900 mb-2">
                 Precisa de mais?
@@ -162,7 +163,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
               </p>
               <Button 
                 size="sm" 
-                className="w-full text-xs"
+                className="w-full text-xs touch-friendly min-h-[44px]"
                 onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
               >
                 Falar com Especialista
@@ -172,11 +173,11 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Overlay - Ajuste de z-index */}
-      {isMobile && isSidebarOpen && (
+      {/* Mobile Overlay - Melhorado */}
+      {isMobile && isOpen && (
         <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
-          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30 transition-all duration-300"
+          onClick={onToggle}
           style={{ top: '64px' }}
         />
       )}

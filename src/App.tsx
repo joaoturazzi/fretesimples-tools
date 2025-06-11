@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import SEO from "./components/SEO";
+import { useLocation } from "react-router-dom";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +28,29 @@ const queryClient = new QueryClient({
   },
 });
 
+const AppContent: React.FC = () => {
+  const location = useLocation();
+  const hideHeaderRoutes = ['/auth']; // Rotas onde o header não deve aparecer
+  const shouldShowHeader = !hideHeaderRoutes.includes(location.pathname);
+
+  return (
+    <>
+      <SEO />
+      {shouldShowHeader && <UnifiedHeader />}
+      <Toaster />
+      <Sonner />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
+  );
+};
+
 const App: React.FC = () => (
   <ErrorBoundary>
     <HelmetProvider>
@@ -34,18 +58,7 @@ const App: React.FC = () => (
         <TooltipProvider>
           <NotificationProvider>
             <AuthProvider>
-              <SEO />
-              <UnifiedHeader />
-              <Toaster />
-              <Sonner />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <AppContent />
             </AuthProvider>
           </NotificationProvider>
         </TooltipProvider>

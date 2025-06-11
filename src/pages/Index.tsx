@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ResponsiveSidebar from '@/components/ResponsiveSidebar';
+import UnifiedHeader from '@/components/UnifiedHeader';
 import { 
   FreightCalculator,
   ProfitSimulator,
@@ -26,6 +27,7 @@ import { cn } from '@/lib/utils';
 const Index = () => {
   const [activeSection, setActiveSection] = useState('calculadora-frete');
   const [showTestingUtils, setShowTestingUtils] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
   const { trackPageView, trackCalculatorStart, trackUserInteraction } = useAnalytics();
   
@@ -33,6 +35,11 @@ const Index = () => {
   useSEO(activeSection);
   
   console.log('Index - activeSection:', activeSection);
+  
+  // Initialize sidebar state based on device
+  useEffect(() => {
+    setIsSidebarOpen(!isMobile);
+  }, [isMobile]);
   
   // Track page view and section changes
   useEffect(() => {
@@ -50,6 +57,12 @@ const Index = () => {
   const handleSectionChange = (section: string) => {
     trackUserInteraction('section_change', 'sidebar_menu', section);
     setActiveSection(section);
+  };
+
+  // Handle sidebar toggle
+  const handleSidebarToggle = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+    trackUserInteraction('sidebar_toggle', 'mobile_menu', isSidebarOpen ? 'close' : 'open');
   };
 
   // Show testing utils in development
@@ -77,15 +90,23 @@ const Index = () => {
   
   return (
     <div className="bg-gray-50 min-h-screen">
+      {/* Header Unificado com Menu Toggle */}
+      <UnifiedHeader onMenuToggle={isMobile ? handleSidebarToggle : undefined} />
+      
+      {/* Sidebar Responsivo */}
       <ResponsiveSidebar 
         activeSection={activeSection} 
-        setActiveSection={handleSectionChange} 
+        setActiveSection={handleSectionChange}
+        isOpen={isSidebarOpen}
+        onToggle={handleSidebarToggle}
       />
       
       <main 
         className={cn(
           "pt-20 pb-16 transition-all duration-300",
-          isMobile ? "ml-0" : "ml-72"
+          // Desktop: sempre com margem para sidebar
+          // Mobile: sem margem, overlay do sidebar
+          isMobile ? "ml-0" : (isSidebarOpen ? "ml-72" : "ml-0")
         )}
       >
         <div className="content-container px-3 sm:px-4 lg:px-6">

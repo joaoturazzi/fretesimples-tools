@@ -4,7 +4,7 @@
   @media (max-width: 768px) {
     /* Header optimizations */
     .unified-header {
-      @apply px-3 h-14;
+      @apply px-3 h-16;
     }
     
     .unified-header .logo-container {
@@ -21,12 +21,12 @@
     }
     
     .sidebar-nav-item {
-      @apply px-3 py-2 text-sm;
+      @apply px-3 py-3 text-sm min-h-[48px];
     }
     
     /* Content area mobile */
     .content-mobile {
-      @apply px-2 pt-16;
+      @apply px-2 pt-20; /* Increased for header */
     }
     
     /* Calculator cards mobile */
@@ -39,11 +39,11 @@
     }
     
     .calculator-input-mobile {
-      @apply text-base px-3 py-2;
+      @apply text-base px-3 py-2 min-h-[44px];
     }
     
     .calculator-button-mobile {
-      @apply px-4 py-2 text-sm;
+      @apply px-4 py-3 text-sm min-h-[44px];
     }
     
     /* Form sections mobile */
@@ -114,6 +114,24 @@
     @apply touch-friendly px-4 py-3;
   }
   
+  /* Enhanced touch targets for mobile */
+  .touch-target-large {
+    @apply min-h-[48px] min-w-[48px];
+  }
+  
+  /* Mobile menu specific */
+  .mobile-menu-header {
+    @apply sticky top-0 bg-white border-b border-gray-100 z-10;
+  }
+  
+  .mobile-nav-item {
+    @apply touch-friendly hover:bg-orange-50 active:bg-orange-100 transition-colors duration-150;
+  }
+  
+  .mobile-nav-item.active {
+    @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white scale-[1.02];
+  }
+  
   /* Performance optimizations */
   .will-change-transform {
     will-change: transform;
@@ -147,9 +165,13 @@
     }
   }
   
-  /* Focus improvements */
+  /* Focus improvements for mobile */
   .focus-ring {
     @apply focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none;
+  }
+  
+  .mobile-focus {
+    @apply focus:bg-orange-100 focus:ring-2 focus:ring-orange-500 focus:ring-offset-1;
   }
   
   /* Loading states */
@@ -159,5 +181,14 @@
   
   .loading-spinner {
     @apply animate-spin rounded-full border-2 border-orange-500 border-t-transparent;
+  }
+  
+  /* Swipe feedback (optional for future) */
+  .swipe-indicator {
+    @apply opacity-0 transition-opacity duration-200;
+  }
+  
+  .swipe-active .swipe-indicator {
+    @apply opacity-100;
   }
 }

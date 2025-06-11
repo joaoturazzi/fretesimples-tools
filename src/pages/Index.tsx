@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import ResponsiveSidebar from '@/components/ResponsiveSidebar';
 import UnifiedHeader from '@/components/UnifiedHeader';
+import ToolsOverview from '@/components/ToolsOverview';
 import { 
   FreightCalculator,
   ProfitSimulator,
@@ -25,7 +26,7 @@ import CciLogo from '@/components/ui/CciLogo';
 import { cn } from '@/lib/utils';
 
 const Index = () => {
-  const [activeSection, setActiveSection] = useState('calculadora-frete');
+  const [activeSection, setActiveSection] = useState('home'); // Changed default to 'home'
   const [showTestingUtils, setShowTestingUtils] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -48,7 +49,7 @@ const Index = () => {
 
   // Track when user starts using a calculator
   useEffect(() => {
-    if (activeSection !== 'sobre') {
+    if (activeSection !== 'sobre' && activeSection !== 'home') {
       trackCalculatorStart(activeSection);
     }
   }, [activeSection, trackCalculatorStart]);
@@ -57,6 +58,12 @@ const Index = () => {
   const handleSectionChange = (section: string) => {
     trackUserInteraction('section_change', 'sidebar_menu', section);
     setActiveSection(section);
+  };
+
+  // Handle tool selection from overview
+  const handleToolSelect = (toolId: string) => {
+    trackUserInteraction('tool_select', 'overview_card', toolId);
+    setActiveSection(toolId);
   };
 
   // Handle sidebar toggle
@@ -117,6 +124,12 @@ const Index = () => {
             </div>
           )}
 
+          {/* Tools Overview - Home Screen */}
+          {activeSection === 'home' && (
+            <ToolsOverview onToolSelect={handleToolSelect} />
+          )}
+
+          {/* Individual Tools */}
           <div className="tools-container">
             <FreightCalculator isActive={activeSection === 'calculadora-frete'} />
             <ProfitSimulator isActive={activeSection === 'simulador-lucro'} />
@@ -133,21 +146,24 @@ const Index = () => {
           
           {activeSection === 'sobre' && <AboutSection />}
           
-          <footer id="footer" className="text-center text-gray-500 text-sm py-6 sm:py-8 border-t border-gray-100 mt-8 sm:mt-12">
-            <div className="flex justify-center items-center mb-4">
-              <div className="bg-white p-2 rounded-full mr-3 shadow-sm">
-                <CciLogo size="sm" showText={false} />
+          {/* Footer - Only show on individual tools, not on home */}
+          {activeSection !== 'home' && (
+            <footer id="footer" className="text-center text-gray-500 text-sm py-6 sm:py-8 border-t border-gray-100 mt-8 sm:mt-12">
+              <div className="flex justify-center items-center mb-4">
+                <div className="bg-white p-2 rounded-full mr-3 shadow-sm">
+                  <CciLogo size="sm" showText={false} />
+                </div>
+                <div className="text-left">
+                  <span className="font-semibold text-gray-700 block text-sm sm:text-base">FreteDigital BY CCI</span>
+                  <span className="text-xs text-gray-500">Soluções em Logística</span>
+                </div>
               </div>
-              <div className="text-left">
-                <span className="font-semibold text-gray-700 block text-sm sm:text-base">FreteDigital BY CCI</span>
-                <span className="text-xs text-gray-500">Soluções em Logística</span>
-              </div>
-            </div>
-            <p className="text-xs sm:text-sm">© {new Date().getFullYear()} - Todas as ferramentas gratuitas para sempre.</p>
-            <p className="mt-1 text-xs sm:text-sm">
-              Desenvolvido para auxiliar transportadores e profissionais de logística.
-            </p>
-          </footer>
+              <p className="text-xs sm:text-sm">© {new Date().getFullYear()} - Todas as ferramentas gratuitas para sempre.</p>
+              <p className="mt-1 text-xs sm:text-sm">
+                Desenvolvido para auxiliar transportadores e profissionais de logística.
+              </p>
+            </footer>
+          )}
         </div>
       </main>
       

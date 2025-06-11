@@ -13,7 +13,9 @@ import {
   Info,
   X,
   Linkedin,
-  FileText
+  FileText,
+  Home,
+  ArrowLeft
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -40,6 +42,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
   };
   
   const sidebarItems = [
+    { id: 'home', label: 'Início', icon: <Home size={20} />, category: 'principal' },
     { id: 'calculadora-frete', label: 'Calculadora de Frete', icon: <Calculator size={20} />, category: 'calculadoras' },
     { id: 'simulador-lucro', label: 'Simulador de Lucro', icon: <TrendingUp size={20} />, category: 'calculadoras' },
     { id: 'calculadora-risco', label: 'Análise de Risco', icon: <AlertTriangle size={20} />, category: 'calculadoras' },
@@ -62,6 +65,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
   }, {} as Record<string, typeof sidebarItems>);
 
   const categoryLabels = {
+    principal: 'Navegação',
     calculadoras: 'Calculadoras',
     ferramentas: 'Ferramentas',
     diagnosticos: 'Diagnósticos',
@@ -98,6 +102,21 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
         )}
 
         <div className="p-4 sm:p-6">
+          {/* Back to Home button - Show only when not on home */}
+          {activeSection !== 'home' && (
+            <div className="mb-4 pb-4 border-b border-orange-100">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSectionClick('home')}
+                className="w-full flex items-center gap-2 text-orange-600 border-orange-200 hover:bg-orange-50"
+              >
+                <ArrowLeft size={16} />
+                Voltar ao Início
+              </Button>
+            </div>
+          )}
+
           {/* Informações da Ferramenta - Mobile otimizado */}
           <div className="mb-6 pb-4 border-b border-orange-100">
             <p className="text-xs text-gray-500 mb-3">

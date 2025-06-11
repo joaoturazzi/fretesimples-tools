@@ -56,18 +56,21 @@ const Index = () => {
 
   // Handle section change with analytics
   const handleSectionChange = (section: string) => {
+    console.log('HandleSectionChange called with:', section);
     trackUserInteraction('section_change', 'sidebar_menu', section);
     setActiveSection(section);
   };
 
   // Handle tool selection from overview
   const handleToolSelect = (toolId: string) => {
+    console.log('HandleToolSelect called with:', toolId);
     trackUserInteraction('tool_select', 'overview_card', toolId);
     setActiveSection(toolId);
   };
 
   // Handle back to home
   const handleBackToHome = () => {
+    console.log('HandleBackToHome called');
     trackUserInteraction('back_to_home', 'tool_header', activeSection);
     setActiveSection('home');
   };
@@ -117,8 +120,6 @@ const Index = () => {
       <main 
         className={cn(
           "pt-20 pb-16 transition-all duration-300",
-          // Desktop: sempre com margem para sidebar
-          // Mobile: sem margem, overlay do sidebar
           isMobile ? "ml-0" : (isSidebarOpen ? "ml-72" : "ml-0")
         )}
       >

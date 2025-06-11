@@ -10,9 +10,10 @@ import DiagnosticResultsComponent from './logistics-diagnostic/DiagnosticResults
 
 interface LogisticsManagementDiagnosticProps {
   isActive: boolean;
+  onBackToHome?: () => void;
 }
 
-const LogisticsManagementDiagnostic = ({ isActive }: LogisticsManagementDiagnosticProps) => {
+const LogisticsManagementDiagnostic = ({ isActive, onBackToHome }: LogisticsManagementDiagnosticProps) => {
   const [profile, setProfile] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -51,6 +52,7 @@ const LogisticsManagementDiagnostic = ({ isActive }: LogisticsManagementDiagnost
       title="Diagnóstico de Maturidade Logística"
       description="Avalie o nível de maturidade da sua gestão logística e receba recomendações práticas."
       isActive={isActive}
+      onBackToHome={onBackToHome}
     >
       {!profile ? (
         <ProfileSelection onSelectProfile={handleSelectProfile} />

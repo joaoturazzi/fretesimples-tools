@@ -37,6 +37,8 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
   const isMobile = useIsMobile();
   
   const handleSectionClick = (section: string) => {
+    console.log('ResponsiveSidebar - handleSectionClick called with:', section);
+    console.log('ResponsiveSidebar - setActiveSection function:', typeof setActiveSection);
     setActiveSection(section);
     // Em mobile, não fechamos automaticamente - usuário decide quando fechar
   };
@@ -46,6 +48,7 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
     { id: 'calculadora-frete', label: 'Calculadora de Frete', icon: <Calculator size={20} />, category: 'calculadoras' },
     { id: 'simulador-lucro', label: 'Simulador de Lucro', icon: <TrendingUp size={20} />, category: 'calculadoras' },
     { id: 'calculadora-risco', label: 'Análise de Risco', icon: <AlertTriangle size={20} />, category: 'calculadoras' },
+    { id: 'calculadora-risco-inteligente', label: 'Análise Inteligente de Risco', icon: <Shield size={20} />, category: 'calculadoras' },
     { id: 'calculadora-combustivel', label: 'Calculadora de Combustível', icon: <Fuel size={20} />, category: 'calculadoras' },
     { id: 'checklist-viagem', label: 'Checklist de Viagem', icon: <ClipboardCheck size={20} />, category: 'ferramentas' },
     { id: 'dimensionamento-veiculo', label: 'Dimensionamento de Veículo', icon: <Package size={20} />, category: 'ferramentas' },
@@ -143,7 +146,10 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
                   {items.map((item) => (
                     <button
                       key={item.id}
-                      onClick={() => handleSectionClick(item.id)}
+                      onClick={() => {
+                        console.log('Sidebar button clicked for:', item.id, item.label);
+                        handleSectionClick(item.id);
+                      }}
                       className={cn(
                         "w-full text-left px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl transition-all duration-200 flex items-center gap-3 text-sm group relative touch-friendly",
                         "min-h-[48px]", // Touch target mínimo

@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import Calculator from '@/components/Calculator';
 import { Shield, RefreshCw, CheckCircle, AlertTriangle, Truck, Package } from 'lucide-react';
 
 interface RiskManagementDiagnosticProps {
   isActive: boolean;
+  onBackToHome?: () => void;
 }
 
 interface Question {
@@ -13,7 +13,7 @@ interface Question {
   value: number;
 }
 
-const RiskManagementDiagnostic = ({ isActive }: RiskManagementDiagnosticProps) => {
+const RiskManagementDiagnostic = ({ isActive, onBackToHome }: RiskManagementDiagnosticProps) => {
   const [profile, setProfile] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -137,6 +137,7 @@ const RiskManagementDiagnostic = ({ isActive }: RiskManagementDiagnosticProps) =
       title="Diagnóstico de Gerenciamento de Risco"
       description="Avalie o nível de maturidade da sua gestão de risco logístico e receba recomendações práticas."
       isActive={isActive}
+      onBackToHome={onBackToHome}
     >
       {!profile ? (
         <div className="text-center py-8">
